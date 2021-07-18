@@ -1,0 +1,35 @@
+{
+  "name": "damage-log",
+  "title": "Damage Log",
+  "description": "Logs damage and healing to tokens",
+  "version": "This is auto replaced",
+  "library": false,
+  "manifestPlusVersion": "1.2.0",
+  "minimumCoreVersion" : "0.8.6",
+  "compatibleCoreVersion": "0.8.8",
+  "author": "Alan Davies",
+  "authors": [
+    {
+      "name": "Alan Davies",
+      "discord": "cs96and#3764",
+      "ko-fi": "cs96and"
+    }
+  ],
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "scripts": [],
+  "styles": [
+    "styles/style.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "url": "This is auto replaced",
+  "manifest": "This is auto replaced",
+  "download": "This is auto replaced"
+}

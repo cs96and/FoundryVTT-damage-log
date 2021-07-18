@@ -1,0 +1,40 @@
+{{!
+ * Damage Log
+ * https://github.com/cs96and/FoundryVTT-damage-log
+ *
+ * Copyright (c) 2021 Alan Davies - All Rights Reserved.
+ *
+ * You may use, distribute and modify this code under the terms of the MIT license.
+ *
+ * You should have received a copy of the MIT license with this file. If not, please visit:
+ * https://mit-license.org/
+}}
+
+<table id="damage-log-table">
+    <tr>
+        <th></th>
+        <th class="num">{{localize "damage-log.old"}}</th>
+        <th class="num">{{localize "damage-log.new"}}</th>
+        <th class="num">{{localize "damage-log.diff"}}</th>
+    </tr>
+    {{#with temp}}
+    {{#if diff }}
+    <tr>
+        <td>Temp</td>
+        <td class="num">{{old}}</td>
+        <td class="num">{{new}}</td>
+        <td class="num">{{numberFormat diff sign=true}}</td>
+    <tr>
+    {{/if}}
+    {{/with}}
+    {{#with value}}
+    {{#if diff }}
+    <tr>
+        <td>HP</td>
+        <td class="num">{{old}}</td>
+        <td class="num">{{new}}</td>
+        <td class="num">{{numberFormat diff sign=true}}</td>
+    </tr>
+    {{/if}}
+    {{/with}}
+</table>

@@ -1,0 +1,39 @@
+/*
+ * Damage Log
+ * https://github.com/cs96and/FoundryVTT-damage-log
+ *
+ * Copyright (c) 2021 Alan Davies - All Rights Reserved.
+ *
+ * You may use, distribute and modify this code under the terms of the MIT license.
+ *
+ * You should have received a copy of the MIT license with this file. If not, please visit:
+ * https://mit-license.org/
+ */
+
+/* Styling for damage messages */
+#chat-log .message.damage-log.damage {
+	background: #ffd9d9;
+	/*border-color: #ffd9d9 !important;*/
+}
+/* Styling for healing messages */
+#chat-log .message.damage-log.healing {
+	background: #d9ffd9;
+	/*border-color: #d9ffd9 !important;*/
+}
+/* Stikethrough reverted messages */
+#chat-log .message.damage-log.reverted {
+	text-decoration: line-through;
+}
+/* Dim reverted damage */
+#chat-log .message.damage-log.reverted.damage {
+	background: #ffeaea;
+}
+/* Dim reverted healing */
+#chat-log .message.damage-log.reverted.healing {
+	background: #eaffea;
+}
+/* Align numbers in tables */
+#damage-log-table th.num,
+#damage-log-table td.num {
+    text-align: right;
+}

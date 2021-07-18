@@ -1,0 +1,13 @@
+{
+	"damage-log.undo-damage": "Undo Damage",
+	"damage-log.undo-healing": "Undo Healing",
+	"damage-log.redo-damage": "Redo Damage",
+	"damage-log.redo-healing": "Redo Healing",
+	"damage-log.old": "Old",
+	"damage-log.new": "New",
+	"damage-log.diff": "Diff",
+	"damage-log.scene-id-missing": "Scene ID missing from damage log",
+	"damage-log.scene-deleted": "Scene {scene} no longer exists",
+	"damage-log.token-id-missing": "Token ID missing from damage log",
+	"damage-log.token-deleted": "Token {token} no longer exists"
+}
