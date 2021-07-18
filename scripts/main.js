@@ -10,99 +10,49 @@
  * https://mit-license.org/
  */
 
+class DamageLog {
 
-// TODO - encapsulate all this in a class.
+	static TABLE_TEMPLATE = "modules/damage-log/templates/damage-log-table.hbs";
 
-function undoDamage(li) {
-	const message = game.messages.get(li.data("messageId"));
-	const speaker = message.data.speaker;
-	const flags = message.data.flags.damageLog;
+	constructor() {
+		this.prevFlags = null;
+		loadTemplates([DamageLog.TABLE_TEMPLATE]);
 
-	if (!speaker.scene)
-	{
-		ui.notifications.error(game.i18n.localize("damage-log.scene-id-missing"));
-		return;
+		Hooks.once('getChatLogEntryContext', DamageLog._onGetChatLogEntryContext);
+		Hooks.on('preUpdateActor', this._onPreUpdateActor.bind(this));
+		Hooks.on('renderChatMessage', DamageLog._onRenderChatMessage);
 	}
 
-	const scene = game.scenes.get(speaker.scene);
-	if (!scene)
-	{
-		ui.notifications.error(game.i18n.format("damage-log.scene-deleted", { scene: speaker.scene }));
-		return;
-	}
-
-	if (!speaker.token)
-	{
-		ui.notifications.error(game.i18n.localize("damage-log.token-id-missing"));
-		return;
-	}
-
-	const token = scene.tokens.get(speaker.token);
-	if (!token)
-	{
-		ui.notifications.error(game.i18n.format("damage-log.token-deleted", { token: speaker.token }));
-		return;
-	}
-
-	const modifier = li.hasClass("reverted") ? -1 : 1;
-
-	const actorData = token.actor.data;
-	const currentHp = actorData.data.attributes.hp;
-	const maxHp = currentHp.max + (currentHp.tempMax ?? 0);
-
-	const update = {
-		"data.attributes.hp": {
-			value: Math.min(maxHp, Math.max(currentHp.value - (flags.value.diff * modifier), 0)),
-			temp: Math.max(currentHp.temp - (flags.temp.diff * modifier), 0)
-		}
-	};
-
-	actorData.document.update(update, { damageLog: { isRevert: true } });
-
-	if (modifier == 1)
-		li.addClass("reverted");
-	else
-		li.removeClass("reverted");
-}
-
-Hooks.once('init', () => {
-	let prevFlags = null
-	const damageLogTableTemplate = "modules/damage-log/templates/damage-log-table.hbs";
-	loadTemplates([damageLogTableTemplate]);
-
-	Hooks.once('getChatLogEntryContext', (html, options) => {
+	static _onGetChatLogEntryContext(html, options) {
 		options.push(
 			{
 				name: game.i18n.localize("damage-log.undo-damage"),
 				icon: '<i class="fas fa-undo-alt"></i>',
 				condition: li => li.hasClass("damage-log") && !li.hasClass("healing") && !li.hasClass("reverted"),
-				callback: li => undoDamage(li)
+				callback: li => DamageLog._undoDamage(li)
 			},
 			{
 				name: game.i18n.localize("damage-log.undo-healing"),
 				icon: '<i class="fas fa-undo-alt"></i>',
 				condition: li => li.hasClass("damage-log") && li.hasClass("healing") && !li.hasClass("reverted"),
-				callback: li => undoDamage(li)
+				callback: li => DamageLog._undoDamage(li)
 			},
 			{
 				name: game.i18n.localize("damage-log.redo-damage"),
 				icon: '<i class="fas fa-redo-alt"></i>',
 				condition: li => li.hasClass("damage-log") && !li.hasClass("healing") && li.hasClass("reverted"),
-				callback: li => undoDamage(li)
+				callback: li => DamageLog._undoDamage(li)
 			},
 			{
 				name: game.i18n.localize("damage-log.redo-healing"),
 				icon: '<i class="fas fa-redo-alt"></i>',
 				condition: li => li.hasClass("damage-log") && li.hasClass("healing") && li.hasClass("reverted"),
-				callback: li => undoDamage(li)
+				callback: li => DamageLog._undoDamage(li)
 			}
 		);
-	});
+	}
 
-	/*
-	 *	preUpdateActor hook.
-	 */
-	Hooks.on('preUpdateActor', async (actor, actorData, options, userId) => {
+	async _onPreUpdateActor(actor, actorData, options, userId) {
 		if (!game.user.isGM) return;
 		if (options.damageLog?.isRevert) return;
 		if (!actor.isToken && !actor.data.token.actorLink) return;
@@ -128,14 +78,14 @@ Hooks.once('init', () => {
 			value: { old: oldValue, new: newValue, diff: valueDiff }
 		};
 
-		const message = await renderTemplate(damageLogTableTemplate, flags);
+		const message = await renderTemplate(DamageLog.TABLE_TEMPLATE, flags);
 
 		// There is a bug in Foundry 0.8.8 that causes preUpdateActor to fire multiple times.
 		// Ignore duplicate updates.
 		const stringifiedFlags = JSON.stringify(flags);
-		if (stringifiedFlags !== prevFlags)
+		if (stringifiedFlags !== this.prevFlags)
 		{
-			prevFlags = stringifiedFlags;
+			this.prevFlags = stringifiedFlags;
 
 			const chatData = {
 				content: message,
@@ -151,13 +101,10 @@ Hooks.once('init', () => {
 
 			ChatMessage.create(chatData, {});
 		}
-	});
+	}
 
-	/*
-	 *	renderChatMessage hook.
-	 */
-	Hooks.on('renderChatMessage', (chatMessage, html, messageData) => {
-		const hp = messageData.message.flags?.damageLog;
+	static _onRenderChatMessage(chatMessage, html, messageData) {
+		const hp = messageData.message?.flags?.damageLog;
 		if (!hp) return;
 
 		html[0].classList.add('damage-log');
@@ -169,5 +116,61 @@ Hooks.once('init', () => {
 			else if ((hp.temp.diff >= 0) && (hp.value.diff >= 0))
 				html[0].classList.add('healing');
 		}
-	});
+	}
+
+	static _undoDamage(li) {
+		const message = game.messages.get(li.data("messageId"));
+		const speaker = message.data.speaker;
+		const flags = message.data.flags.damageLog;
+
+		if (!speaker.scene)
+		{
+			ui.notifications.error(game.i18n.localize("damage-log.scene-id-missing"));
+			return;
+		}
+
+		const scene = game.scenes.get(speaker.scene);
+		if (!scene)
+		{
+			ui.notifications.error(game.i18n.format("damage-log.scene-deleted", { scene: speaker.scene }));
+			return;
+		}
+
+		if (!speaker.token)
+		{
+			ui.notifications.error(game.i18n.localize("damage-log.token-id-missing"));
+			return;
+		}
+
+		const token = scene.tokens.get(speaker.token);
+		if (!token)
+		{
+			ui.notifications.error(game.i18n.format("damage-log.token-deleted", { token: speaker.token }));
+			return;
+		}
+
+		const modifier = li.hasClass("reverted") ? -1 : 1;
+
+		const actorData = token.actor.data;
+		const currentHp = actorData.data.attributes.hp;
+		const maxHp = currentHp.max + (currentHp.tempMax ?? 0);
+
+		const update = {
+			"data.attributes.hp": {
+				value: Math.min(maxHp, Math.max(currentHp.value - (flags.value.diff * modifier), 0)),
+				temp: Math.max(currentHp.temp - (flags.temp.diff * modifier), 0)
+			}
+		};
+
+		actorData.document.update(update, { damageLog: { isRevert: true } });
+
+		if (modifier == 1)
+			li.addClass("reverted");
+		else
+			li.removeClass("reverted");
+	}
+}
+
+Hooks.once('init', () => {
+	game.damageLog = new DamageLog();
 });
