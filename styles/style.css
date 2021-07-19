@@ -53,6 +53,17 @@
 #chat-log .message.damage-log.reverted.healing {
 	background: #eaffea;
 }
+/* Hide whisper information on damage logs */
+#chat-log .message.damage-log .chat-mode-indicator,
+#chat-log .message.damage-log .whisper-to,
+#chat-log .message.damage-log .chat-portrait-indicator,
+#chat-log .message.damage-log .chat-portrait-whisper-to {
+	display: none;
+}
+/* Hide chat portrait image next to flavor text */
+#chat-log .message.damage-log .flavor-text img.message-portrait {
+	display: none;
+}
 
 /* Force showing of damage logs (for compatibility with Tabbed Chatlog) */
 #chat-log .message.damage-log.hard-show {
