@@ -90,33 +90,64 @@ class DamageLog {
 		$("#chat-log").scrollTop(9999999);
 	}
 
-	async _onPreUpdateActor(actor, actorData, options, userId) {
+	async _onPreUpdateActor(actor, updateData, options, userId) {
 		if (!game.user.isGM) return;
 		if (options.damageLog?.isRevert) return;
-		if (!actor.isToken && !actor.data.token.actorLink) return;
 
-		const hpData = actorData.data?.attributes?.hp;
-		if (!hpData) return;
+		// TODO - getSpeaker should really expect a TokenDocument, but there is currently a bug in Foundry 0.8.8
+		// that makes it only accept a Token.  Once 0.8.9 is released, change this to send the TokenDocument instead.
+		const speaker = ChatMessage.getSpeaker({ actor, token: actor.token?._object });
 
-		const actorHp = actor.data.data.attributes.hp;
+		// For "real" (i.e. non-synthetic) actors, make sure there is a linked token in the current scene.
+		if (!actor.isToken) {
+			const activeTokens = actor.getActiveTokens({linked: true});
+			if (!activeTokens.find(i => i.id == speaker.token))
+				return;
+		}
 
-		const oldTemp = actorHp.temp ?? 0;
-		const newTemp = hpData.temp ?? oldTemp;
+		let oldTemp = 0, newTemp = 0;
+		let oldValue = 0, newValue = 0;
+		switch (game.system.id)
+		{
+			case "dnd5e":
+			case "pf1":
+			case "pf2e":
+			{
+				const oldHp = actor.data.data.attributes.hp;
+				const newHp = updateData.data?.attributes?.hp;
+
+				oldTemp = oldHp.temp ?? 0;
+				newTemp = newHp.temp ?? oldTemp;
+		
+				oldValue = oldHp.value ?? 0;
+				newValue = newHp.value ?? oldValue;
+				break;
+			}
+
+			case "worldbuilding":
+			{
+				const oldHp = actor.data.data?.health;
+				const newHp = updateData.data?.health;
+
+				oldValue = oldHp.value ?? 0;
+				newValue = newHp.value ?? 0;
+				break;
+			}
+
+			default:
+				return;
+		}
+
 		const tempDiff = newTemp - oldTemp;
-
-		const oldValue = actorHp.value ?? 0;
-		const newValue = hpData.value ?? oldValue;
 		const valueDiff = newValue - oldValue;
 
 		if ((0 === tempDiff) && (0 === valueDiff)) return;
 
 		const flags = {
-			speaker: ChatMessage.getSpeaker({ actor }),
+			speaker,
 			temp: { old: oldTemp, new: newTemp, diff: tempDiff },
 			value: { old: oldValue, new: newValue, diff: valueDiff }
 		};
-
-		const message = await renderTemplate(DamageLog.TABLE_TEMPLATE, flags);
 
 		// There is a bug in Foundry 0.8.8 that causes preUpdateActor to fire multiple times.
 		// Ignore duplicate updates.
@@ -124,6 +155,8 @@ class DamageLog {
 		if (stringifiedFlags !== this.prevFlags)
 		{
 			this.prevFlags = stringifiedFlags;
+
+			const message = await renderTemplate(DamageLog.TABLE_TEMPLATE, flags);
 
 			const chatData = {
 				content: message,
@@ -195,17 +228,39 @@ class DamageLog {
 		}
 
 		const modifier = li.hasClass("reverted") ? -1 : 1;
-
 		const actorData = token.actor.data;
-		const currentHp = actorData.data.attributes.hp;
-		const maxHp = currentHp.max + (currentHp.tempMax ?? 0);
-
-		const update = {
-			"data.attributes.hp": {
-				value: Math.min(maxHp, Math.max(currentHp.value - (flags.value.diff * modifier), 0)),
-				temp: Math.max(currentHp.temp - (flags.temp.diff * modifier), 0)
+		let update = null;
+		
+		switch (game.system.id)
+		{
+			case "dnd5e":
+			case "pf1":
+			case "pf2e":
+			{
+				const currentHp = actorData.data.attributes.hp;
+				const maxHp = currentHp.max + (currentHp.tempMax ?? 0);
+		
+				update = {
+					"data.attributes.hp": {
+						value: Math.min(maxHp, Math.max(currentHp.value - (flags.value.diff * modifier), 0)),
+						temp: Math.max(currentHp.temp - (flags.temp.diff * modifier), 0)
+					}
+				};
+				break;
 			}
-		};
+
+			case "worldbuilding":
+			{
+				const currentHp = actorData.data.health;
+				update = {
+					"data.health.value": Math.min(currentHp.max, Math.max(currentHp.value - (flags.value.diff * modifier), currentHp.min))
+				};
+				break;
+			}
+
+			default:
+				return;
+		}
 
 		actorData.document.update(update, { damageLog: { isRevert: true } });
 
