@@ -173,6 +173,7 @@ class DamageLog {
 
 		const tempDiff = newTemp - oldTemp;
 		const valueDiff = newValue - oldValue;
+		const totalDiff = tempDiff + valueDiff;
 
 		if ((0 === tempDiff) && (0 === valueDiff)) return;
 
@@ -201,11 +202,10 @@ class DamageLog {
 					flags.preventRollsNotification = true;
 			}
 
-			const content = await renderTemplate(DamageLog.TABLE_TEMPLATE, flags);
-
 			const chatData = {
-				content,
+				content: await renderTemplate(DamageLog.TABLE_TEMPLATE, flags),
 				flags: { damageLog: flags },
+				flavor: game.i18n.format((totalDiff < 0 ? "damage-log.damage-flavor-text" : "damage-log.healing-flavor-text"), { diff: Math.abs(totalDiff) }),
 				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
 				speaker,
 				whisper: game.users.contents.filter(u => u.isGM).map(u => u.id)
