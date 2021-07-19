@@ -19,12 +19,15 @@ class DamageLog {
 		this.prevFlags = null;
 		this.tabs = null;
 		this.currentTab = "chat";
+		this.hasTabbedChatlog = !!game.modules.get("tabbed-chatlog")?.active;
+
 		loadTemplates([DamageLog.TABS_TEMPLATE, DamageLog.TABLE_TEMPLATE]);
 
 		Hooks.once('getChatLogEntryContext', DamageLog._onGetChatLogEntryContext);
 		Hooks.on("renderChatLog", this._onRenderChatLog.bind(this));
 		Hooks.on('preUpdateActor', this._onPreUpdateActor.bind(this));
 		Hooks.on('renderChatMessage', this._onRenderChatMessage.bind(this));
+		Hooks.on('changeSidebarTab', this._onChangeSidebarTab.bind(this));
 	}
 
 	static _onGetChatLogEntryContext(html, options) {
@@ -57,8 +60,15 @@ class DamageLog {
 	}
 
 	async _onRenderChatLog(chatLog, html, user) {
-		const toPrepend = await renderTemplate(DamageLog.TABS_TEMPLATE);
-		html.prepend(toPrepend);
+		if (this.hasTabbedChatlog)
+		{
+			// Force Tabbed Chatlog to render first
+			setTimeout(() => this._onTabbedChatlogRenderChatLog(chatLog, html, user), 0)
+			return;
+		}
+
+		const tabsHtml = await renderTemplate(DamageLog.TABS_TEMPLATE);
+		html.prepend(tabsHtml);
 
 		this.tabs = new Tabs({
 			navSelector: ".damage-log.tabs",
@@ -69,22 +79,45 @@ class DamageLog {
 		this.tabs.bind(html[0]);
 	}
 
+	_onTabbedChatlogRenderChatLog(chatLog, html, user) {
+		// Append our tab to the end of Tabebd Chatlog's tabs
+		const tabs = $(".tabbedchatlog.tabs");
+		tabs.append(`<a class="item damage-log" data-tab="damage-log">${game.i18n.localize("damage-log.damage-log-tab-name")}</a>`);
+
+		// Override Tabbed Chatlog's callback to call our _onTabSwitch() function first.
+		const tabbedChatlogCallback = game.tabbedchat.tabs.callback;
+		game.tabbedchat.tabs.callback = ((event, html, tab) => {
+			this._onTabSwitch(event, html, tab);
+			tabbedChatlogCallback(event, html, tab);
+		});
+	}
+
 	_onTabSwitch(event, html, tab) {
 		this.currentTab = tab;
 		const damageLogMessages = $(".chat-message.message.damage-log");
 		const chatMessages = $(".chat-message.message:not(.damage-log)");
 
-		switch (tab)
+		if (tab === "damage-log")
 		{
-			case "chat":
-				chatMessages.show();
-				damageLogMessages.hide();
-				break;
-
-			case "damage-log":
-				chatMessages.hide();
-				damageLogMessages.show();
-				break;
+			chatMessages.hide();
+			damageLogMessages.show();
+			if (this.hasTabbedChatlog)
+			{
+				damageLogMessages.removeClass("hardHide");
+				damageLogMessages.removeClass("hard-hide");
+				damageLogMessages.addClass("hard-show");
+			}
+		}
+		else
+		{
+			chatMessages.show();
+			damageLogMessages.hide();
+			if (this.hasTabbedChatlog)
+			{
+				damageLogMessages.addClass("hardHide");
+				damageLogMessages.addClass("hard-hide");
+				damageLogMessages.removeClass("hard-show");
+			}
 		}
 
 		$("#chat-log").scrollTop(9999999);
@@ -156,44 +189,84 @@ class DamageLog {
 		{
 			this.prevFlags = stringifiedFlags;
 
-			const message = await renderTemplate(DamageLog.TABLE_TEMPLATE, flags);
-
-			const chatData = {
-				content: message,
-				flags: { damageLog: flags },
-				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-				speaker: flags.speaker,
-				whisper: game.users.contents.filter(u => u.isGM).map(u => u.id)
-			};
-
 			// No need to keep the speaker data in the flags, because it is also in the chatData.
 			// We only kept it in there briefly for the stringify check.
 			delete flags.speaker;
+
+			if (this.hasTabbedChatlog)
+			{
+				// If the rolls notification is not currently showing, set a flag so we can prevent it from showing in _onRenderChatMessage.
+				const rollsNotification = $("#rollsNotification")[0];
+				if (rollsNotification?.style.display === "none")
+					flags.preventRollsNotification = true;
+			}
+
+			const content = await renderTemplate(DamageLog.TABLE_TEMPLATE, flags);
+
+			const chatData = {
+				content,
+				flags: { damageLog: flags },
+				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+				speaker,
+				whisper: game.users.contents.filter(u => u.isGM).map(u => u.id)
+			};
 
 			ChatMessage.create(chatData, {});
 		}
 	}
 
-	_onRenderChatMessage(chatMessage, html, messageData) {
+	async _onRenderChatMessage(chatMessage, html, messageData) {
+		if (this.hasTabbedChatlog)
+		{
+			// Force Tabbed Chatlog's to render first.
+			await new Promise(r => setTimeout(r, 0));
+		}
+
 		const hp = messageData.message?.flags?.damageLog;
 		if (!hp) {
-			if (this.currentTab == "damage-log")
+			if (this.currentTab === "damage-log")
 				html.hide();
 			return;
 		}
 
-		html[0].classList.add('damage-log');
+		// If the rolls notification wasn't showing before the message was created, then hide it again.
+		if (hp.preventRollsNotification)
+			$("#rollsNotification").hide();
+
+		html.addClass("damage-log");
 
 		if ((0 !== hp.temp.diff) || (0 !== hp.value.diff))
 		{
 			if ((hp.temp.diff <= 0) && (hp.value.diff <= 0))
-				html[0].classList.add('damage');
+				html.addClass("damage");
 			else if ((hp.temp.diff >= 0) && (hp.value.diff >= 0))
-				html[0].classList.add('healing');
+				html.addClass("healing");
 		}
 
-		if (this.currentTab != "damage-log")
+		if (this.currentTab === "damage-log")
+		{
+			if (this.hasTabbedChatlog)
+			{
+				html.removeClass("hardHide");
+				html.removeClass("hard-hide");
+				html.addClass("hard-show");
+			}
+		}
+		else
+		{
 			html.hide();
+			if (this.hasTabbedChatlog)
+			{
+				html.addClass("hardHide");
+				html.addClass("hard-hide");
+				html.removeClass("hard-show");
+			}
+		}
+	}
+
+	_onChangeSidebarTab(tab) {
+		if (tab.id === "chat")
+			this.tabs?.activate(this.currentTab);
 	}
 
 	static _undoDamage(li) {

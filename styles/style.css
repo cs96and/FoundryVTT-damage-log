@@ -20,11 +20,17 @@
 
 /* Styling for the active tab*/
 .damage-log .item.active {
-	color: #FFF;
+	color: white;
 	border: 1px solid red;
 	border-bottom: none;
 	box-shadow: 0 0 6px inset #ff6400;
 	border-radius: 5px 5px 0 0;
+}
+
+/* Align numbers in tables */
+#damage-log-table th.num,
+#damage-log-table td.num {
+    text-align: right;
 }
 
 /* Styling for damage messages */
@@ -47,8 +53,12 @@
 #chat-log .message.damage-log.reverted.healing {
 	background: #eaffea;
 }
-/* Align numbers in tables */
-#damage-log-table th.num,
-#damage-log-table td.num {
-    text-align: right;
+
+/* Force showing of damage logs (for compatibility with Tabbed Chatlog) */
+#chat-log .message.damage-log.hard-show {
+    display: list-item !important;
+}
+/* Force hiding of damage logs (for compatibility with Tabbed Chatlog) */
+#chat-log .message.damage-log.hard-hide {
+    display: none !important;
 }
