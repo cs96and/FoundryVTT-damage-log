@@ -10,15 +10,30 @@
  * https://mit-license.org/
  */
 
+/* Styling for the tabs */
+.damage-log.tabs {
+	flex: 0;
+	margin: 0 0 5px;
+	border-bottom: 1px solid #ff6400;
+	box-shadow: 0 0 10px red;
+}
+
+/* Styling for the active tab*/
+.damage-log .item.active {
+	color: #FFF;
+	border: 1px solid red;
+	border-bottom: none;
+	box-shadow: 0 0 6px inset #ff6400;
+	border-radius: 5px 5px 0 0;
+}
+
 /* Styling for damage messages */
 #chat-log .message.damage-log.damage {
 	background: #ffd9d9;
-	/*border-color: #ffd9d9 !important;*/
 }
 /* Styling for healing messages */
 #chat-log .message.damage-log.healing {
 	background: #d9ffd9;
-	/*border-color: #d9ffd9 !important;*/
 }
 /* Stikethrough reverted messages */
 #chat-log .message.damage-log.reverted {

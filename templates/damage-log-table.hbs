@@ -14,16 +14,16 @@
     <tr>
         <th></th>
         <th class="num">{{localize "damage-log.old"}}</th>
-        <th class="num">{{localize "damage-log.new"}}</th>
         <th class="num">{{localize "damage-log.diff"}}</th>
+        <th class="num">{{localize "damage-log.new"}}</th>
     </tr>
     {{#with temp}}
     {{#if diff }}
     <tr>
         <td>Temp</td>
         <td class="num">{{old}}</td>
-        <td class="num">{{new}}</td>
         <td class="num">{{numberFormat diff sign=true}}</td>
+        <td class="num">{{new}}</td>
     <tr>
     {{/if}}
     {{/with}}
@@ -32,8 +32,8 @@
     <tr>
         <td>HP</td>
         <td class="num">{{old}}</td>
-        <td class="num">{{new}}</td>
         <td class="num">{{numberFormat diff sign=true}}</td>
+        <td class="num">{{new}}</td>
     </tr>
     {{/if}}
     {{/with}}

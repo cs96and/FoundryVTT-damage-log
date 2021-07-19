@@ -12,15 +12,19 @@
 
 class DamageLog {
 
+	static TABS_TEMPLATE = "modules/damage-log/templates/damage-log-tabs.hbs";
 	static TABLE_TEMPLATE = "modules/damage-log/templates/damage-log-table.hbs";
 
 	constructor() {
 		this.prevFlags = null;
-		loadTemplates([DamageLog.TABLE_TEMPLATE]);
+		this.tabs = null;
+		this.currentTab = "chat";
+		loadTemplates([DamageLog.TABS_TEMPLATE, DamageLog.TABLE_TEMPLATE]);
 
 		Hooks.once('getChatLogEntryContext', DamageLog._onGetChatLogEntryContext);
+		Hooks.on("renderChatLog", this._onRenderChatLog.bind(this));
 		Hooks.on('preUpdateActor', this._onPreUpdateActor.bind(this));
-		Hooks.on('renderChatMessage', DamageLog._onRenderChatMessage);
+		Hooks.on('renderChatMessage', this._onRenderChatMessage.bind(this));
 	}
 
 	static _onGetChatLogEntryContext(html, options) {
@@ -50,6 +54,40 @@ class DamageLog {
 				callback: li => DamageLog._undoDamage(li)
 			}
 		);
+	}
+
+	async _onRenderChatLog(chatLog, html, user) {
+		const toPrepend = await renderTemplate(DamageLog.TABS_TEMPLATE);
+		html.prepend(toPrepend);
+
+		this.tabs = new Tabs({
+			navSelector: ".damage-log.tabs",
+			contentSelector: undefined,
+			initial: this.currentTab,
+			callback: this._onTabSwitch.bind(this)
+		});
+		this.tabs.bind(html[0]);
+	}
+
+	_onTabSwitch(event, html, tab) {
+		this.currentTab = tab;
+		const damageLogMessages = $(".chat-message.message.damage-log");
+		const chatMessages = $(".chat-message.message:not(.damage-log)");
+
+		switch (tab)
+		{
+			case "chat":
+				chatMessages.show();
+				damageLogMessages.hide();
+				break;
+
+			case "damage-log":
+				chatMessages.hide();
+				damageLogMessages.show();
+				break;
+		}
+
+		$("#chat-log").scrollTop(9999999);
 	}
 
 	async _onPreUpdateActor(actor, actorData, options, userId) {
@@ -103,9 +141,13 @@ class DamageLog {
 		}
 	}
 
-	static _onRenderChatMessage(chatMessage, html, messageData) {
+	_onRenderChatMessage(chatMessage, html, messageData) {
 		const hp = messageData.message?.flags?.damageLog;
-		if (!hp) return;
+		if (!hp) {
+			if (this.currentTab == "damage-log")
+				html.hide();
+			return;
+		}
 
 		html[0].classList.add('damage-log');
 
@@ -116,6 +158,9 @@ class DamageLog {
 			else if ((hp.temp.diff >= 0) && (hp.value.diff >= 0))
 				html[0].classList.add('healing');
 		}
+
+		if (this.currentTab != "damage-log")
+			html.hide();
 	}
 
 	static _undoDamage(li) {
