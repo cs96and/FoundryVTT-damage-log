@@ -134,7 +134,7 @@ class DamageLog {
 		// For "real" (i.e. non-synthetic) actors, make sure there is a linked token in the current scene.
 		if (!actor.isToken) {
 			const activeTokens = actor.getActiveTokens({linked: true});
-			if (!activeTokens.find(i => i.id == speaker.token))
+			if (!activeTokens.find(i => i.id === speaker.token))
 				return;
 		}
 
@@ -337,7 +337,7 @@ class DamageLog {
 
 		actorData.document.update(update, { damageLog: { isRevert: true } });
 
-		if (modifier == 1)
+		if (modifier === 1)
 			li.addClass("reverted");
 		else
 			li.removeClass("reverted");
