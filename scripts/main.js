@@ -124,7 +124,7 @@ class DamageLog {
 	}
 
 	async _onPreUpdateActor(actor, updateData, options, userId) {
-		if (!game.user.isGM) return;
+		if (userId !== game.user.id) return;
 		if (options.damageLog?.isRevert) return;
 
 		// TODO - getSpeaker should really expect a TokenDocument, but there is currently a bug in Foundry 0.8.8
