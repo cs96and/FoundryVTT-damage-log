@@ -7,7 +7,7 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C057N35)
 
-Damage Log is a FoundryVTT module that monitiors for changes to characters' heath, and displays those changes in a separate chatlog tab (currently only viewable by the GM).  Changes can be easily be undone, or re-applied using the chat card's right-click menu.
+Damage Log is a FoundryVTT module that monitiors for changes to characters' health, and displays those changes in a separate chatlog tab (currently only viewable by the GM).  Changes can be easily be undone, or re-applied using the chat card's right-click menu.
 
 Damage Log is also compatible with the [Tabbed Chatlog](https://github.com/cswendrowski/FoundryVTT-Tabbed-Chatlog) module, and will add an extra tab on to the end of Tabbed Chatlog's tabs.
 
@@ -19,3 +19,11 @@ Damage Log is current compatible with the following systems.
 * Pathfinder 1st Edition (pf1)
 * Pathfinder 2nd Edition (pf2e)
 * Simple Worldbuilding
+
+## Installation
+Damage Log can be installed using the Foundry module installer.  Alternatively, you can install it using the following manifest URL...
+https://github.com/cs96and/FoundryVTT-damage-log/releases/latest/download/module.json
+
+## Support Me
+If you find this module useful and would like to offer your support, why not buy me a coffee (or a beer)?
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C057N35)
