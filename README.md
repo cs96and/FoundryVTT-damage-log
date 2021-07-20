@@ -18,7 +18,7 @@ Damage Log is current compatible with the following systems.
 * Dungeons & Dragons 5th Edition (dnd5e)
 * Pathfinder 1st Edition (pf1)
 * Pathfinder 2nd Edition (pf2e)
-* Simple Worldbuilding
+* Simple Worldbuilding (worldbuilding)
 
 ## Installation
 Damage Log can be installed using the Foundry module installer.  Alternatively, you can install it using the following manifest URL...
