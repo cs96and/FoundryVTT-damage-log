@@ -29,6 +29,12 @@
       "path": "lang/en.json"
     }
   ],
+  "system": [
+    "dnd5e",
+    "pf1",
+    "pf2e",
+    "worldbuilding"
+  ],
   "url": "This is auto replaced",
   "manifest": "This is auto replaced",
   "download": "This is auto replaced"
