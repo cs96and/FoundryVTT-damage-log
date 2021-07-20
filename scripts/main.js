@@ -60,6 +60,8 @@ class DamageLog {
 	}
 
 	async _onRenderChatLog(chatLog, html, user) {
+		if (!game.user.isGM) return;
+
 		if (this.hasTabbedChatlog)
 		{
 			// Force Tabbed Chatlog to render first
