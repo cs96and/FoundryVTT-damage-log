@@ -151,6 +151,7 @@ class DamageLog {
 		switch (game.system.id)
 		{
 			case "dnd5e":
+			case "D35E":
 			case "pf1":
 			case "pf2e":
 			{
@@ -319,6 +320,7 @@ class DamageLog {
 		switch (game.system.id)
 		{
 			case "dnd5e":
+			case "D35E":
 			case "pf1":
 			case "pf2e":
 			{
