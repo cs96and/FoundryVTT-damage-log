@@ -26,7 +26,7 @@ class DamageLog {
 
 		loadTemplates([DamageLog.TABS_TEMPLATE, DamageLog.TABLE_TEMPLATE]);
 
-		Hooks.once('getChatLogEntryContext', DamageLog._onGetChatLogEntryContext);
+		Hooks.once('getChatLogEntryContext', this._onGetChatLogEntryContext.bind(this));
 		Hooks.on('preUpdateActor', this._onPreUpdateActor.bind(this));
 		Hooks.on('renderChatMessage', this._onRenderChatMessage.bind(this));
 		if (this.settings.useTab)
@@ -36,37 +36,46 @@ class DamageLog {
 		}
 	}
 
-	static _onGetChatLogEntryContext(html, options) {
+	_onGetChatLogEntryContext(html, options) {
+		const canUndo = li => {
+			if (game.user.isGM) return true;
+			if (!this.settings.allowPlayerUndo) return false;
+
+			const message = game.messages.get(li.data("messageId"));
+			const actor = game.actors.get(message?.data?.speaker?.actor);
+			return actor?.testUserPermission(game.user, CONST.ENTITY_PERMISSIONS.OWNER);
+		};
+
 		options.push(
 			{
 				name: game.i18n.localize("damage-log.undo-damage"),
 				icon: '<i class="fas fa-undo-alt"></i>',
-				condition: li => li.hasClass("damage-log") && !li.hasClass("healing") && !li.hasClass("reverted"),
+				condition: li => canUndo(li) && li.hasClass("damage-log") && li.hasClass("damage") && !li.hasClass("reverted"),
 				callback: li => DamageLog._undoDamage(li)
 			},
 			{
 				name: game.i18n.localize("damage-log.undo-healing"),
 				icon: '<i class="fas fa-undo-alt"></i>',
-				condition: li => li.hasClass("damage-log") && li.hasClass("healing") && !li.hasClass("reverted"),
+				condition: li => canUndo(li) && li.hasClass("damage-log") && li.hasClass("healing") && !li.hasClass("reverted"),
 				callback: li => DamageLog._undoDamage(li)
 			},
 			{
 				name: game.i18n.localize("damage-log.redo-damage"),
 				icon: '<i class="fas fa-redo-alt"></i>',
-				condition: li => li.hasClass("damage-log") && !li.hasClass("healing") && li.hasClass("reverted"),
+				condition: li => canUndo(li) && li.hasClass("damage-log") && li.hasClass("damage") && li.hasClass("reverted"),
 				callback: li => DamageLog._undoDamage(li)
 			},
 			{
 				name: game.i18n.localize("damage-log.redo-healing"),
 				icon: '<i class="fas fa-redo-alt"></i>',
-				condition: li => li.hasClass("damage-log") && li.hasClass("healing") && li.hasClass("reverted"),
+				condition: li => canUndo(li) && li.hasClass("damage-log") && li.hasClass("healing") && li.hasClass("reverted"),
 				callback: li => DamageLog._undoDamage(li)
 			}
 		);
 	}
 
 	async _onRenderChatLog(chatLog, html, user) {
-		if (!game.user.isGM) return;
+		if (!game.user.isGM && !this.settings.allowPlayerView) return;
 
 		if (this.hasTabbedChatlog)
 		{
@@ -211,13 +220,20 @@ class DamageLog {
 					flags.preventRollsNotification = true;
 			}
 
+			const canView = (user, actorData) => {
+				if (user.isGM) return true;
+
+				const userPermission = actorData.permission[user.id] ?? actorData.permission.default;
+				return (userPermission >= this.settings.minPlayerPermission);
+			}
+
 			const chatData = {
 				content: await renderTemplate(DamageLog.TABLE_TEMPLATE, flags),
 				flags: { damageLog: flags },
 				flavor: game.i18n.format((totalDiff < 0 ? "damage-log.damage-flavor-text" : "damage-log.healing-flavor-text"), { diff: Math.abs(totalDiff) }),
 				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
 				speaker,
-				whisper: game.users.contents.filter(u => u.isGM).map(u => u.id)
+				whisper: game.users.contents.filter(user => canView(user, actor.data)).map(user => user.id)
 			};
 
 			ChatMessage.create(chatData, {});

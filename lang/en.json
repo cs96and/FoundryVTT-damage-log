@@ -15,7 +15,20 @@
 	"damage-log.diff": "Diff",
 
 	"damage-log.settings.use-tab": "Use separate damage log tab",
-	"damage-log.settings.use-tab-hint": "Use a separate tab for dame logs.  If this is unchecked, damage logs will be sent to the default chatlog.",
+	"damage-log.settings.use-tab-hint": "Use a separate tab for damage logs.  If this is unchecked, damage logs will be sent to the default chatlog.",
+
+	"damage-log.settings.allow-player-view": "Allow players to view the damage log",
+
+	"damage-log.settings.min-player-permission": "Minimum actor permission",
+	"damage-log.settings.min-player-permission-hint": "Players will only be able to see actors in the damage log for which they have this permission (or better).",
+
+	"damage-log.settings.allow-player-undo": "Allow players to undo/redo damage",
+	"damage-log.settings.allow-player-undo-hint": "When enabled, players will be able to undo/redo damage and healing dealt to their *owned* actors.",
+
+	"damage-log.settings.none": "None",
+	"damage-log.settings.limited": "Limited",
+	"damage-log.settings.observer": "Observer",
+	"damage-log.settings.owner": "Owner",
 
 	"damage-log.error.scene-id-missing": "Scene ID missing from damage log",
 	"damage-log.error.scene-deleted": "Scene {scene} no longer exists",
