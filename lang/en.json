@@ -1,17 +1,24 @@
 {
 	"damage-log.chat-tab-name": "Chat",
 	"damage-log.damage-log-tab-name": "Damage Log",
+
 	"damage-log.undo-damage": "Undo Damage",
 	"damage-log.undo-healing": "Undo Healing",
 	"damage-log.redo-damage": "Redo Damage",
 	"damage-log.redo-healing": "Redo Healing",
+
 	"damage-log.damage-flavor-text": "Took {diff} damage",
 	"damage-log.healing-flavor-text": "Healed {diff} damage",
+
 	"damage-log.old": "Old",
 	"damage-log.new": "New",
 	"damage-log.diff": "Diff",
-	"damage-log.scene-id-missing": "Scene ID missing from damage log",
-	"damage-log.scene-deleted": "Scene {scene} no longer exists",
-	"damage-log.token-id-missing": "Token ID missing from damage log",
-	"damage-log.token-deleted": "Token {token} no longer exists"
+
+	"damage-log.settings.use-tab": "Use separate damage log tab",
+	"damage-log.settings.use-tab-hint": "Use a separate tab for dame logs.  If this is unchecked, damage logs will be sent to the default chatlog.",
+
+	"damage-log.error.scene-id-missing": "Scene ID missing from damage log",
+	"damage-log.error.scene-deleted": "Scene {scene} no longer exists",
+	"damage-log.error.token-id-missing": "Token ID missing from damage log",
+	"damage-log.error.token-deleted": "Token {token} no longer exists"
 }

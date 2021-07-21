@@ -10,12 +10,15 @@
  * https://mit-license.org/
  */
 
+import { DamageLogSettings } from "./settings.js";
+
 class DamageLog {
 
 	static TABS_TEMPLATE = "modules/damage-log/templates/damage-log-tabs.hbs";
 	static TABLE_TEMPLATE = "modules/damage-log/templates/damage-log-table.hbs";
 
 	constructor() {
+		this.settings = new DamageLogSettings();
 		this.prevFlags = null;
 		this.tabs = null;
 		this.currentTab = "chat";
@@ -24,10 +27,13 @@ class DamageLog {
 		loadTemplates([DamageLog.TABS_TEMPLATE, DamageLog.TABLE_TEMPLATE]);
 
 		Hooks.once('getChatLogEntryContext', DamageLog._onGetChatLogEntryContext);
-		Hooks.on("renderChatLog", this._onRenderChatLog.bind(this));
 		Hooks.on('preUpdateActor', this._onPreUpdateActor.bind(this));
 		Hooks.on('renderChatMessage', this._onRenderChatMessage.bind(this));
-		Hooks.on('changeSidebarTab', this._onChangeSidebarTab.bind(this));
+		if (this.settings.useTab)
+		{
+			Hooks.on("renderChatLog", this._onRenderChatLog.bind(this));
+			Hooks.on('changeSidebarTab', this._onChangeSidebarTab.bind(this));
+		}
 	}
 
 	static _onGetChatLogEntryContext(html, options) {
@@ -82,7 +88,7 @@ class DamageLog {
 	}
 
 	_onTabbedChatlogRenderChatLog(chatLog, html, user) {
-		// Append our tab to the end of Tabebd Chatlog's tabs
+		// Append our tab to the end of Tabbed Chatlog's tabs
 		const tabs = $(".tabbedchatlog.tabs");
 		tabs.append(`<a class="item damage-log" data-tab="damage-log">${game.i18n.localize("damage-log.damage-log-tab-name")}</a>`);
 
@@ -196,7 +202,7 @@ class DamageLog {
 			// We only kept it in there briefly for the stringify check.
 			delete flags.speaker;
 
-			if (this.hasTabbedChatlog)
+			if (this.settings.useTab && this.hasTabbedChatlog)
 			{
 				// If the rolls notification is not currently showing, set a flag so we can prevent it from showing in _onRenderChatMessage.
 				const rollsNotification = $("#rollsNotification")[0];
@@ -218,20 +224,21 @@ class DamageLog {
 	}
 
 	async _onRenderChatMessage(chatMessage, html, messageData) {
-		if (this.hasTabbedChatlog)
+		if (this.settings.useTab && this.hasTabbedChatlog)
 		{
-			// Force Tabbed Chatlog's to render first.
+			// Force Tabbed Chatlog to render first.
 			await new Promise(r => setTimeout(r, 0));
 		}
 
 		const hp = messageData.message?.flags?.damageLog;
 		if (!hp) {
-			if (this.currentTab === "damage-log")
+			if (this.settings.useTab && (this.currentTab === "damage-log"))
 				html.hide();
 			return;
 		}
 
 		// If the rolls notification wasn't showing before the message was created, then hide it again.
+		// TODO - this currently only works for the user that modified the token.
 		if (hp.preventRollsNotification)
 			$("#rollsNotification").hide();
 
@@ -245,23 +252,26 @@ class DamageLog {
 				html.addClass("healing");
 		}
 
-		if (this.currentTab === "damage-log")
+		if (this.settings.useTab)
 		{
-			if (this.hasTabbedChatlog)
+			if (this.currentTab === "damage-log")
 			{
-				html.removeClass("hardHide");
-				html.removeClass("hard-hide");
-				html.addClass("hard-show");
+				if (this.hasTabbedChatlog)
+				{
+					html.removeClass("hardHide");
+					html.removeClass("hard-hide");
+					html.addClass("hard-show");
+				}
 			}
-		}
-		else
-		{
-			html.hide();
-			if (this.hasTabbedChatlog)
+			else
 			{
-				html.addClass("hardHide");
-				html.addClass("hard-hide");
-				html.removeClass("hard-show");
+				html.hide();
+				if (this.hasTabbedChatlog)
+				{
+					html.addClass("hardHide");
+					html.addClass("hard-hide");
+					html.removeClass("hard-show");
+				}
 			}
 		}
 	}
@@ -278,27 +288,27 @@ class DamageLog {
 
 		if (!speaker.scene)
 		{
-			ui.notifications.error(game.i18n.localize("damage-log.scene-id-missing"));
+			ui.notifications.error(game.i18n.localize("damage-log.error.scene-id-missing"));
 			return;
 		}
 
 		const scene = game.scenes.get(speaker.scene);
 		if (!scene)
 		{
-			ui.notifications.error(game.i18n.format("damage-log.scene-deleted", { scene: speaker.scene }));
+			ui.notifications.error(game.i18n.format("damage-log.error.scene-deleted", { scene: speaker.scene }));
 			return;
 		}
 
 		if (!speaker.token)
 		{
-			ui.notifications.error(game.i18n.localize("damage-log.token-id-missing"));
+			ui.notifications.error(game.i18n.localize("damage-log.error.token-id-missing"));
 			return;
 		}
 
 		const token = scene.tokens.get(speaker.token);
 		if (!token)
 		{
-			ui.notifications.error(game.i18n.format("damage-log.token-deleted", { token: speaker.token }));
+			ui.notifications.error(game.i18n.format("damage-log.error.token-deleted", { token: speaker.token }));
 			return;
 		}
 
