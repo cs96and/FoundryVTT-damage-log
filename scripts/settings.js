@@ -13,6 +13,9 @@
 export class DamageLogSettings {
 
 	constructor() {
+
+		Hooks.on('renderSettingsConfig', this._onRenderSettingsConfig.bind(this));
+
 		game.settings.register("damage-log", "useTab", {
 			name: game.i18n.localize("damage-log.settings.use-tab"),
 			hint: game.i18n.localize("damage-log.settings.use-tab-hint"),
@@ -20,7 +23,7 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: true,
-			onChange: () => window.location.reload()
+			onChange: debounce(() => window.location.reload(), 250)
 		});
 
 		game.settings.register("damage-log", "allowPlayerView", {
@@ -29,7 +32,7 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: false,
-			onChange: () => window.location.reload()
+			onChange: debounce(() => window.location.reload(), 250)
 		});
 
 		const permissionChoices = {};
@@ -46,7 +49,7 @@ export class DamageLogSettings {
 			type: Number,
 			choices: permissionChoices,
 			default: CONST.ENTITY_PERMISSIONS.OWNER,
-			onChange: () => window.location.reload()
+			onChange: debounce(() => window.location.reload(), 250)
 		});
 
 		game.settings.register("damage-log", "allowPlayerUndo", {
@@ -63,6 +66,17 @@ export class DamageLogSettings {
 		this.allowPlayerView = game.settings.get("damage-log", "allowPlayerView");
 		this.minPlayerPermission = game.settings.get("damage-log", "minPlayerPermission");
 		this.allowPlayerUndo = game.settings.get("damage-log", "allowPlayerUndo");
-		let x = 0;
+	}
+
+	_onRenderSettingsConfig(settingsConfig, html, user) {
+		// Disable the player-centric controls if allowPlayerView is disabled.
+		const playerSpecificControls = $('select[name="damage-log.minPlayerPermission"],:checkbox[name="damage-log.allowPlayerUndo"]');
+		playerSpecificControls.prop("disabled", !this.allowPlayerView);
+
+		// Handle the allowPlayerView checkbox being toggled.
+		const allowPlayersCheckbox = $(':checkbox[name="damage-log.allowPlayerView"]');
+		allowPlayersCheckbox.change(function() {
+			playerSpecificControls.prop("disabled", !this.checked);
+		});
 	}
 }
