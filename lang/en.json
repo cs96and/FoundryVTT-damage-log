@@ -25,6 +25,9 @@
 	"damage-log.settings.allow-player-undo": "Allow players to undo/redo damage",
 	"damage-log.settings.allow-player-undo-hint": "When enabled, players will be able to undo/redo damage and healing dealt to their *owned* actors.",
 
+	"damage-log.settings.show-limited-info": "Show limited damage info to players",
+	"damage-log.settings.show-limited-info-hint": "When enabled, players can see the damage taken by *all* actors, but not the old/diff/new table of values.  WARNING: if this module is ever disaabled, players will be able to see all the damage information",
+
 	"damage-log.settings.none": "None",
 	"damage-log.settings.limited": "Limited",
 	"damage-log.settings.observer": "Observer",

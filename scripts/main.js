@@ -109,7 +109,7 @@ class DamageLog {
 		});
 	}
 
-	_onTabSwitch(event, html, tab) {
+	_onTabSwitch(event, tabs, tab) {
 		this.currentTab = tab;
 		const damageLogMessages = $(".chat-message.message.damage-log");
 		const chatMessages = $(".chat-message.message:not(.damage-log)");
@@ -220,21 +220,18 @@ class DamageLog {
 					flags.preventRollsNotification = true;
 			}
 
-			const canView = (user, actorData) => {
-				if (user.isGM) return true;
-
-				const userPermission = actorData.permission[user.id] ?? actorData.permission.default;
-				return (userPermission >= this.settings.minPlayerPermission);
-			}
-
 			const chatData = {
 				content: await renderTemplate(DamageLog.TABLE_TEMPLATE, flags),
 				flags: { damageLog: flags },
 				flavor: game.i18n.format((totalDiff < 0 ? "damage-log.damage-flavor-text" : "damage-log.healing-flavor-text"), { diff: Math.abs(totalDiff) }),
 				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-				speaker,
-				whisper: game.users.contents.filter(user => canView(user, actor.data)).map(user => user.id)
+				speaker
 			};
+
+			// If limited player view is enabled, send messages to all players (confidential info will get stripped out in _onRenderChatMessage)
+			// Otherwise, only send the message to the players who have the correct permissions.
+			if (!this.settings.allowPlayerView || !this.settings.showLimitedInfoToPlayers)
+				chatData["whisper"] = game.users.contents.filter(user => this._canUserViewActor(user, actor.data)).map(user => user.id);
 
 			ChatMessage.create(chatData, {});
 		}
@@ -291,12 +288,46 @@ class DamageLog {
 				}
 			}
 		}
+
+		if (!game.user.isGM)
+		{
+			// We shouldn't receive damage messages that we aren't allowed to see.  However if the settings change, then there will be
+			// messages in the log that we no longer have permissions for, so we should try to hide them.
+			// We can't just completely empty the html object, as that causes issues for other modules that also capture this hook.
+			// Try to remove as much as we can, and then hide what remains.
+			const hideMessageFromPlayer = (showHeader) => {
+				html.find("div.message-content").empty();
+				if (!showHeader)
+				{
+					html.find("span.flavor-text").remove();
+					html.addClass("super-hard-hide");
+				}
+			}
+
+			if (this.settings.allowPlayerView) {
+				const actor = game.actors.get(messageData.message?.speaker?.actor)
+				if (actor && !this._canUserViewActor(game.user, actor.data)) {
+					hideMessageFromPlayer(this.settings.showLimitedInfoToPlayers);
+				}
+			}
+			else {
+				hideMessageFromPlayer(false);
+			}
+		}
 	}
 
 	_onChangeSidebarTab(tab) {
 		if (tab.id === "chat")
 			this.tabs?.activate(this.currentTab);
 	}
+
+	_canUserViewActor(user, actorData) {
+		if (user.isGM) return true;
+		if (!this.settings.allowPlayerView) return false;
+
+		const userPermission = actorData.permission[user.id] ?? actorData.permission.default;
+		return (userPermission >= this.settings.minPlayerPermission);
+	};
 
 	static _undoDamage(li) {
 		const message = game.messages.get(li.data("messageId"));

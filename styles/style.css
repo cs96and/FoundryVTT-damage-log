@@ -73,3 +73,7 @@
 #chat-log .message.damage-log.hard-hide {
     display: none !important;
 }
+/* Force hiding of damage logs (class will never get removed) */
+#chat-log .message.damage-log.super-hard-hide {
+    display: none !important;
+}

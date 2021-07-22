@@ -62,19 +62,30 @@ export class DamageLogSettings {
 			onChange: () => this.allowPlayerUndo = game.settings.get("damage-log", "allowPlayerUndo")
 		});
 
+		game.settings.register("damage-log", "showLimitedInfoToPlayers", {
+			name: game.i18n.localize("damage-log.settings.show-limited-info"),
+			hint: game.i18n.localize("damage-log.settings.show-limited-info-hint"),
+			scope: 'world',
+			config: true,
+			type: Boolean,
+			default: false,
+			onChange: () => window.location.reload()
+		});
+
 		this.useTab = game.settings.get("damage-log", "useTab");
 		this.allowPlayerView = game.settings.get("damage-log", "allowPlayerView");
 		this.minPlayerPermission = game.settings.get("damage-log", "minPlayerPermission");
 		this.allowPlayerUndo = game.settings.get("damage-log", "allowPlayerUndo");
+		this.showLimitedInfoToPlayers = game.settings.get("damage-log", "showLimitedInfoToPlayers");
 	}
 
 	_onRenderSettingsConfig(settingsConfig, html, user) {
 		// Disable the player-centric controls if allowPlayerView is disabled.
-		const playerSpecificControls = $('select[name="damage-log.minPlayerPermission"],:checkbox[name="damage-log.allowPlayerUndo"]');
+		const playerSpecificControls = html.find('select[name="damage-log.minPlayerPermission"],:checkbox[name="damage-log.allowPlayerUndo"],:checkbox[name="damage-log.showLimitedInfoToPlayers"]');
 		playerSpecificControls.prop("disabled", !this.allowPlayerView);
 
 		// Handle the allowPlayerView checkbox being toggled.
-		const allowPlayersCheckbox = $(':checkbox[name="damage-log.allowPlayerView"]');
+		const allowPlayersCheckbox = html.find(':checkbox[name="damage-log.allowPlayerView"]');
 		allowPlayersCheckbox.change(function() {
 			playerSpecificControls.prop("disabled", !this.checked);
 		});
