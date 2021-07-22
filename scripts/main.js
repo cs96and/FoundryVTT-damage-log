@@ -342,10 +342,11 @@ class DamageLog {
 			{
 				const currentHp = actorData.data.attributes.hp;
 				const maxHp = currentHp.max + (currentHp.tempMax ?? 0);
-		
+				const minHp = currentHp.min ?? 0;
+
 				update = {
 					"data.attributes.hp": {
-						value: Math.min(maxHp, Math.max(currentHp.value - (flags.value.diff * modifier), 0)),
+						value: Math.min(maxHp, Math.max(currentHp.value - (flags.value.diff * modifier), minHp)),
 						temp: Math.max(currentHp.temp - (flags.temp.diff * modifier), 0)
 					}
 				};
