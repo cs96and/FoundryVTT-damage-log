@@ -72,11 +72,32 @@ export class DamageLogSettings {
 			onChange: () => window.location.reload()
 		});
 
+		game.settings.register("damage-log", "dbVersion", {
+			scope: 'world',
+			config: false,
+			type: Number,
+			default: 0
+		});
+
 		this.useTab = game.settings.get("damage-log", "useTab");
 		this.allowPlayerView = game.settings.get("damage-log", "allowPlayerView");
 		this.minPlayerPermission = game.settings.get("damage-log", "minPlayerPermission");
 		this.allowPlayerUndo = game.settings.get("damage-log", "allowPlayerUndo");
 		this.showLimitedInfoToPlayers = game.settings.get("damage-log", "showLimitedInfoToPlayers");
+	}
+
+	/**
+	 * Get the db version.
+	 */
+	get dbVersion() {
+		return game.settings.get("damage-log", "dbVersion");
+	}
+
+	/**
+	 * Set the db version.
+	 */
+	set dbVersion(value) {
+		return game.settings.set("damage-log", "dbVersion", value);
 	}
 
 	_onRenderSettingsConfig(settingsConfig, html, user) {

@@ -28,6 +28,7 @@ class DamageLog {
 
 		Hooks.once('getChatLogEntryContext', this._onGetChatLogEntryContext.bind(this));
 		Hooks.on('preUpdateActor', this._onPreUpdateActor.bind(this));
+		Hooks.on('updateActor', this._onUpdateActor.bind(this));
 		Hooks.on('renderChatMessage', this._onRenderChatMessage.bind(this));
 		if (this.settings.useTab)
 		{
@@ -142,7 +143,7 @@ class DamageLog {
 
 	async _onPreUpdateActor(actor, updateData, options, userId) {
 		if (userId !== game.user.id) return;
-		if (options.damageLog?.isRevert) return;
+		if (options["damage-log"]?.messageId) return;
 
 		// TODO - getSpeaker should really expect a TokenDocument, but there is currently a bug in Foundry 0.8.8
 		// that makes it only accept a Token.  Once 0.8.9 is released, change this to send the TokenDocument instead.
@@ -222,7 +223,7 @@ class DamageLog {
 
 			const chatData = {
 				content: await renderTemplate(DamageLog.TABLE_TEMPLATE, flags),
-				flags: { damageLog: flags },
+				flags: { "damage-log": flags },
 				flavor: game.i18n.format((totalDiff < 0 ? "damage-log.damage-flavor-text" : "damage-log.healing-flavor-text"), { diff: Math.abs(totalDiff) }),
 				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
 				speaker
@@ -237,14 +238,34 @@ class DamageLog {
 		}
 	}
 
-	async _onRenderChatMessage(chatMessage, html, messageData) {
+	_onUpdateActor(actor, updateData, options, userId) {
+		const flags = options["damage-log"];
+		if (flags?.messageId)
+		{
+			const message = game.messages.get(flags.messageId);
+			if (!message) return;
+
+			// If the user that created the message is connected, let their client update the message.
+			// Otherwise let the GM do it.
+			if (message.user.active ? (message.user.id === game.user.id) : game.user.isGM)
+			{
+				// Changing the message flags will cause the renderChatMessage hook to fire
+				if (flags.revert > 0)
+					message.setFlag("damage-log", "revert", true);
+				else
+					message.unsetFlag("damage-log", "revert");
+			}
+		}
+	}
+
+	async _onRenderChatMessage(message, html, messageData) {
 		if (this.settings.useTab && this.hasTabbedChatlog)
 		{
 			// Force Tabbed Chatlog to render first.
 			await new Promise(r => setTimeout(r, 0));
 		}
 
-		const hp = messageData.message?.flags?.damageLog;
+		const hp = message.data?.flags["damage-log"];
 		if (!hp) {
 			if (this.settings.useTab && (this.currentTab === "damage-log"))
 				html.hide();
@@ -255,6 +276,11 @@ class DamageLog {
 		// TODO - this currently only works for the user that modified the token.
 		if (hp.preventRollsNotification)
 			$("#rollsNotification").hide();
+
+		if (hp.revert)
+			html.addClass("reverted");
+		else
+			html.removeClass("reverted");
 
 		html.addClass("damage-log");
 
@@ -332,7 +358,7 @@ class DamageLog {
 	static _undoDamage(li) {
 		const message = game.messages.get(li.data("messageId"));
 		const speaker = message.data.speaker;
-		const flags = message.data.flags.damageLog;
+		const flags = message.data.flags["damage-log"];
 
 		if (!speaker.scene)
 		{
@@ -397,15 +423,31 @@ class DamageLog {
 				return;
 		}
 
-		actorData.document.update(update, { damageLog: { isRevert: true } });
-
-		if (modifier === 1)
-			li.addClass("reverted");
-		else
-			li.removeClass("reverted");
+		actorData.document.update(update, { "damage-log": { revert: modifier, messageId: message.id } });
 	}
 }
 
-Hooks.once('init', () => {
+Hooks.once("init", () => {
 	game.damageLog = new DamageLog();
+});
+
+Hooks.once("ready", async () => {
+	if(game.user.isGM && (game.damageLog.settings.dbVersion < 1))
+	{
+		ui.notifications.info("Damage Log | Updating message database, please do not close the game", { permanent: true });
+
+		for (const message of game.messages) {
+			const oldFlags = message.data?.flags?.damageLog;
+			if (oldFlags) {
+				console.log(`Damage Log | Updating flags for message ${message.id}`);
+				await message.update({
+					"flags.damage-log": oldFlags,
+					"flags.-=damageLog": null
+				});
+			}
+		}
+
+		game.damageLog.settings.dbVersion = 1;
+		ui.notifications.info("Damage Log | Finished updating message database", { permanent: true });
+	}
 });
