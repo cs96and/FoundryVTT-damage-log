@@ -51,25 +51,25 @@ class DamageLog {
 			{
 				name: game.i18n.localize("damage-log.undo-damage"),
 				icon: '<i class="fas fa-undo-alt"></i>',
-				condition: li => canUndo(li) && li.hasClass("damage-log") && li.hasClass("damage") && !li.hasClass("reverted"),
+				condition: li => canUndo(li) && li.is(".damage-log.damage:not(.reverted)"),
 				callback: li => DamageLog._undoDamage(li)
 			},
 			{
 				name: game.i18n.localize("damage-log.undo-healing"),
 				icon: '<i class="fas fa-undo-alt"></i>',
-				condition: li => canUndo(li) && li.hasClass("damage-log") && li.hasClass("healing") && !li.hasClass("reverted"),
+				condition: li => canUndo(li) && li.is(".damage-log.healing:not(.reverted)"),
 				callback: li => DamageLog._undoDamage(li)
 			},
 			{
 				name: game.i18n.localize("damage-log.redo-damage"),
 				icon: '<i class="fas fa-redo-alt"></i>',
-				condition: li => canUndo(li) && li.hasClass("damage-log") && li.hasClass("damage") && li.hasClass("reverted"),
+				condition: li => canUndo(li) && li.is(".damage-log.damage.reverted"),
 				callback: li => DamageLog._undoDamage(li)
 			},
 			{
 				name: game.i18n.localize("damage-log.redo-healing"),
 				icon: '<i class="fas fa-redo-alt"></i>',
-				condition: li => canUndo(li) && li.hasClass("damage-log") && li.hasClass("healing") && li.hasClass("reverted"),
+				condition: li => canUndo(li) && li.is(".damage-log.healing.reverted"),
 				callback: li => DamageLog._undoDamage(li)
 			}
 		);
@@ -286,10 +286,10 @@ class DamageLog {
 
 		if ((0 !== hp.temp.diff) || (0 !== hp.value.diff))
 		{
-			if ((hp.temp.diff <= 0) && (hp.value.diff <= 0))
-				html.addClass("damage");
-			else if ((hp.temp.diff >= 0) && (hp.value.diff >= 0))
+			if ((hp.temp.diff + hp.value.diff) >= 0)
 				html.addClass("healing");
+			else
+				html.addClass("damage");
 		}
 
 		if (this.settings.useTab)
