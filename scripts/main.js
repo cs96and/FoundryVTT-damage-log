@@ -17,6 +17,10 @@ class DamageLog {
 	static TABS_TEMPLATE = "modules/damage-log/templates/damage-log-tabs.hbs";
 	static TABLE_TEMPLATE = "modules/damage-log/templates/damage-log-table.hbs";
 
+	/**
+	 * DamageLog constructor.
+	 * @constructor
+	 */
 	constructor() {
 		this.settings = new DamageLogSettings();
 		this.prevFlags = null;
@@ -37,6 +41,10 @@ class DamageLog {
 		}
 	}
 
+	/**
+	 * Handle the "getChatLogEntryContext" hook.
+	 * This sets up the right click context menus for chat messages.
+	 */
 	_onGetChatLogEntryContext(html, options) {
 		const canUndo = li => {
 			if (game.user.isGM) return true;
@@ -75,6 +83,10 @@ class DamageLog {
 		);
 	}
 
+	/**
+	 * Handle the "renderChatLog" hook.
+	 * This creates the separate tab for the damage log.
+	 */
 	async _onRenderChatLog(chatLog, html, user) {
 		if (!game.user.isGM && !this.settings.allowPlayerView) return;
 
@@ -97,6 +109,9 @@ class DamageLog {
 		this.tabs.bind(html[0]);
 	}
 
+	/**
+	 * Creates the damage log tab when Tabbed Chatlog module is installed.
+	 */
 	_onTabbedChatlogRenderChatLog(chatLog, html, user) {
 		// Append our tab to the end of Tabbed Chatlog's tabs
 		const tabs = $(".tabbedchatlog.tabs");
@@ -110,6 +125,9 @@ class DamageLog {
 		});
 	}
 
+	/**
+	 * Handle the user switching tabs.
+	 */
 	_onTabSwitch(event, tabs, tab) {
 		this.currentTab = tab;
 		const damageLogMessages = $(".chat-message.message.damage-log");
@@ -141,6 +159,10 @@ class DamageLog {
 		$("#chat-log").scrollTop(9999999);
 	}
 
+	/**
+	 * Handle the "preUpdateActor" hook.
+	 * Calculate the difference between the old and new HP values for the actor and creates the damage log chat message.
+	 */
 	async _onPreUpdateActor(actor, updateData, options, userId) {
 		if (userId !== game.user.id) return;
 		if (options["damage-log"]?.messageId) return;
@@ -238,6 +260,11 @@ class DamageLog {
 		}
 	}
 
+	/**
+	 * Handle the "updateActor" hook.
+	 * Only interested in this hook when the user reverts or re-applys damage/healing.
+	 * Sets or clears the "reverted" flag in the message.
+	 */
 	_onUpdateActor(actor, updateData, options, userId) {
 		const flags = options["damage-log"];
 		if (flags?.messageId)
@@ -258,6 +285,11 @@ class DamageLog {
 		}
 	}
 
+	/**
+	 * Handle the "renderChatMessage" hook.
+	 * Applies classes to the message's HTML based on the message flags.
+	 * Also responsible for hiding messages, depending on which tab is currently showing.
+	 */
 	async _onRenderChatMessage(message, html, messageData) {
 		if (this.settings.useTab && this.hasTabbedChatlog)
 		{
@@ -342,11 +374,18 @@ class DamageLog {
 		}
 	}
 
+	/**
+	 * Handle the "changeSidebarTab" hook.
+	 * When switching to Foundry's "chat" tab, make sure the damage-log's current tab is marked as active.
+	 */
 	_onChangeSidebarTab(tab) {
 		if (tab.id === "chat")
 			this.tabs?.activate(this.currentTab);
 	}
 
+	/**
+	 * Check whether a user has permission to see a given actor's damage info or not.
+	 */
 	_canUserViewActor(user, actorData) {
 		if (user.isGM) return true;
 		if (!this.settings.allowPlayerView) return false;
@@ -355,6 +394,9 @@ class DamageLog {
 		return (userPermission >= this.settings.minPlayerPermission);
 	};
 
+	/**
+	 * Undo the the damage on a given message.
+	 */
 	static _undoDamage(li) {
 		const message = game.messages.get(li.data("messageId"));
 		const speaker = message.data.speaker;
@@ -427,10 +469,16 @@ class DamageLog {
 	}
 }
 
+/**
+ * Initialization.  Create the DamageLog.
+ */
 Hooks.once("init", () => {
 	game.damageLog = new DamageLog();
 });
 
+/**
+ * Ready handling.  Convert damage log messages from to new flag format.
+ */
 Hooks.once("ready", async () => {
 	if(game.user.isGM && (game.damageLog.settings.dbVersion < 1))
 	{

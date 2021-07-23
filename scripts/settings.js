@@ -12,9 +12,14 @@
 
 export class DamageLogSettings {
 
+	/**
+	 * DamageLogSettings constructor.
+	 * Registers Damage Log's settings with Foundry.
+	 * @constructor
+	 */
 	constructor() {
 
-		Hooks.on('renderSettingsConfig', this._onRenderSettingsConfig.bind(this));
+		Hooks.on("renderSettingsConfig", this._onRenderSettingsConfig.bind(this));
 
 		game.settings.register("damage-log", "useTab", {
 			name: game.i18n.localize("damage-log.settings.use-tab"),
@@ -79,6 +84,7 @@ export class DamageLogSettings {
 			default: 0
 		});
 
+		// Cache the settings in class properties for quick lookup.
 		this.useTab = game.settings.get("damage-log", "useTab");
 		this.allowPlayerView = game.settings.get("damage-log", "allowPlayerView");
 		this.minPlayerPermission = game.settings.get("damage-log", "minPlayerPermission");
@@ -100,6 +106,11 @@ export class DamageLogSettings {
 		return game.settings.set("damage-log", "dbVersion", value);
 	}
 
+	/**
+	 * Handle the "renderSettingsConfig" hook.
+	 * This is fired when Foundry's settings window is opened.
+	 * Enable / disable interaction with various settings, depending on whether "Allow Player View" is enabled.
+	 */
 	_onRenderSettingsConfig(settingsConfig, html, user) {
 		// Disable the player-centric controls if allowPlayerView is disabled.
 		const playerSpecificControls = html.find('select[name="damage-log.minPlayerPermission"],:checkbox[name="damage-log.allowPlayerUndo"],:checkbox[name="damage-log.showLimitedInfoToPlayers"]');
