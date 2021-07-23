@@ -139,20 +139,20 @@ class DamageLog {
 			damageLogMessages.show();
 			if (this.hasTabbedChatlog)
 			{
-				damageLogMessages.removeClass("hardHide");
-				damageLogMessages.removeClass("hard-hide");
-				damageLogMessages.addClass("hard-show");
+				damageLogMessages
+					.removeClass(["hardHide", "hard-hide"])
+					.addClass("hard-show");
 			}
 		}
 		else
 		{
-			chatMessages.show();
 			damageLogMessages.hide();
+			chatMessages.show();
 			if (this.hasTabbedChatlog)
 			{
-				damageLogMessages.addClass("hardHide");
-				damageLogMessages.addClass("hard-hide");
-				damageLogMessages.removeClass("hard-show");
+				damageLogMessages
+					.addClass(["hardHide", "hard-hide"])
+					.removeClass("hard-show");
 			}
 		}
 
