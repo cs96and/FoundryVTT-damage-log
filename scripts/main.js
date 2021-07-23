@@ -51,7 +51,7 @@ class DamageLog {
 			if (!this.settings.allowPlayerUndo) return false;
 
 			const message = game.messages.get(li.data("messageId"));
-			const actor = game.actors.get(message?.data?.speaker?.actor);
+			const actor = ChatMessage.getSpeakerActor(message?.data?.speaker);
 			return actor?.testUserPermission(game.user, CONST.ENTITY_PERMISSIONS.OWNER);
 		};
 
@@ -244,7 +244,6 @@ class DamageLog {
 			}
 
 			const chatData = {
-				content: await renderTemplate(DamageLog.TABLE_TEMPLATE, flags),
 				flags: { "damage-log": flags },
 				flavor: game.i18n.format((totalDiff < 0 ? "damage-log.damage-flavor-text" : "damage-log.healing-flavor-text"), { diff: Math.abs(totalDiff) }),
 				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
@@ -254,7 +253,7 @@ class DamageLog {
 			// If limited player view is enabled, send messages to all players (confidential info will get stripped out in _onRenderChatMessage)
 			// Otherwise, only send the message to the players who have the correct permissions.
 			if (!this.settings.allowPlayerView || !this.settings.showLimitedInfoToPlayers)
-				chatData["whisper"] = game.users.contents.filter(user => this._canUserViewActor(user, actor.data)).map(user => user.id);
+				chatData["whisper"] = game.users.contents.filter(user => this._canUserViewActorDamage(user, actor)).map(user => user.id);
 
 			ChatMessage.create(chatData, {});
 		}
@@ -309,6 +308,16 @@ class DamageLog {
 		if (hp.preventRollsNotification)
 			$("#rollsNotification").hide();
 
+		// Work out if the user is allowed to see the damage table, and then add it to the HTML.
+		let canViewTable = game.user.isGM;
+		if (!canViewTable && this.settings.allowPlayerView) {
+			const actor = ChatMessage.getSpeakerActor(message.data?.speaker);
+			canViewTable = this._canUserViewActorDamage(game.user, actor);
+		}
+
+		if (canViewTable)
+			html.find("div.message-content").prepend(await renderTemplate(DamageLog.TABLE_TEMPLATE, hp));
+
 		if (hp.revert)
 			html.addClass("reverted");
 		else
@@ -347,31 +356,10 @@ class DamageLog {
 			}
 		}
 
-		if (!game.user.isGM)
-		{
-			// We shouldn't receive damage messages that we aren't allowed to see.  However if the settings change, then there will be
-			// messages in the log that we no longer have permissions for, so we should try to hide them.
-			// We can't just completely empty the html object, as that causes issues for other modules that also capture this hook.
-			// Try to remove as much as we can, and then hide what remains.
-			const hideMessageFromPlayer = (showHeader) => {
-				html.find("div.message-content").empty();
-				if (!showHeader)
-				{
-					html.find("span.flavor-text").remove();
-					html.addClass("super-hard-hide");
-				}
-			}
-
-			if (this.settings.allowPlayerView) {
-				const actor = game.actors.get(messageData.message?.speaker?.actor)
-				if (actor && !this._canUserViewActor(game.user, actor.data)) {
-					hideMessageFromPlayer(this.settings.showLimitedInfoToPlayers);
-				}
-			}
-			else {
-				hideMessageFromPlayer(false);
-			}
-		}
+		// The user shouldn't receive damage messages that they aren't allowed to see.  However if the settings change, then there will be
+		// messages in the log that we no longer have permissions for, so we should hide them.
+		if (!canViewTable && !this.settings.showLimitedInfoToPlayers)
+			html.addClass("super-hard-hide");
 	}
 
 	/**
@@ -386,12 +374,11 @@ class DamageLog {
 	/**
 	 * Check whether a user has permission to see a given actor's damage info or not.
 	 */
-	_canUserViewActor(user, actorData) {
+	_canUserViewActorDamage(user, actor) {
 		if (user.isGM) return true;
 		if (!this.settings.allowPlayerView) return false;
-
-		const userPermission = actorData.permission[user.id] ?? actorData.permission.default;
-		return (userPermission >= this.settings.minPlayerPermission);
+ 
+		return actor?.testUserPermission(user, this.settings.minPlayerPermission);
 	};
 
 	/**
@@ -480,22 +467,31 @@ Hooks.once("init", () => {
  * Ready handling.  Convert damage log messages from to new flag format.
  */
 Hooks.once("ready", async () => {
-	if(game.user.isGM && (game.damageLog.settings.dbVersion < 1))
+	if (game.user.isGM && (game.damageLog.settings.dbVersion < 1))
 	{
-		ui.notifications.info("Damage Log | Updating message database, please do not close the game", { permanent: true });
+		console.log("Damage Log | Updating message database");
 
+		let haveNotified = false;
 		for (const message of game.messages) {
 			const oldFlags = message.data?.flags?.damageLog;
 			if (oldFlags) {
+				if (!haveNotified) {
+					ui.notifications.warn("Damage Log | Updating message database, please do not close the game", { permanent: true });
+					haveNotified = true;
+				}
 				console.log(`Damage Log | Updating flags for message ${message.id}`);
 				await message.update({
 					"flags.damage-log": oldFlags,
-					"flags.-=damageLog": null
+					"flags.-=damageLog": null,
+					"content": null
 				});
 			}
 		}
 
 		game.damageLog.settings.dbVersion = 1;
-		ui.notifications.info("Damage Log | Finished updating message database", { permanent: true });
+
+		console.log("Damage Log | Finished updating message database");
+		if (haveNotified)
+			ui.notifications.info("Damage Log | Finished updating message database", { permanent: true });
 	}
 });
