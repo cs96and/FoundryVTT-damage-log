@@ -7,11 +7,20 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C057N35)
 
-Damage Log is a FoundryVTT module that monitiors for changes to characters' health, and displays those changes in a separate chatlog tab (currently only viewable by the GM).  Changes can be easily be undone, or re-applied using the chat card's right-click menu.
+Damage Log is a FoundryVTT module that monitiors for changes to characters' health, and displays those changes in a separate chatlog tab.  Changes can be easily be undone, or re-applied using the chat card's right-click menu.
 
 Damage Log is also compatible with the [Tabbed Chatlog](https://github.com/cswendrowski/FoundryVTT-Tabbed-Chatlog) module, and will add an extra tab on to the end of Tabbed Chatlog's tabs.
 
 ![](images/damage-log.gif)
+
+## Features
+* Creates a separate "Damage Log" chatlog tab.  Whenever an actor takes damage or receives healing, a message containing the HP changes is added to the tab.
+* The extra tab can be disabled, in which case the messages go to the normal chatlog.
+* Damage can easily be reverted or re-applied using the message's right click menu.
+* By default, only the GM can see the damage log.  The GM can optionally let players see the damage log for actors they are permissioned for (the minimum permission level is configurable, and defaults to "owner").
+* The GM can also let players see limited damage info for all actors (i.e. the amount of damage taken, but not the old and new HP values).
+* Works with [Better Rolls](https://foundryvtt.com/packages/betterrolls5e), [Midi QoL](https://foundryvtt.com/packages/midi-qol/), and probably works with other dice rolling modules too.
+* Integrates with the [Tabbed Chatlog](https://github.com/cswendrowski/FoundryVTT-Tabbed-Chatlog) module.  Damage Log's extra tab will be added on to the end of Tabbed Chatlog's tabs.
 
 ## System Compatibility
 Damage Log is current compatible with the following systems.
@@ -22,9 +31,10 @@ Damage Log is current compatible with the following systems.
 * Simple Worldbuilding (worldbuilding)
 
 ## Installation
-Damage Log can be installed using the Foundry module installer.  Alternatively, you can install it using the following manifest URL...
+Damage Log can be installed using the Foundry module installer.  Alternatively, you can install it using the following manifest URL...<br>
 https://github.com/cs96and/FoundryVTT-damage-log/releases/latest/download/module.json
 
 ## Support Me
 If you find this module useful and would like to offer your support, why not buy me a coffee (or a beer)?
+
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C057N35)
