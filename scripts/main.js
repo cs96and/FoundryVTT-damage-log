@@ -180,6 +180,7 @@ class DamageLog {
 
 		let oldTemp = 0, newTemp = 0;
 		let oldValue = 0, newValue = 0;
+		let hpName = game.i18n.localize("damage-log.standardName");
 		switch (game.system.id)
 		{
 			case "dnd5e":
@@ -208,6 +209,15 @@ class DamageLog {
 				break;
 			}
 
+			case "age-of-sigmar-soulbound":
+				hpName = game.i18n.localize("damage-log.aosName");
+				const oldHp = actor.combat.health.toughness;
+				const newHp = updateData.data?.combat.health.toughness;
+
+				oldValue = oldHp.value ?? 0;
+				newValue = newHp.value ?? 0;
+				break;
+
 			default:
 				return;
 		}
@@ -221,7 +231,7 @@ class DamageLog {
 		const flags = {
 			speaker,
 			temp: { old: oldTemp, new: newTemp, diff: tempDiff },
-			value: { old: oldValue, new: newValue, diff: valueDiff }
+			value: { name: hpName, old: oldValue, new: newValue, diff: valueDiff }
 		};
 
 		// There is a bug in Foundry 0.8.8 that causes preUpdateActor to fire multiple times.
@@ -445,6 +455,15 @@ class DamageLog {
 				update = {
 					"data.health.value": Math.min(currentHp.max, Math.max(currentHp.value - (flags.value.diff * modifier), currentHp.min))
 				};
+				break;
+			}
+
+			case "age-of-sigmar-soulbound":
+			{
+				const currentToughness = actorData.data.combat.health.toughness;
+				update = {
+					"data.combat.health.toughness.value" : Math.min(currentToughness.max, currentToughness.value - (flags.value.diff * modifier))
+				}
 				break;
 			}
 
