@@ -86,33 +86,62 @@ class DamageLog {
 	/**
 	 * Handle the "renderChatLog" hook.
 	 * This creates the separate tab for the damage log.
+	 * It also sets up a mutation observer to move any damage messages to the damage log tab.
 	 */
-	async _onRenderChatLog(chatLog, html, user) {
+	async _onRenderChatLog(chatTab, html, user) {
 		if (!game.user.isGM && !this.settings.allowPlayerView) return;
 
-		if (this.hasTabbedChatlog)
-		{
+		if (this.hasTabbedChatlog) {
 			// Force Tabbed Chatlog to render first
-			setTimeout(() => this._onTabbedChatlogRenderChatLog(chatLog, html, user), 0)
-			return;
+			await new Promise(r => {
+				this._onTabbedChatlogRenderChatLog(chatTab, html, user);
+				r();
+			});
+		}
+		else {
+			const tabsHtml = await renderTemplate(DamageLog.TABS_TEMPLATE);
+			html.prepend(tabsHtml);
+
+			this.tabs = new Tabs({
+				navSelector: ".damage-log-nav.tabs",
+				contentSelector: undefined,
+				initial: this.currentTab,
+				callback: this._onTabSwitch.bind(this)
+			});
+			this.tabs.bind(html[0]);
 		}
 
-		const tabsHtml = await renderTemplate(DamageLog.TABS_TEMPLATE);
-		html.prepend(tabsHtml);
+		const chatLog = html.find("#chat-log");
+		chatLog.after('<ol id="damage-log"></ol>');
 
-		this.tabs = new Tabs({
-			navSelector: ".damage-log.tabs",
-			contentSelector: undefined,
-			initial: this.currentTab,
-			callback: this._onTabSwitch.bind(this)
+		// Move all existing damage log messages into the damage log
+		const damageLog = html.find('#damage-log');
+		const damageMessages = chatLog.find(".message.damage-log");
+		damageLog.append(damageMessages);
+		damageMessages.filter(".not-permitted").remove();
+
+		this._onTabSwitch(undefined, undefined, this.currentTab);
+
+		// Listen for items being added to the chat log.  If they are damage messages, move them to the damage log tab.
+		const observer = new MutationObserver((mutationList, observer) => {
+			for (const mutation of mutationList) {
+				let nodes = $(mutation.addedNodes).filter(".damage-log");
+				nodes.filter(".not-permitted").remove();
+				nodes = nodes.not(".not-permitted");
+				if (0 !== nodes.length) {
+					damageLog.append(nodes);
+					damageLog.animate({scrollTop: damageLog[0].scrollHeight}, "fast", "swing");
+				}
+			}
 		});
-		this.tabs.bind(html[0]);
+
+		observer.observe(chatLog.get()[0], { childList: true });
 	}
 
 	/**
 	 * Creates the damage log tab when Tabbed Chatlog module is installed.
 	 */
-	_onTabbedChatlogRenderChatLog(chatLog, html, user) {
+	_onTabbedChatlogRenderChatLog(chatTab, html, user) {
 		// Append our tab to the end of Tabbed Chatlog's tabs
 		const tabs = $(".tabbedchatlog.tabs");
 		tabs.append(`<a class="item damage-log" data-tab="damage-log">${game.i18n.localize("damage-log.damage-log-tab-name")}</a>`);
@@ -130,33 +159,21 @@ class DamageLog {
 	 */
 	_onTabSwitch(event, tabs, tab) {
 		this.currentTab = tab;
-		const damageLogMessages = $(".chat-message.message.damage-log");
-		const chatMessages = $(".chat-message.message:not(.damage-log)");
 
-		if (tab === "damage-log")
-		{
-			chatMessages.hide();
-			damageLogMessages.show();
-			if (this.hasTabbedChatlog)
-			{
-				damageLogMessages
-					.removeClass(["hardHide", "hard-hide"])
-					.addClass("hard-show");
-			}
+		const chatLog = $("#chat-log");
+		const damageLog = $("#damage-log");
+
+		if (tab === "damage-log") {
+			chatLog.hide();
+			damageLog.show();
+			damageLog.scrollTop(damageLog[0].scrollHeight);
 		}
 		else
 		{
-			damageLogMessages.hide();
-			chatMessages.show();
-			if (this.hasTabbedChatlog)
-			{
-				damageLogMessages
-					.addClass(["hardHide", "hard-hide"])
-					.removeClass("hard-show");
-			}
+			damageLog.hide();
+			chatLog.show();
+			chatLog.scrollTop(chatLog[0].scrollHeight);
 		}
-
-		$("#chat-log").scrollTop(9999999);
 	}
 
 	/**
@@ -287,26 +304,22 @@ class DamageLog {
 	/**
 	 * Handle the "renderChatMessage" hook.
 	 * Applies classes to the message's HTML based on the message flags.
-	 * Also responsible for hiding messages, depending on which tab is currently showing.
 	 */
 	async _onRenderChatMessage(message, html, messageData) {
-		if (this.settings.useTab && this.hasTabbedChatlog)
-		{
-			// Force Tabbed Chatlog to render first.
-			await new Promise(r => setTimeout(r, 0));
-		}
-
 		const hp = message.data?.flags["damage-log"];
-		if (!hp) {
-			if (this.settings.useTab && (this.currentTab === "damage-log"))
-				html.hide();
-			return;
-		}
+		if (!hp) return;
 
-		// If the rolls notification wasn't showing before the message was created, then hide it again.
-		// TODO - this currently only works for the user that modified the token.
-		if (hp.preventRollsNotification)
-			$("#rollsNotification").hide();
+		html.addClass("damage-log");
+
+		if (hp.revert)
+			html.addClass("reverted");
+		else
+			html.removeClass("reverted");
+
+		if ((hp.temp.diff + hp.value.diff) >= 0)
+			html.addClass("healing");
+		else
+			html.addClass("damage");
 
 		// Work out if the user is allowed to see the damage table, and then add it to the HTML.
 		let canViewTable = game.user.isGM;
@@ -315,51 +328,23 @@ class DamageLog {
 			canViewTable = this._canUserViewActorDamage(game.user, actor);
 		}
 
+		if (!canViewTable && !this.settings.showLimitedInfoToPlayers)
+			html.addClass("not-permitted");
+
+		if (this.settings.useTab && this.hasTabbedChatlog) {
+			// Do the following after Tabbed Chatlog has rendered.
+			new Promise(r => {
+				// If the rolls notification wasn't showing before the message was created, then hide it again.
+				// TODO - this currently only works for the user that modified the token.
+				if (hp.preventRollsNotification)
+					$("#rollsNotification").hide();
+				html.removeClass("hardHide").addClass("hard-show").css("display", "").show();
+				r();
+			});
+		}
+
 		if (canViewTable)
 			html.find("div.message-content").prepend(await renderTemplate(DamageLog.TABLE_TEMPLATE, hp));
-
-		if (hp.revert)
-			html.addClass("reverted");
-		else
-			html.removeClass("reverted");
-
-		html.addClass("damage-log");
-
-		if ((0 !== hp.temp.diff) || (0 !== hp.value.diff))
-		{
-			if ((hp.temp.diff + hp.value.diff) >= 0)
-				html.addClass("healing");
-			else
-				html.addClass("damage");
-		}
-
-		if (this.settings.useTab)
-		{
-			if (this.currentTab === "damage-log")
-			{
-				if (this.hasTabbedChatlog)
-				{
-					html.removeClass("hardHide");
-					html.removeClass("hard-hide");
-					html.addClass("hard-show");
-				}
-			}
-			else
-			{
-				html.hide();
-				if (this.hasTabbedChatlog)
-				{
-					html.addClass("hardHide");
-					html.addClass("hard-hide");
-					html.removeClass("hard-show");
-				}
-			}
-		}
-
-		// The user shouldn't receive damage messages that they aren't allowed to see.  However if the settings change, then there will be
-		// messages in the log that we no longer have permissions for, so we should hide them.
-		if (!canViewTable && !this.settings.showLimitedInfoToPlayers)
-			html.addClass("super-hard-hide");
 	}
 
 	/**

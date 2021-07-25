@@ -11,15 +11,15 @@
  */
 
 /* Styling for the tabs */
-.damage-log.tabs {
+nav.damage-log-nav.tabs {
 	flex: 0;
 	margin: 0 0 5px;
 	border-bottom: 1px solid #ff6400;
 	box-shadow: 0 0 10px red;
 }
 
-/* Styling for the active tab*/
-.damage-log .item.active {
+/* Styling for the active tab */
+nav.damage-log-nav .item.active {
 	color: white;
 	border: 1px solid red;
 	border-bottom: none;
@@ -28,52 +28,65 @@
 }
 
 /* Align numbers in tables */
-#damage-log-table th.num,
-#damage-log-table td.num {
-    text-align: right;
+.damage-log-table th.num,
+.damage-log-table td.num {
+	text-align: right;
 }
 
+/* Remove margin and padding from the damage log list */
+#damage-log {
+	margin: 0;
+	padding: 0;
+	overflow-y: auto;
+}
 /* Styling for damage messages */
-#chat-log .message.damage-log.damage {
+#damage-log .message.damage-log.damage {
 	background: #ffd9d9;
 }
 /* Styling for healing messages */
-#chat-log .message.damage-log.healing {
+#damage-log .message.damage-log.healing {
 	background: #d9ffd9;
 }
 /* Stikethrough reverted messages */
-#chat-log .message.damage-log.reverted {
+#damage-log .message.damage-log.reverted {
 	text-decoration: line-through;
 }
 /* Dim reverted damage */
-#chat-log .message.damage-log.reverted.damage {
+#damage-log .message.damage-log.reverted.damage {
 	background: #ffeaea;
 }
 /* Dim reverted healing */
-#chat-log .message.damage-log.reverted.healing {
+#damage-log .message.damage-log.reverted.healing {
 	background: #eaffea;
 }
 /* Hide whisper information on damage logs */
-#chat-log .message.damage-log .chat-mode-indicator,
-#chat-log .message.damage-log .whisper-to,
-#chat-log .message.damage-log .chat-portrait-indicator,
-#chat-log .message.damage-log .chat-portrait-whisper-to {
+#damage-log .message.damage-log .chat-mode-indicator,
+#damage-log .message.damage-log .whisper-to,
+#damage-log .message.damage-log .chat-portrait-indicator,
+#damage-log .message.damage-log .chat-portrait-whisper-to {
 	display: none;
 }
+/* Styling for chat portraits in the damage log tab */
+#damage-log .message .message-header img
+{
+  flex: 0 0 0px;
+  margin-right: 5px;
+  margin-bottom: 3px;
+  object-fit: cover;
+}
 /* Hide chat portrait image next to flavor text */
-#chat-log .message.damage-log .flavor-text img.message-portrait {
+#damage-log .message.damage-log .flavor-text img.message-portrait {
 	display: none;
 }
 
 /* Force showing of damage logs (for compatibility with Tabbed Chatlog) */
-#chat-log .message.damage-log.hard-show {
-    display: list-item !important;
+#damage-log .message.damage-log.hard-show {
+    display: flex !important;
 }
-/* Force hiding of damage logs (for compatibility with Tabbed Chatlog) */
-#chat-log .message.damage-log.hard-hide {
-    display: none !important;
+/* Force hiding of damage logs the user is not permitted to see */
+.message.damage-log.not-permitted {
+	display: none !important;
 }
-/* Force hiding of damage logs (class will never get removed) */
-#chat-log .message.damage-log.super-hard-hide {
-    display: none !important;
-}
+
+
+
