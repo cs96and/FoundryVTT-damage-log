@@ -29,6 +29,7 @@ Damage Log is current compatible with the following systems.
 * Pathfinder 1st Edition (pf1)
 * Pathfinder 2nd Edition (pf2e)
 * Simple Worldbuilding (worldbuilding)
+* Age of Sigmar: Soulbound (age-of-sigmar-soulbound)
 
 ## Installation
 Damage Log can be installed using the Foundry module installer.  Alternatively, you can install it using the following manifest URL...<br>
