@@ -7,7 +7,7 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C057N35)
 
-Damage Log is a FoundryVTT module that monitiors for changes to characters' health, and displays those changes in a separate chatlog tab.  Changes can be easily be undone, or re-applied using the chat card's right-click menu.
+Damage Log is a FoundryVTT module that monitors for changes to characters' health, and displays those changes in a separate chatlog tab.  Changes can be easily be undone, or re-applied using the chat card's right-click menu.
 
 Damage Log is also compatible with the [Tabbed Chatlog](https://github.com/cswendrowski/FoundryVTT-Tabbed-Chatlog) module, and will add an extra tab on to the end of Tabbed Chatlog's tabs.
 
