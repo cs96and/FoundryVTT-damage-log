@@ -21,7 +21,7 @@
 	],
 	"scripts": [],
 	"styles": [
-		"styles/style.css"
+		"styles/damage-log.css"
 	],
 	"languages": [
 		{
