@@ -419,14 +419,17 @@ class DamageLog {
 		}
 
 		const modifier = li.hasClass("reverted") ? -1 : 1;
+		const actorData = token.actor.data;
 
 		// Get a nested property of actorData.data using a string.
-		const getActorAttrib = path => path.split('.').reduce((prev, curr) => prev && prev[curr], token.actor.data.data);
+		const getActorAttrib = (path) => {
+			return path.split('.').reduce((prev, curr) => prev && prev[curr], actorData.data);
+		}
 
 		const update = {};
 
 		if (this.system.value) {
-			let newValue = getActorAttrib(this.system.value) - (flags.value.diff * modifier);
+			let newValue = (getActorAttrib(this.system.value) ?? 0) - (flags.value.diff * modifier);
 
 			if (this.settings.clampToMin) {
 				const minHp = getActorAttrib(this.system.min) ?? 0;
