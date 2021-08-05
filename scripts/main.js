@@ -14,6 +14,36 @@ import { DamageLogSettings } from "./settings.js";
 
 class DamageLog {
 
+	/**
+	 * Location of HP attributes in D&D-like systems.
+	 */
+	static DND_ATTRIBUTES = {
+		value: "attributes.hp.value",
+		min: "attributes.hp.min",
+		max: "attributes.hp.max",
+		tempMax: "attributes.hp.tempMax",
+		temp: "attributes.hp.temp"
+	};
+
+	/**
+	 * Location of HP attributes for supported systems.
+	 */
+	static SYSTEMS = {
+		dnd5e: DamageLog.DND_ATTRIBUTES,
+		D35E: DamageLog.DND_ATTRIBUTES,
+		pf1: DamageLog.DND_ATTRIBUTES,
+		pf2e: DamageLog.DND_ATTRIBUTES,
+		worldbuilding: {
+			value: "health.value",
+			min: "health.min",
+			max: "health.max"
+		},
+		"age-of-sigmar-soulbound": {
+			value: "combat.health.toughness.value",
+			max: "combat.health.toughness.max"
+		}
+	};
+
 	static TABS_TEMPLATE = "modules/damage-log/templates/damage-log-tabs.hbs";
 	static TABLE_TEMPLATE = "modules/damage-log/templates/damage-log-table.hbs";
 
@@ -23,10 +53,16 @@ class DamageLog {
 	 */
 	constructor() {
 		this.settings = new DamageLogSettings();
+		this.system = DamageLog.SYSTEMS[game.system.id];
 		this.prevFlags = null;
 		this.tabs = null;
 		this.currentTab = "chat";
 		this.hasTabbedChatlog = !!game.modules.get("tabbed-chatlog")?.active;
+
+		if (!this.system) {
+			Hooks.once("ready", () => ui.notifications.error(game.i18n.format("damage-log.error.system-not-supported", { systemId: game.system.id })));
+			throw false;
+		}
 
 		loadTemplates([DamageLog.TABS_TEMPLATE, DamageLog.TABLE_TEMPLATE]);
 
@@ -60,25 +96,25 @@ class DamageLog {
 				name: game.i18n.localize("damage-log.undo-damage"),
 				icon: '<i class="fas fa-undo-alt"></i>',
 				condition: li => canUndo(li) && li.is(".damage-log.damage:not(.reverted)"),
-				callback: li => DamageLog._undoDamage(li)
+				callback: li => this._undoDamage(li)
 			},
 			{
 				name: game.i18n.localize("damage-log.undo-healing"),
 				icon: '<i class="fas fa-undo-alt"></i>',
 				condition: li => canUndo(li) && li.is(".damage-log.healing:not(.reverted)"),
-				callback: li => DamageLog._undoDamage(li)
+				callback: li => this._undoDamage(li)
 			},
 			{
 				name: game.i18n.localize("damage-log.redo-damage"),
 				icon: '<i class="fas fa-redo-alt"></i>',
 				condition: li => canUndo(li) && li.is(".damage-log.damage.reverted"),
-				callback: li => DamageLog._undoDamage(li)
+				callback: li => this._undoDamage(li)
 			},
 			{
 				name: game.i18n.localize("damage-log.redo-healing"),
 				icon: '<i class="fas fa-redo-alt"></i>',
 				condition: li => canUndo(li) && li.is(".damage-log.healing.reverted"),
-				callback: li => DamageLog._undoDamage(li)
+				callback: li => this._undoDamage(li)
 			}
 		);
 	}
@@ -86,33 +122,62 @@ class DamageLog {
 	/**
 	 * Handle the "renderChatLog" hook.
 	 * This creates the separate tab for the damage log.
+	 * It also sets up a mutation observer to move any damage messages to the damage log tab.
 	 */
-	async _onRenderChatLog(chatLog, html, user) {
+	async _onRenderChatLog(chatTab, html, user) {
 		if (!game.user.isGM && !this.settings.allowPlayerView) return;
 
-		if (this.hasTabbedChatlog)
-		{
+		if (this.hasTabbedChatlog) {
 			// Force Tabbed Chatlog to render first
-			setTimeout(() => this._onTabbedChatlogRenderChatLog(chatLog, html, user), 0)
-			return;
+			await new Promise(r => {
+				this._onTabbedChatlogRenderChatLog(chatTab, html, user);
+				r();
+			});
+		}
+		else {
+			const tabsHtml = await renderTemplate(DamageLog.TABS_TEMPLATE);
+			html.prepend(tabsHtml);
+
+			this.tabs = new Tabs({
+				navSelector: ".damage-log-nav.tabs",
+				contentSelector: undefined,
+				initial: this.currentTab,
+				callback: this._onTabSwitch.bind(this)
+			});
+			this.tabs.bind(html[0]);
 		}
 
-		const tabsHtml = await renderTemplate(DamageLog.TABS_TEMPLATE);
-		html.prepend(tabsHtml);
+		const chatLog = html.find("#chat-log");
+		chatLog.after('<ol id="damage-log"></ol>');
 
-		this.tabs = new Tabs({
-			navSelector: ".damage-log.tabs",
-			contentSelector: undefined,
-			initial: this.currentTab,
-			callback: this._onTabSwitch.bind(this)
+		// Move all existing damage log messages into the damage log
+		const damageLog = html.find('#damage-log');
+		const damageMessages = chatLog.find(".message.damage-log");
+		damageLog.append(damageMessages);
+		damageMessages.filter(".not-permitted").remove();
+
+		this._onTabSwitch(undefined, undefined, this.currentTab);
+
+		// Listen for items being added to the chat log.  If they are damage messages, move them to the damage log tab.
+		const observer = new MutationObserver((mutationList, observer) => {
+			for (const mutation of mutationList) {
+				let nodes = $(mutation.addedNodes).filter(".damage-log");
+				nodes.filter(".not-permitted").remove();
+				nodes = nodes.not(".not-permitted");
+				if (0 !== nodes.length) {
+					damageLog.append(nodes);
+					damageLog.animate({scrollTop: damageLog[0].scrollHeight});
+				}
+			}
 		});
-		this.tabs.bind(html[0]);
+
+		observer.observe(chatLog.get()[0], { childList: true });
 	}
 
 	/**
 	 * Creates the damage log tab when Tabbed Chatlog module is installed.
 	 */
-	_onTabbedChatlogRenderChatLog(chatLog, html, user) {
+	_onTabbedChatlogRenderChatLog(chatTab, html, user) {
 		// Append our tab to the end of Tabbed Chatlog's tabs
 		const tabs = $(".tabbedchatlog.tabs");
 		tabs.append(`<a class="item damage-log" data-tab="damage-log">${game.i18n.localize("damage-log.damage-log-tab-name")}</a>`);
@@ -130,33 +195,21 @@ class DamageLog {
 	 */
 	_onTabSwitch(event, tabs, tab) {
 		this.currentTab = tab;
-		const damageLogMessages = $(".chat-message.message.damage-log");
-		const chatMessages = $(".chat-message.message:not(.damage-log)");
 
-		if (tab === "damage-log")
-		{
-			chatMessages.hide();
-			damageLogMessages.show();
-			if (this.hasTabbedChatlog)
-			{
-				damageLogMessages
-					.removeClass(["hardHide", "hard-hide"])
-					.addClass("hard-show");
-			}
+		const chatLog = $("#chat-log");
+		const damageLog = $("#damage-log");
+
+		if (tab === "damage-log") {
+			chatLog.hide();
+			damageLog.show();
+			damageLog.scrollTop(damageLog[0].scrollHeight);
 		}
 		else
 		{
-			damageLogMessages.hide();
-			chatMessages.show();
-			if (this.hasTabbedChatlog)
-			{
-				damageLogMessages
-					.addClass(["hardHide", "hard-hide"])
-					.removeClass("hard-show");
-			}
+			damageLog.hide();
+			chatLog.show();
+			chatLog.scrollTop(chatLog[0].scrollHeight);
 		}
-
-		$("#chat-log").scrollTop(9999999);
 	}
 
 	/**
@@ -178,61 +231,31 @@ class DamageLog {
 				return;
 		}
 
-		let oldTemp = 0, newTemp = 0;
-		let oldValue = 0, newValue = 0;
-		let hpName = game.i18n.localize("damage-log.standardName");
-		switch (game.system.id)
-		{
-			case "dnd5e":
-			case "D35E":
-			case "pf1":
-			case "pf2e":
-			{
-				const oldHp = actor.data.data.attributes.hp;
-				const newHp = updateData.data?.attributes?.hp;
+		// Get a nested property of an object using a string.
+		const getAttrib = (obj, path) => path.split('.').reduce((prev, curr) => prev && prev[curr], obj);
 
-				oldTemp = oldHp.temp ?? 0;
-				newTemp = newHp.temp ?? oldTemp;
-		
-				oldValue = oldHp.value ?? 0;
-				newValue = newHp.value ?? oldValue;
-				break;
-			}
+		const oldValue = getAttrib(actor.data.data, this.system.value) ?? 0;
+		const newValue = getAttrib(updateData.data, this.system.value) ?? oldValue;
 
-			case "worldbuilding":
-			{
-				const oldHp = actor.data.data?.health;
-				const newHp = updateData.data?.health;
+		const oldTemp = getAttrib(actor.data.data, this.system.temp) ?? 0;
+		const newTemp = getAttrib(updateData.data, this.system.temp) ?? oldTemp;
 
-				oldValue = oldHp.value ?? 0;
-				newValue = newHp.value ?? 0;
-				break;
-			}
-
-			case "age-of-sigmar-soulbound":
-				hpName = game.i18n.localize("damage-log.aosName");
-				const oldHp = actor.combat.health.toughness;
-				const newHp = updateData.data?.combat.health.toughness;
-
-				oldValue = oldHp.value ?? 0;
-				newValue = newHp.value ?? 0;
-				break;
-
-			default:
-				return;
-		}
-
-		const tempDiff = newTemp - oldTemp;
-		const valueDiff = newValue - oldValue;
-		const totalDiff = tempDiff + valueDiff;
-
-		if ((0 === tempDiff) && (0 === valueDiff)) return;
+		let hpLocalizationName = `damage-log.hp-name.${game.system.id}`;
+		if (!game.i18n.has(hpLocalizationName))
+			hpLocalizationName = "damage-log.hp-name.default";
 
 		const flags = {
 			speaker,
-			temp: { old: oldTemp, new: newTemp, diff: tempDiff },
-			value: { name: hpName, old: oldValue, new: newValue, diff: valueDiff }
+			value: {
+				name: game.i18n.localize(hpLocalizationName),
+				old: oldValue, new: newValue, diff: newValue - oldValue
+			},
+			temp: {
+				old: oldTemp, new: newTemp, diff: newTemp - newTemp
+			}
 		};
+
+		if ((0 === flags.temp.diff) && (0 === flags.value.diff)) return;
 
 		// There is a bug in Foundry 0.8.8 that causes preUpdateActor to fire multiple times.
 		// Ignore duplicate updates.
@@ -253,9 +276,11 @@ class DamageLog {
 					flags.preventRollsNotification = true;
 			}
 
+			const totalDiff = flags.temp.diff + flags.value.diff;
+
 			const chatData = {
 				flags: { "damage-log": flags },
-				flavor: game.i18n.format((totalDiff < 0 ? "damage-log.damage-flavor-text" : "damage-log.healing-flavor-text"), { diff: Math.abs(totalDiff) }),
+				flavor: game.i18n.format((totalDiff > 0 ? "damage-log.healing-flavor-text" : "damage-log.damage-flavor-text"), { diff: Math.abs(totalDiff) }),
 				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
 				speaker
 			};
@@ -297,26 +322,22 @@ class DamageLog {
 	/**
 	 * Handle the "renderChatMessage" hook.
 	 * Applies classes to the message's HTML based on the message flags.
-	 * Also responsible for hiding messages, depending on which tab is currently showing.
 	 */
 	async _onRenderChatMessage(message, html, messageData) {
-		if (this.settings.useTab && this.hasTabbedChatlog)
-		{
-			// Force Tabbed Chatlog to render first.
-			await new Promise(r => setTimeout(r, 0));
-		}
-
 		const hp = message.data?.flags["damage-log"];
-		if (!hp) {
-			if (this.settings.useTab && (this.currentTab === "damage-log"))
-				html.hide();
-			return;
-		}
+		if (!hp) return;
 
-		// If the rolls notification wasn't showing before the message was created, then hide it again.
-		// TODO - this currently only works for the user that modified the token.
-		if (hp.preventRollsNotification)
-			$("#rollsNotification").hide();
+		html.addClass("damage-log");
+
+		if (hp.revert)
+			html.addClass("reverted");
+		else
+			html.removeClass("reverted");
+
+		if ((hp.temp.diff + hp.value.diff) >= 0)
+			html.addClass("healing");
+		else
+			html.addClass("damage");
 
 		// Work out if the user is allowed to see the damage table, and then add it to the HTML.
 		let canViewTable = game.user.isGM;
@@ -325,51 +346,23 @@ class DamageLog {
 			canViewTable = this._canUserViewActorDamage(game.user, actor);
 		}
 
+		if (!canViewTable && !this.settings.showLimitedInfoToPlayers)
+			html.addClass("not-permitted");
+
+		if (this.settings.useTab && this.hasTabbedChatlog) {
+			// Do the following after Tabbed Chatlog has rendered.
+			new Promise(r => {
+				// If the rolls notification wasn't showing before the message was created, then hide it again.
+				// TODO - this currently only works for the user that modified the token.
+				if (hp.preventRollsNotification)
+					$("#rollsNotification").hide();
+				html.removeClass("hardHide").addClass("hard-show").css("display", "").show();
+				r();
+			});
+		}
+
 		if (canViewTable)
 			html.find("div.message-content").prepend(await renderTemplate(DamageLog.TABLE_TEMPLATE, hp));
-
-		if (hp.revert)
-			html.addClass("reverted");
-		else
-			html.removeClass("reverted");
-
-		html.addClass("damage-log");
-
-		if ((0 !== hp.temp.diff) || (0 !== hp.value.diff))
-		{
-			if ((hp.temp.diff + hp.value.diff) >= 0)
-				html.addClass("healing");
-			else
-				html.addClass("damage");
-		}
-
-		if (this.settings.useTab)
-		{
-			if (this.currentTab === "damage-log")
-			{
-				if (this.hasTabbedChatlog)
-				{
-					html.removeClass("hardHide");
-					html.removeClass("hard-hide");
-					html.addClass("hard-show");
-				}
-			}
-			else
-			{
-				html.hide();
-				if (this.hasTabbedChatlog)
-				{
-					html.addClass("hardHide");
-					html.addClass("hard-hide");
-					html.removeClass("hard-show");
-				}
-			}
-		}
-
-		// The user shouldn't receive damage messages that they aren't allowed to see.  However if the settings change, then there will be
-		// messages in the log that we no longer have permissions for, so we should hide them.
-		if (!canViewTable && !this.settings.showLimitedInfoToPlayers)
-			html.addClass("super-hard-hide");
 	}
 
 	/**
@@ -394,7 +387,7 @@ class DamageLog {
 	/**
 	 * Undo the the damage on a given message.
 	 */
-	static _undoDamage(li) {
+	_undoDamage(li) {
 		const message = game.messages.get(li.data("messageId"));
 		const speaker = message.data.speaker;
 		const flags = message.data.flags["damage-log"];
@@ -427,48 +420,33 @@ class DamageLog {
 
 		const modifier = li.hasClass("reverted") ? -1 : 1;
 		const actorData = token.actor.data;
-		let update = null;
-		
-		switch (game.system.id)
-		{
-			case "dnd5e":
-			case "D35E":
-			case "pf1":
-			case "pf2e":
-			{
-				const currentHp = actorData.data.attributes.hp;
-				const maxHp = currentHp.max + (currentHp.tempMax ?? 0);
-				const minHp = currentHp.min ?? 0;
 
-				update = {
-					"data.attributes.hp": {
-						value: Math.min(maxHp, Math.max(currentHp.value - (flags.value.diff * modifier), minHp)),
-						temp: Math.max(currentHp.temp - (flags.temp.diff * modifier), 0)
-					}
-				};
-				break;
+		// Get a nested property of actorData.data using a string.
+		const getActorAttrib = (path) => {
+			return path.split('.').reduce((prev, curr) => prev && prev[curr], actorData.data);
+		}
+
+		const update = {};
+
+		if (this.system.value) {
+			let newValue = (getActorAttrib(this.system.value) ?? 0) - (flags.value.diff * modifier);
+
+			if (this.settings.clampToMin) {
+				const minHp = getActorAttrib(this.system.min) ?? 0;
+				newValue = Math.max(newValue, minHp);
 			}
 
-			case "worldbuilding":
-			{
-				const currentHp = actorData.data.health;
-				update = {
-					"data.health.value": Math.min(currentHp.max, Math.max(currentHp.value - (flags.value.diff * modifier), currentHp.min))
-				};
-				break;
+			if (this.settings.clampToMax && this.system.max) {
+				const maxHp = getActorAttrib(this.system.max) + (getActorAttrib(this.system.tempMax) ?? 0);
+				newValue = Math.min(newValue, maxHp);
 			}
 
-			case "age-of-sigmar-soulbound":
-			{
-				const currentToughness = actorData.data.combat.health.toughness;
-				update = {
-					"data.combat.health.toughness.value" : Math.min(currentToughness.max, currentToughness.value - (flags.value.diff * modifier))
-				}
-				break;
-			}
+			update[`data.${this.system.value}`] = newValue;
+		}
 
-			default:
-				return;
+		if (this.system.temp) {
+			const newTemp = getActorAttrib(this.system.temp) - (flags.temp.diff * modifier);
+			update[`data.${this.system.temp}`] = Math.max(newTemp, 0);
 		}
 
 		actorData.document.update(update, { "damage-log": { revert: modifier, messageId: message.id } });
@@ -480,37 +458,37 @@ class DamageLog {
  */
 Hooks.once("init", () => {
 	game.damageLog = new DamageLog();
-});
 
-/**
- * Ready handling.  Convert damage log messages from to new flag format.
- */
-Hooks.once("ready", async () => {
-	if (game.user.isGM && (game.damageLog.settings.dbVersion < 1))
-	{
-		console.log("Damage Log | Updating message database");
+	/**
+	 * Ready handling.  Convert damage log messages from to new flag format.
+	 */
+	Hooks.once("ready", async () => {
+		if (game.user.isGM && (game.damageLog.settings.dbVersion < 1))
+		{
+			console.log("Damage Log | Updating message database");
 
-		let haveNotified = false;
-		for (const message of game.messages) {
-			const oldFlags = message.data?.flags?.damageLog;
-			if (oldFlags) {
-				if (!haveNotified) {
-					ui.notifications.warn("Damage Log | Updating message database, please do not close the game", { permanent: true });
-					haveNotified = true;
+			let haveNotified = false;
+			for (const message of game.messages) {
+				const oldFlags = message.data?.flags?.damageLog;
+				if (oldFlags) {
+					if (!haveNotified) {
+						ui.notifications.warn("Damage Log | Updating message database, please do not close the game", { permanent: true });
+						haveNotified = true;
+					}
+					console.log(`Damage Log | Updating flags for message ${message.id}`);
+					await message.update({
+						"flags.damage-log": oldFlags,
+						"flags.-=damageLog": null,
+						"content": null
+					});
 				}
-				console.log(`Damage Log | Updating flags for message ${message.id}`);
-				await message.update({
-					"flags.damage-log": oldFlags,
-					"flags.-=damageLog": null,
-					"content": null
-				});
 			}
+
+			game.damageLog.settings.dbVersion = 1;
+
+			console.log("Damage Log | Finished updating message database");
+			if (haveNotified)
+				ui.notifications.info("Damage Log | Finished updating message database", { permanent: true });
 		}
-
-		game.damageLog.settings.dbVersion = 1;
-
-		console.log("Damage Log | Finished updating message database");
-		if (haveNotified)
-			ui.notifications.info("Damage Log | Finished updating message database", { permanent: true });
-	}
+	});
 });

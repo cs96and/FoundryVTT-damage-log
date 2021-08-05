@@ -77,6 +77,26 @@ export class DamageLogSettings {
 			onChange: () => window.location.reload()
 		});
 
+		game.settings.register("damage-log", "clampToMax", {
+			name: game.i18n.localize("damage-log.settings.clamp-to-max"),
+			hint: game.i18n.localize("damage-log.settings.clamp-to-max-hint"),
+			scope: 'world',
+			config: true,
+			type: Boolean,
+			default: true,
+			onChange: () => this.clampToMax = game.settings.get("damage-log", "clampToMax")
+		});
+
+		game.settings.register("damage-log", "clampToMin", {
+			name: game.i18n.localize("damage-log.settings.clamp-to-min"),
+			hint: game.i18n.localize("damage-log.settings.clamp-to-min-hint"),
+			scope: 'world',
+			config: true,
+			type: Boolean,
+			default: true,
+			onChange: () => this.clampToMin = game.settings.get("damage-log", "clampToMin")
+		});
+
 		game.settings.register("damage-log", "dbVersion", {
 			scope: 'world',
 			config: false,
@@ -90,6 +110,8 @@ export class DamageLogSettings {
 		this.minPlayerPermission = game.settings.get("damage-log", "minPlayerPermission");
 		this.allowPlayerUndo = game.settings.get("damage-log", "allowPlayerUndo");
 		this.showLimitedInfoToPlayers = game.settings.get("damage-log", "showLimitedInfoToPlayers");
+		this.clampToMax = game.settings.get("damage-log", "clampToMax");
+		this.clampToMin = game.settings.get("damage-log", "clampToMin");
 	}
 
 	/**

@@ -14,8 +14,8 @@
 	"damage-log.new": "New",
 	"damage-log.diff": "Diff",
 
-	"damage-log.standardName" : "HP",
-	"damage-log.aosName" : "Toughness",
+	"damage-log.hp-name.default" : "HP",
+	"damage-log.hp-name.age-of-sigmar-soulbound" : "Toughness",
 
 	"damage-log.settings.use-tab": "Use separate damage log tab",
 	"damage-log.settings.use-tab-hint": "Use a separate tab for damage logs.  If this is unchecked, damage logs will be sent to the default chatlog.",
@@ -31,13 +31,20 @@
 	"damage-log.settings.show-limited-info": "Show limited damage info to players",
 	"damage-log.settings.show-limited-info-hint": "When enabled, players can see the damage taken by *all* actors, but not the old/diff/new table of values.  WARNING: if this module is ever disaabled, players will be able to see all the damage information",
 
+	"damage-log.settings.clamp-to-max": "Clamp to max HP",
+	"damage-log.settings.clamp-to-max-hint": "When reverting damage or re-applying healing, prevent the character's HP going over its current allowed maxiumum value",
+
+	"damage-log.settings.clamp-to-min": "Clamp to min HP",
+	"damage-log.settings.clamp-to-min-hint": "When re-applying damage or reverting healing, prevent the character's HP going under its current allowed minimum value",
+
 	"damage-log.settings.none": "None",
 	"damage-log.settings.limited": "Limited",
 	"damage-log.settings.observer": "Observer",
 	"damage-log.settings.owner": "Owner",
 
-	"damage-log.error.scene-id-missing": "Scene ID missing from damage log",
-	"damage-log.error.scene-deleted": "Scene {scene} no longer exists",
-	"damage-log.error.token-id-missing": "Token ID missing from damage log",
-	"damage-log.error.token-deleted": "Token {token} no longer exists"
+	"damage-log.error.system-not-supported": "Damage Log | The '{systemId}' system is not currently supported",
+	"damage-log.error.scene-id-missing": "Damage Log | Scene ID missing from damage log",
+	"damage-log.error.scene-deleted": "Damage Log | Scene '{scene}' no longer exists",
+	"damage-log.error.token-id-missing": "Damage Log | Token ID missing from damage log",
+	"damage-log.error.token-deleted": "Damage Log | Token '{token}' no longer exists"
 }
