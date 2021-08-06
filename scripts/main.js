@@ -232,7 +232,9 @@ class DamageLog {
 		}
 
 		// Get a nested property of an object using a string.
-		const getAttrib = (obj, path) => path.split('.').reduce((prev, curr) => prev && prev[curr], obj);
+		const getAttrib = (obj, path) => {
+			return path && path.split('.').reduce((prev, curr) => prev && prev[curr], obj);
+		}
 
 		const oldValue = getAttrib(actor.data.data, this.system.value) ?? 0;
 		const newValue = getAttrib(updateData.data, this.system.value) ?? oldValue;
@@ -423,7 +425,7 @@ class DamageLog {
 
 		// Get a nested property of actorData.data using a string.
 		const getActorAttrib = (path) => {
-			return path.split('.').reduce((prev, curr) => prev && prev[curr], actorData.data);
+			return path && path.split('.').reduce((prev, curr) => prev && prev[curr], actorData.data);
 		}
 
 		const update = {};
