@@ -79,48 +79,6 @@ class DamageLog {
 	}
 
 	/**
-	 * Handle the "getChatLogEntryContext" hook.
-	 * This sets up the right click context menus for chat messages.
-	 */
-	_onGetChatLogEntryContext(html, options) {
-		const canUndo = li => {
-			if (game.user.isGM) return true;
-			if (!this.settings.allowPlayerUndo) return false;
-
-			const message = game.messages.get(li.data("messageId"));
-			const actor = ChatMessage.getSpeakerActor(message?.data?.speaker);
-			return actor?.testUserPermission(game.user, CONST.ENTITY_PERMISSIONS.OWNER);
-		};
-
-		options.push(
-			{
-				name: game.i18n.localize("damage-log.undo-damage"),
-				icon: '<i class="fas fa-undo-alt"></i>',
-				condition: li => canUndo(li) && li.is(".damage-log.damage:not(.reverted)"),
-				callback: li => this._undoDamage(li)
-			},
-			{
-				name: game.i18n.localize("damage-log.undo-healing"),
-				icon: '<i class="fas fa-undo-alt"></i>',
-				condition: li => canUndo(li) && li.is(".damage-log.healing:not(.reverted)"),
-				callback: li => this._undoDamage(li)
-			},
-			{
-				name: game.i18n.localize("damage-log.redo-damage"),
-				icon: '<i class="fas fa-redo-alt"></i>',
-				condition: li => canUndo(li) && li.is(".damage-log.damage.reverted"),
-				callback: li => this._undoDamage(li)
-			},
-			{
-				name: game.i18n.localize("damage-log.redo-healing"),
-				icon: '<i class="fas fa-redo-alt"></i>',
-				condition: li => canUndo(li) && li.is(".damage-log.healing.reverted"),
-				callback: li => this._undoDamage(li)
-			}
-		);
-	}
-
-	/**
 	 * Handle the "renderChatLog" hook.
 	 * This creates the separate tab for the damage log.
 	 * It also sets up a mutation observer to move any damage messages to the damage log tab.
@@ -215,6 +173,69 @@ class DamageLog {
 			chatLog.show();
 			chatLog.scrollTop(chatLog[0].scrollHeight);
 		}
+	}
+
+	/**
+	 * Handle the "changeSidebarTab" hook.
+	 * When switching to Foundry's "chat" tab, make sure the damage-log's current tab is marked as active.
+	 */
+	_onChangeSidebarTab(tab) {
+		if (tab.id === "chat")
+			this.tabs?.activate(this.currentTab);
+	}
+
+	/**
+	 * Handle the sidebar collapsing / being revealed.
+	 * When the sidebar is revealed and the current tab is the damage log, scroll to the end of the log
+	 * For some reason this doesn't work unless we wait at least 250ms first.
+	 */
+	_onCollapseSidebar(sidebar, isCollapsing) {
+		if (!isCollapsing && ("damage-log" == this.currentTab)) {
+			const damageLog = sidebar.element.find("#damage-log");
+			setTimeout(() => damageLog.scrollTop(damageLog[0].scrollHeight), 250);
+		}
+	}
+
+	/**
+	 * Handle the "getChatLogEntryContext" hook.
+	 * This sets up the right click context menus for chat messages.
+	 */
+	_onGetChatLogEntryContext(html, options) {
+		const canUndo = li => {
+			if (game.user.isGM) return true;
+			if (!this.settings.allowPlayerUndo) return false;
+
+			const message = game.messages.get(li.data("messageId"));
+			const actor = ChatMessage.getSpeakerActor(message?.data?.speaker);
+			return actor?.testUserPermission(game.user, CONST.ENTITY_PERMISSIONS.OWNER);
+		};
+
+		options.push(
+			{
+				name: game.i18n.localize("damage-log.undo-damage"),
+				icon: '<i class="fas fa-undo-alt"></i>',
+				condition: li => canUndo(li) && li.is(".damage-log.damage:not(.reverted)"),
+				callback: li => this._undoDamage(li)
+			},
+			{
+				name: game.i18n.localize("damage-log.undo-healing"),
+				icon: '<i class="fas fa-undo-alt"></i>',
+				condition: li => canUndo(li) && li.is(".damage-log.healing:not(.reverted)"),
+				callback: li => this._undoDamage(li)
+			},
+			{
+				name: game.i18n.localize("damage-log.redo-damage"),
+				icon: '<i class="fas fa-redo-alt"></i>',
+				condition: li => canUndo(li) && li.is(".damage-log.damage.reverted"),
+				callback: li => this._undoDamage(li)
+			},
+			{
+				name: game.i18n.localize("damage-log.redo-healing"),
+				icon: '<i class="fas fa-redo-alt"></i>',
+				condition: li => canUndo(li) && li.is(".damage-log.healing.reverted"),
+				callback: li => this._undoDamage(li)
+			}
+		);
 	}
 
 	/**
@@ -370,27 +391,6 @@ class DamageLog {
 
 		if (canViewTable)
 			html.find("div.message-content").prepend(await renderTemplate(DamageLog.TABLE_TEMPLATE, hp));
-	}
-
-	/**
-	 * Handle the "changeSidebarTab" hook.
-	 * When switching to Foundry's "chat" tab, make sure the damage-log's current tab is marked as active.
-	 */
-	_onChangeSidebarTab(tab) {
-		if (tab.id === "chat")
-			this.tabs?.activate(this.currentTab);
-	}
-
-	/**
-	 * Handle the sidebar collapsing / being revealed.
-	 * When the sidebar is revealed and the current tab is the damage log, scroll to the end of the log
-	 * For some reason this doesn't work unless we wait at least 250ms first.
-	 */
-	_onCollapseSidebar(sidebar, isCollapsing) {
-		if (!isCollapsing && ("damage-log" == this.currentTab)) {
-			const damageLog = sidebar.element.find("#damage-log");
-			setTimeout(() => damageLog.scrollTop(damageLog[0].scrollHeight), 250);
-		}
 	}
 
 	/**
