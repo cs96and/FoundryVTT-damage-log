@@ -150,6 +150,13 @@ class DamageLog {
 			this._onTabSwitch(event, html, tab, chatTab);
 			tabbedChatlogCallback(event, html, tab);
 		});
+
+		if (chatTab.popOut) {
+			if ("damage-log" === this.currentTab) {
+				html.find(".item.active").removeClass("active");
+				html.find(".item.damage-log").addClass("active");
+			}
+		}
 	}
 
 	/**
@@ -190,7 +197,7 @@ class DamageLog {
 	 * For some reason this doesn't work unless we wait at least 250ms first.
 	 */
 	_onCollapseSidebar(sidebar, isCollapsing) {
-		if (!isCollapsing && ("damage-log" == this.currentTab)) {
+		if (!isCollapsing && ("damage-log" === this.currentTab)) {
 			const damageLog = sidebar.element.find("#damage-log");
 			setTimeout(() => damageLog.scrollTop(damageLog[0].scrollHeight), 250);
 		}
