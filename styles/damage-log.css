@@ -33,6 +33,14 @@ nav.damage-log-nav .item.active {
 	padding: 0;
 	overflow-y: auto;
 }
+/* Reduce margins and padding in damage log tables */
+#damage-log .message.damage-log table {
+	margin: 2px auto;
+}
+#damage-log .message.damage-log table th,
+#damage-log .message.damage-log table td {
+	padding: 2px;
+}
 /* Align numbers in tables */
 #damage-log .message.damage-log table .num {
 	text-align: right;
