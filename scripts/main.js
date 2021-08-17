@@ -58,6 +58,7 @@ class DamageLog {
 		this.tabs = null;
 		this.currentTab = "chat";
 		this.hasTabbedChatlog = !!game.modules.get("tabbed-chatlog")?.active;
+		this.damageType = "";
 
 		if (!this.system) {
 			Hooks.once("ready", () => ui.notifications.error(game.i18n.format("damage-log.error.system-not-supported", { systemId: game.system.id })));
@@ -76,6 +77,25 @@ class DamageLog {
 		Hooks.on('preUpdateActor', this._onPreUpdateActor.bind(this));
 		Hooks.on('updateActor', this._onUpdateActor.bind(this));
 		Hooks.on('renderChatMessage', this._onRenderChatMessage.bind(this));
+
+		// If BetterRolls5e is enabled, wrap the BetterRollsChatCard.applyDamage function
+		// to cache the damage type of applied damage.
+		if (!!game.modules.get("betterrolls5e")?.active) {
+			import("../../betterrolls5e/scripts/chat-message.js").then((obj) => {
+				const damageLog = this;
+				const origBetterRollsApplyDamage = obj.BetterRollsChatCard.prototype.applyDamage;
+
+				obj.BetterRollsChatCard.prototype.applyDamage = async function(actor, damageType, ...rest) {
+					// Here, "this" will be a BetterRollsChatCard object.
+					try {
+						damageLog.damageType = damageType;
+						return await origBetterRollsApplyDamage.call(this, actor, damageType, ...rest);
+					} finally {
+						damageLog.damageType = "";
+					}
+				};
+			})
+		}
 	}
 
 	/**
@@ -313,9 +333,14 @@ class DamageLog {
 
 			const totalDiff = flags.temp.diff + flags.value.diff;
 
+			const flavorOptions = {
+				diff: Math.abs(totalDiff),
+				damageType: this.damageType
+			};
+
 			const chatData = {
 				flags: { "damage-log": flags },
-				flavor: game.i18n.format((totalDiff > 0 ? "damage-log.healing-flavor-text" : "damage-log.damage-flavor-text"), { diff: Math.abs(totalDiff) }),
+				flavor: game.i18n.format((totalDiff > 0 ? "damage-log.healing-flavor-text" : "damage-log.damage-flavor-text"), flavorOptions),
 				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
 				speaker
 			};

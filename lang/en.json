@@ -7,7 +7,7 @@
 	"damage-log.redo-damage": "Redo Damage",
 	"damage-log.redo-healing": "Redo Healing",
 
-	"damage-log.damage-flavor-text": "Took {diff} damage",
+	"damage-log.damage-flavor-text": "Took {diff} {damageType} damage",
 	"damage-log.healing-flavor-text": "Healed {diff} damage",
 
 	"damage-log.old": "Old",
