@@ -66,15 +66,15 @@ class DamageLog {
 
 		loadTemplates([DamageLog.TABS_TEMPLATE, DamageLog.TABLE_TEMPLATE]);
 
-		Hooks.once('getChatLogEntryContext', this._onGetChatLogEntryContext.bind(this));
-		Hooks.on('preUpdateActor', this._onPreUpdateActor.bind(this));
-		Hooks.on('updateActor', this._onUpdateActor.bind(this));
-		Hooks.on('renderChatMessage', this._onRenderChatMessage.bind(this));
 		if (this.settings.useTab)
 		{
 			Hooks.on("renderChatLog", this._onRenderChatLog.bind(this));
 			Hooks.on('changeSidebarTab', this._onChangeSidebarTab.bind(this));
 		}
+		Hooks.on('getChatLogEntryContext', this._onGetChatLogEntryContext.bind(this));
+		Hooks.on('preUpdateActor', this._onPreUpdateActor.bind(this));
+		Hooks.on('updateActor', this._onUpdateActor.bind(this));
+		Hooks.on('renderChatMessage', this._onRenderChatMessage.bind(this));
 	}
 
 	/**
@@ -138,13 +138,16 @@ class DamageLog {
 			const tabsHtml = await renderTemplate(DamageLog.TABS_TEMPLATE);
 			html.prepend(tabsHtml);
 
-			this.tabs = new Tabs({
+			const tabs = new Tabs({
 				navSelector: ".damage-log-nav.tabs",
 				contentSelector: undefined,
 				initial: this.currentTab,
-				callback: this._onTabSwitch.bind(this)
+				callback: (event, tabs, tab) => this._onTabSwitch(event, tabs, tab, chatTab)
 			});
-			this.tabs.bind(html[0]);
+			tabs.bind(html[0]);
+
+			if (!chatTab.popOut)
+				this.tabs = tabs;
 		}
 
 		const chatLog = html.find("#chat-log");
@@ -156,7 +159,7 @@ class DamageLog {
 		damageLog.append(damageMessages);
 		damageMessages.filter(".not-permitted").remove();
 
-		this._onTabSwitch(undefined, undefined, this.currentTab);
+		this._onTabSwitch(undefined, undefined, this.currentTab, chatTab);
 
 		// Listen for items being added to the chat log.  If they are damage messages, move them to the damage log tab.
 		const observer = new MutationObserver((mutationList, observer) => {
@@ -179,13 +182,13 @@ class DamageLog {
 	 */
 	_onTabbedChatlogRenderChatLog(chatTab, html, user) {
 		// Append our tab to the end of Tabbed Chatlog's tabs
-		const tabs = $(".tabbedchatlog.tabs");
+		const tabs = html.find(".tabbedchatlog.tabs");
 		tabs.append(`<a class="item damage-log" data-tab="damage-log">${game.i18n.localize("damage-log.damage-log-tab-name")}</a>`);
 
 		// Override Tabbed Chatlog's callback to call our _onTabSwitch() function first.
 		const tabbedChatlogCallback = game.tabbedchat.tabs.callback;
 		game.tabbedchat.tabs.callback = ((event, html, tab) => {
-			this._onTabSwitch(event, html, tab);
+			this._onTabSwitch(event, html, tab, chatTab);
 			tabbedChatlogCallback(event, html, tab);
 		});
 	}
@@ -193,11 +196,12 @@ class DamageLog {
 	/**
 	 * Handle the user switching tabs.
 	 */
-	_onTabSwitch(event, tabs, tab) {
-		this.currentTab = tab;
+	_onTabSwitch(event, tabs, tab, chatTab) {
+		if (!chatTab.popOut)
+			this.currentTab = tab;
 
-		const chatLog = $("#chat-log");
-		const damageLog = $("#damage-log");
+		const chatLog = chatTab.element.find("#chat-log");
+		const damageLog = chatTab.element.find("#damage-log");
 
 		if (tab === "damage-log") {
 			chatLog.hide();
