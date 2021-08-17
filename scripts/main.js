@@ -70,6 +70,7 @@ class DamageLog {
 		{
 			Hooks.on("renderChatLog", this._onRenderChatLog.bind(this));
 			Hooks.on('changeSidebarTab', this._onChangeSidebarTab.bind(this));
+			Hooks.on("collapseSidebar", this._onCollapseSidebar.bind(this));
 		}
 		Hooks.on('getChatLogEntryContext', this._onGetChatLogEntryContext.bind(this));
 		Hooks.on('preUpdateActor', this._onPreUpdateActor.bind(this));
@@ -378,6 +379,18 @@ class DamageLog {
 	_onChangeSidebarTab(tab) {
 		if (tab.id === "chat")
 			this.tabs?.activate(this.currentTab);
+	}
+
+	/**
+	 * Handle the sidebar collapsing / being revealed.
+	 * When the sidebar is revealed and the current tab is the damage log, scroll to the end of the log
+	 * For some reason this doesn't work unless we wait at least 250ms first.
+	 */
+	_onCollapseSidebar(sidebar, isCollapsing) {
+		if (!isCollapsing && ("damage-log" == this.currentTab)) {
+			const damageLog = sidebar.element.find("#damage-log");
+			setTimeout(() => damageLog.scrollTop(damageLog[0].scrollHeight), 250);
+		}
 	}
 
 	/**
