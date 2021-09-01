@@ -253,9 +253,9 @@ class DamageLog {
 		if (userId !== game.user.id) return;
 		if (options["damage-log"]?.messageId) return;
 
-		// TODO - getSpeaker should really expect a TokenDocument, but there is currently a bug in Foundry 0.8.8
-		// that makes it only accept a Token.  Once 0.8.9 is released, change this to send the TokenDocument instead.
-		const speaker = ChatMessage.getSpeaker({ actor, token: actor.token?._object });
+		// getSpeaker should really expect a TokenDocument, but there is a bug in Foundry 0.8.8 that makes it only accept a Token.
+		const token = (isNewerVersion(game.data.version, "0.8.8") ? actor.token : actor.token?._object);
+		const speaker = ChatMessage.getSpeaker({ actor, token });
 
 		// For "real" (i.e. non-synthetic) actors, make sure there is a linked token in the current scene.
 		if (!actor.isToken) {
