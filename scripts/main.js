@@ -59,6 +59,7 @@ class DamageLog {
 		this.currentTab = "chat";
 		this.hasTabbedChatlog = !!game.modules.get("tabbed-chatlog")?.active;
 		this.damageType = "";
+		this.prevScrollTop = 0;
 
 		if (!this.system) {
 			Hooks.once("ready", () => ui.notifications.error(game.i18n.format("damage-log.error.system-not-supported", { systemId: game.system.id })));
@@ -139,6 +140,9 @@ class DamageLog {
 
 		this._onTabSwitch(undefined, undefined, this.currentTab, chatTab);
 
+		// Handle scrolling the damage log
+		damageLogSelector.scroll(this._onScroll.bind(this));
+
 		// Listen for items being added to the chat log.  If they are damage messages, move them to the damage log tab.
 		const observer = new MutationObserver((mutationList, observer) => {
 			for (const mutation of mutationList) {
@@ -204,6 +208,7 @@ class DamageLog {
 			chatLog.hide();
 			damageLog.show();
 			damageLog.scrollTop(damageLog[0].scrollHeight);
+			this.prevScrollTop = damageLog[0].scrollTop;
 		}
 		else
 		{
@@ -211,6 +216,22 @@ class DamageLog {
 			chatLog.show();
 			chatLog.scrollTop(chatLog[0].scrollHeight);
 		}
+	}
+
+	/**
+	 * Handle scrolling to top of the damage log.  If the scrollbar reaches the top, load more messages.
+	 */
+	async _onScroll(event) {
+		const element = event.target;
+
+		// Only try to load more messages if we are scrolling upwards
+		if ((0 === element.scrollTop) && (element.scrollTop < this.prevScrollTop)) {
+			const scrollBottom = element.scrollHeight;
+			await ui.chat._renderBatch(ui.chat.element, CONFIG.ChatMessage.batchSize);
+			element.scrollTop = element.scrollHeight - scrollBottom;
+		}
+
+		this.prevScrollTop = element.scrollTop;
 	}
 
 	/**
