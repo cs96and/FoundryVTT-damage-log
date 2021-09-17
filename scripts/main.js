@@ -112,8 +112,7 @@ class DamageLog {
 				this._onTabbedChatlogRenderChatLog(chatTab, html, user);
 				r();
 			});
-		}
-		else {
+		} else {
 			const tabsHtml = await renderTemplate(DamageLog.TABS_TEMPLATE);
 			html.prepend(tabsHtml);
 
@@ -129,13 +128,13 @@ class DamageLog {
 				this.tabs = tabs;
 		}
 
-		const chatLog = html.find("#chat-log");
-		chatLog.after('<ol id="damage-log"></ol>');
+		const chatLogSelector = html.find("#chat-log");
+		chatLogSelector.after('<ol id="damage-log"></ol>');
 
 		// Move all existing damage log messages into the damage log
-		const damageLog = html.find('#damage-log');
-		const damageMessages = chatLog.find(".message.damage-log");
-		damageLog.append(damageMessages);
+		const damageLogSelector = html.find('#damage-log');
+		const damageMessages = chatLogSelector.find(".message.damage-log");
+		damageLogSelector.append(damageMessages);
 		damageMessages.filter(".not-permitted").remove();
 
 		this._onTabSwitch(undefined, undefined, this.currentTab, chatTab);
@@ -143,17 +142,29 @@ class DamageLog {
 		// Listen for items being added to the chat log.  If they are damage messages, move them to the damage log tab.
 		const observer = new MutationObserver((mutationList, observer) => {
 			for (const mutation of mutationList) {
+				if (0 === mutation.addedNodes.length) continue;
+
+				// Check if the messages are being added to the top or bottom of the chat log
+				const firstChatLogMessageId = chatLogSelector[0]?.childNodes[0]?.getAttribute("data-message-id");
+				const firstAppendedMessageId = mutation.addedNodes[0]?.getAttribute("data-message-id");
+				const shouldPrepend = (firstAppendedMessageId === firstChatLogMessageId);
+
 				let nodes = $(mutation.addedNodes).filter(".damage-log");
 				nodes.filter(".not-permitted").remove();
 				nodes = nodes.not(".not-permitted");
 				if (0 !== nodes.length) {
-					damageLog.append(nodes);
-					damageLog.animate({scrollTop: damageLog[0].scrollHeight});
+					if (shouldPrepend) {
+						damageLogSelector.prepend(nodes);
+					}
+					else {
+						damageLogSelector.append(nodes);
+						damageLogSelector.animate({scrollTop: damageLogSelector[0].scrollHeight});
+					}
 				}
 			}
 		});
 
-		observer.observe(chatLog.get()[0], { childList: true });
+		observer.observe(chatLogSelector[0], { childList: true });
 	}
 
 	/**
