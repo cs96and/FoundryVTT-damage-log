@@ -76,7 +76,9 @@ nav.damage-log-nav .item.active {
 #damage-log .message.damage-log .flavor-text img.message-portrait {
 	display: none;
 }
-/* Force showing of message header (sender / metadata) */
+/* Force showing of message header (portrait / sender / metadata) */
+#damage-log .dfce-cm-bottom .message-portrait,
+#damage-log .dfce-cm-middle .message-portrait,
 #damage-log .message.damage-log.chatmsg__trim-top header.message-header .message-sender,
 #damage-log .message.damage-log.chatmsg__trim-top header.message-header .message-metadata {
 	display: initial;
