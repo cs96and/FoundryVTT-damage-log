@@ -15,6 +15,11 @@
 			"ko-fi": "cs96and"
 		}
 	],
+	"dependencies": [
+		{
+		  "name": "lib-wrapper"
+		}
+	  ],
 	"esmodules": [
 		"scripts/main.js",
 		"scripts/settings.js"

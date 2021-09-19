@@ -79,6 +79,11 @@ class DamageLog {
 		Hooks.on('updateActor', this._onUpdateActor.bind(this));
 		Hooks.on('renderChatMessage', this._onRenderChatMessage.bind(this));
 
+		if (game.modules.get('lib-wrapper')?.active)
+			libWrapper.register('damage-log', 'ChatLog.prototype.updateTimestamps', this._onUpdateTimestamps, 'WRAPPER');
+		else if (game.user.isGM)
+			ui.notifications.error("Damage Log requires the 'libWrapper' module. Please install and activate it.");
+
 		// If BetterRolls5e is enabled, wrap the BetterRollsChatCard.applyDamage function
 		// to cache the damage type of applied damage.
 		if (!!game.modules.get("betterrolls5e")?.active) {
@@ -215,6 +220,22 @@ class DamageLog {
 			damageLog.hide();
 			chatLog.show();
 			chatLog.scrollTop(chatLog[0].scrollHeight);
+		}
+	}
+
+	/**
+	 *	Handle updating the timestamps on damage log messages.
+	 */
+	_onUpdateTimestamps(wrapper, ...args) {
+		wrapper(...args);
+
+		// "this" will be a ChatLog here
+		const messages = this.element.find("#damage-log .message");
+		for (let li of messages) {
+			const message = game.messages.get(li.dataset["messageId"]);
+			if (!message?.data.timestamp) continue;
+			const stamp = li.querySelector('.message-timestamp');
+			stamp.textContent = foundry.utils.timeSince(message.data.timestamp);
 		}
 	}
 
