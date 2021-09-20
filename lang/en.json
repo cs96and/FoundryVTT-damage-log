@@ -29,7 +29,7 @@
 	"damage-log.settings.allow-player-undo-hint": "When enabled, players will be able to undo/redo damage and healing dealt to their *owned* actors.",
 
 	"damage-log.settings.show-limited-info": "Show limited damage info to players",
-	"damage-log.settings.show-limited-info-hint": "When enabled, players can see the damage taken by *all* actors, but not the old/diff/new table of values.  WARNING: if this module is ever disabled, players will be able to see all the damage information",
+	"damage-log.settings.show-limited-info-hint": "When enabled, players can see the damage taken by *all* actors, but not the old/diff/new table of values.",
 
 	"damage-log.settings.clamp-to-max": "Clamp to max HP",
 	"damage-log.settings.clamp-to-max-hint": "When reverting damage or re-applying healing, prevent the character's HP going over its current allowed maxiumum value",
