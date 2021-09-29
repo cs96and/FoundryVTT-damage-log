@@ -152,7 +152,7 @@ class DamageLog {
 				if (0 === mutation.addedNodes.length) continue;
 
 				// Check if the messages are being added to the top or bottom of the chat log
-				const firstChatLogMessageId = chatLogSelector[0]?.childNodes[0]?.getAttribute("data-message-id");
+				const firstChatLogMessageId = chatLogSelector.find("li").first()[0]?.getAttribute("data-message-id");
 				const firstAppendedMessageId = mutation.addedNodes[0]?.getAttribute("data-message-id");
 				const shouldPrepend = (firstAppendedMessageId === firstChatLogMessageId);
 
