@@ -81,8 +81,6 @@ class DamageLog {
 
 		if (game.modules.get('lib-wrapper')?.active)
 			libWrapper.register('damage-log', 'ChatLog.prototype.updateTimestamps', this._onUpdateTimestamps, 'WRAPPER');
-		else if (game.user.isGM)
-			ui.notifications.error("Damage Log requires the 'libWrapper' module. Please install and activate it.");
 
 		// If BetterRolls5e is enabled, wrap the BetterRollsChatCard.applyDamage function
 		// to cache the damage type of applied damage.
@@ -567,6 +565,10 @@ Hooks.once("init", () => {
 	 * Ready handling.  Convert damage log messages from to new flag format.
 	 */
 	Hooks.once("ready", async () => {
+
+		if (!game.modules.get('lib-wrapper')?.active && game.user.isGM)
+			ui.notifications.error("Damage Log requires the 'libWrapper' module. Please install and activate it.", { permanent: true });
+
 		if (game.user.isGM && (game.damageLog.settings.dbVersion < 1))
 		{
 			console.log("Damage Log | Updating message database");
