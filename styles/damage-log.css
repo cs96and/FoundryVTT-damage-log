@@ -34,58 +34,62 @@ nav.damage-log-nav .item.active {
 	overflow-y: auto;
 }
 /* Reduce margins and padding in damage log tables */
-#damage-log .message.damage-log table {
+.message.damage-log table {
 	margin: 2px auto;
 }
-#damage-log .message.damage-log table th,
-#damage-log .message.damage-log table td {
+.message.damage-log table th,
+.message.damage-log table td {
 	padding: 2px;
 }
 /* Align numbers in tables */
-#damage-log .message.damage-log table .num {
+.message.damage-log table .num {
 	text-align: right;
 }
 /* Styling for damage messages */
-#damage-log .message.damage-log.damage {
+.message.damage-log.damage {
 	background: #ffd9d9;
 }
 /* Styling for healing messages */
-#damage-log .message.damage-log.healing {
+.message.damage-log.healing {
 	background: #d9ffd9;
 }
 /* Stikethrough reverted messages */
-#damage-log .message.damage-log.reverted {
+.message.damage-log.reverted {
 	text-decoration: line-through;
 }
 /* Dim reverted damage */
-#damage-log .message.damage-log.reverted.damage {
+.message.damage-log.reverted.damage {
 	background: #ffeaea;
 }
 /* Dim reverted healing */
-#damage-log .message.damage-log.reverted.healing {
+.message.damage-log.reverted.healing {
 	background: #eaffea;
 }
 /* Hide whisper information on damage logs */
-#damage-log .message.damage-log .chat-mode-indicator,
-#damage-log .message.damage-log .whisper-to,
-#damage-log .message.damage-log .chat-portrait-indicator,
-#damage-log .message.damage-log .chat-portrait-whisper-to {
+.message.damage-log .chat-mode-indicator,
+.message.damage-log .whisper-to,
+.message.damage-log .chat-portrait-indicator,
+.message.damage-log .chat-portrait-whisper-to {
 	display: none;
 }
 /* Hide chat portrait image next to flavor text */
-#damage-log .message.damage-log .flavor-text img.message-portrait {
+.message.damage-log .flavor-text img.message-portrait {
 	display: none;
 }
 /* Force showing of message header (portrait / sender / metadata) */
-#damage-log .dfce-cm-bottom .message-portrait,
-#damage-log .dfce-cm-middle .message-portrait,
-#damage-log .message.damage-log.chatmsg__trim-top header.message-header .message-sender,
-#damage-log .message.damage-log.chatmsg__trim-top header.message-header .message-metadata {
+.message.damage-log.dfce-cm-bottom header.message-header .message-portrait,
+.message.damage-log.dfce-cm-middle header.message-header .message-portrait,
+.message.damage-log.dfce-cm-bottom header.message-header .message-sender,
+.message.damage-log.dfce-cm-middle header.message-header .message-sender,
+.message.damage-log.dfce-cm-bottom header.message-header .message-timestamp,
+.message.damage-log.dfce-cm-middle header.message-header .message-timestamp,
+.message.damage-log.chatmsg__trim-top header.message-header .message-sender,
+.message.damage-log.chatmsg__trim-top header.message-header .message-metadata {
 	display: initial;
 }
 
 /* Force showing of damage logs (for compatibility with Tabbed Chatlog) */
-#damage-log .message.damage-log.hard-show {
+.message.damage-log.hard-show {
     display: flex !important;
 }
 /* Force hiding of damage logs the user is not permitted to see */
