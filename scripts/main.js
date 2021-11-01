@@ -79,8 +79,10 @@ class DamageLog {
 		Hooks.on('updateActor', this._onUpdateActor.bind(this));
 		Hooks.on('renderChatMessage', this._onRenderChatMessage.bind(this));
 
-		if (game.modules.get('lib-wrapper')?.active)
+		if (game.modules.get('lib-wrapper')?.active) {
+			libWrapper.register('damage-log', 'ChatLog.prototype.notify', this._onChatLogNotify, 'MIXED');
 			libWrapper.register('damage-log', 'ChatLog.prototype.updateTimestamps', this._onUpdateTimestamps, 'WRAPPER');
+		}
 
 		// If BetterRolls5e is enabled, wrap the BetterRollsChatCard.applyDamage function
 		// to cache the damage type of applied damage.
@@ -219,6 +221,16 @@ class DamageLog {
 			chatLog.show();
 			chatLog.scrollTop(chatLog[0].scrollHeight);
 		}
+	}
+
+	/**
+	 *	Disable the chat notification on damage log messages.
+	 */
+	 _onChatLogNotify(wrapper, message, ...args) {
+		if (message.data?.flags["damage-log"])
+			return;
+
+		return wrapper(message, ...args);
 	}
 
 	/**
