@@ -82,6 +82,9 @@ class DamageLog {
 		if (game.modules.get('lib-wrapper')?.active) {
 			libWrapper.register('damage-log', 'ChatLog.prototype.notify', this._onChatLogNotify, 'MIXED');
 			libWrapper.register('damage-log', 'ChatLog.prototype.updateTimestamps', this._onUpdateTimestamps, 'WRAPPER');
+
+			libWrapper.ignore_conflicts('damage-log', 'hide-gm-rolls', 'ChatLog.prototype.notify');
+			libWrapper.ignore_conflicts('damage-log', 'monks-little-details', 'ChatLog.prototype.notify');
 		}
 
 		// If BetterRolls5e is enabled, wrap the BetterRollsChatCard.applyDamage function
