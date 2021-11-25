@@ -398,6 +398,7 @@ class DamageLog {
 			}
 
 			const totalDiff = flags.temp.diff + flags.value.diff;
+			const isHealing = (totalDiff >= 0);
 
 			const flavorOptions = {
 				diff: Math.abs(totalDiff),
@@ -413,7 +414,7 @@ class DamageLog {
 
 			// If limited player view is enabled, send messages to all players (confidential info will get stripped out in _onRenderChatMessage)
 			// Otherwise, only send the message to the players who have the correct permissions.
-			if (!this.settings.allowPlayerView || !this.settings.showLimitedInfoToPlayers)
+			if (!this.settings.allowPlayerView || (!this.settings.showLimitedInfoToPlayers || (isHealing && this.settings.hideHealingInLimitedInfo)))
 				chatData["whisper"] = game.users.contents.filter(user => this._canUserViewActorDamage(user, actor)).map(user => user.id);
 
 			ChatMessage.create(chatData, {});
@@ -460,7 +461,8 @@ class DamageLog {
 		else
 			html.removeClass("reverted");
 
-		if ((hp.temp.diff + hp.value.diff) >= 0)
+		const isHealing = ((hp.temp.diff + hp.value.diff) >= 0);
+		if (isHealing)
 			html.addClass("healing");
 		else
 			html.addClass("damage");
@@ -472,7 +474,7 @@ class DamageLog {
 			canViewTable = this._canUserViewActorDamage(game.user, actor);
 		}
 
-		if (!canViewTable && !this.settings.showLimitedInfoToPlayers)
+		if (!canViewTable && (!this.settings.showLimitedInfoToPlayers || (isHealing && this.settings.hideHealingInLimitedInfo)))
 			html.addClass("not-permitted");
 
 		if (this.settings.useTab && this.hasTabbedChatlog) {

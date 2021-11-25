@@ -77,6 +77,16 @@ export class DamageLogSettings {
 			onChange: () => window.location.reload()
 		});
 
+		game.settings.register("damage-log", "hideHealingInLimitedInfo", {
+			name: game.i18n.localize("damage-log.settings.hide-healing-in-limited-info"),
+			hint: game.i18n.localize("damage-log.settings.hide-healing-in-limited-info-hint"),
+			scope: 'world',
+			config: true,
+			type: Boolean,
+			default: false,
+			onChange: () => window.location.reload()
+		});
+
 		game.settings.register("damage-log", "clampToMax", {
 			name: game.i18n.localize("damage-log.settings.clamp-to-max"),
 			hint: game.i18n.localize("damage-log.settings.clamp-to-max-hint"),
@@ -110,6 +120,7 @@ export class DamageLogSettings {
 		this.minPlayerPermission = game.settings.get("damage-log", "minPlayerPermission");
 		this.allowPlayerUndo = game.settings.get("damage-log", "allowPlayerUndo");
 		this.showLimitedInfoToPlayers = game.settings.get("damage-log", "showLimitedInfoToPlayers");
+		this.hideHealingInLimitedInfo = game.settings.get("damage-log", "hideHealingInLimitedInfo");
 		this.clampToMax = game.settings.get("damage-log", "clampToMax");
 		this.clampToMin = game.settings.get("damage-log", "clampToMin");
 	}
@@ -142,6 +153,16 @@ export class DamageLogSettings {
 		const allowPlayersCheckbox = html.find(':checkbox[name="damage-log.allowPlayerView"]');
 		allowPlayersCheckbox.change(function() {
 			playerSpecificControls.prop("disabled", !this.checked);
+		});
+
+		// Disable "Hide healing in the limited damage info", if "Show limited damage info to players" is disabled.
+		const hideHealingControl = html.find(':checkbox[name="damage-log.hideHealingInLimitedInfo"]');
+		hideHealingControl.prop("disabled", !this.showLimitedInfoToPlayers);
+
+		// Handle the showLimitedInfoToPlayers checkbox being toggled.
+		const showLimitedInfoCheckbox = html.find(':checkbox[name="damage-log.showLimitedInfoToPlayers"]');
+		showLimitedInfoCheckbox.change(function() {
+			hideHealingControl.prop("disabled", !this.checked);
 		});
 	}
 }
