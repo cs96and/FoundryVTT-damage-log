@@ -18,6 +18,11 @@ nav.damage-log-nav.tabs {
 	box-shadow: 0 0 10px red;
 }
 
+/* Ensure tabs take up their full available width */
+nav.damage-log-nav .item {
+	flex: 1;
+}
+
 /* Styling for the active tab */
 nav.damage-log-nav .item.active {
 	color: white;
