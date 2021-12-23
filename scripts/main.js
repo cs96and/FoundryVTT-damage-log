@@ -82,6 +82,7 @@ class DamageLog {
 		if (game.modules.get('lib-wrapper')?.active) {
 			libWrapper.register('damage-log', 'ChatLog.prototype.notify', this._onChatLogNotify, 'MIXED');
 			libWrapper.register('damage-log', 'ChatLog.prototype.updateTimestamps', this._onUpdateTimestamps, 'WRAPPER');
+			libWrapper.register('damage-log', 'Messages.prototype.flush', this._onMessageLogFlush.bind(this), 'MIXED');
 
 			libWrapper.ignore_conflicts('damage-log', 'hide-gm-rolls', 'ChatLog.prototype.notify');
 			libWrapper.ignore_conflicts('damage-log', 'monks-little-details', 'ChatLog.prototype.notify');
@@ -119,6 +120,7 @@ class DamageLog {
 			// Force Tabbed Chatlog to render first
 			await new Promise(r => {
 				this._onTabbedChatlogRenderChatLog(chatTab, html, user);
+				this.currentTab = game.tabbedchat.tabs.active;
 				r();
 			});
 		} else {
@@ -249,6 +251,26 @@ class DamageLog {
 			if (!message?.data.timestamp) continue;
 			const stamp = li.querySelector('.message-timestamp');
 			stamp.textContent = foundry.utils.timeSince(message.data.timestamp);
+		}
+	}
+
+	_onMessageLogFlush(wrapper, ...args) {
+		if (this.hasTabbedChatlog && (this.currentTab === "damage-log")) {
+			return Dialog.confirm({
+				title: game.i18n.localize("CHAT.FlushTitle"),
+				content: game.i18n.localize("CHAT.FlushWarning"),
+				yes: () => {
+					const damageLogMessagesIds = game.messages.filter(message => "damage-log" in message.data.flags).map(message => message.id);
+					game.messages.documentClass.deleteDocuments(damageLogMessagesIds, {deleteAll: false});
+				},
+				options: {
+					top: window.innerHeight - 150,
+					left: window.innerWidth - 720
+				}
+			});
+		}
+		else {
+			return wrapper(...args);
 		}
 	}
 
