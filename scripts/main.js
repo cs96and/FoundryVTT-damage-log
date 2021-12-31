@@ -394,7 +394,7 @@ class DamageLog {
 				old: oldValue, new: newValue, diff: newValue - oldValue
 			},
 			temp: {
-				old: oldTemp, new: newTemp, diff: newTemp - newTemp
+				old: oldTemp, new: newTemp, diff: newTemp - oldTemp
 			}
 		};
 
