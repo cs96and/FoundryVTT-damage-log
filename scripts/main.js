@@ -427,10 +427,17 @@ class DamageLog {
 				damageType: this.damageType
 			};
 
+			let content = ''
+			if (0 != flags.value.diff)
+				content += `${flags.value.name}: ${flags.value.old} -&gt; ${flags.value.new} `;
+			if (0 != flags.temp.diff)
+				content += `Temp: ${flags.temp.old} -&gt; ${flags.temp.new}`;
+
 			const chatData = {
 				flags: { "damage-log": flags },
-				flavor: game.i18n.format((totalDiff > 0 ? "damage-log.healing-flavor-text" : "damage-log.damage-flavor-text"), flavorOptions),
 				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+				flavor: game.i18n.format((totalDiff > 0 ? "damage-log.healing-flavor-text" : "damage-log.damage-flavor-text"), flavorOptions),
+				content,
 				speaker
 			};
 
@@ -511,8 +518,13 @@ class DamageLog {
 			});
 		}
 
+		const content = html.find("div.message-content");
+
+		// The current content is just some placeholder text.  Completely replace it with the HTML table, or nothing if the user is not allowed to see it.
 		if (canViewTable)
-			html.find("div.message-content").prepend(await renderTemplate(DamageLog.TABLE_TEMPLATE, hp));
+			content.html(await renderTemplate(DamageLog.TABLE_TEMPLATE, hp));
+		else
+			content.text('');
 	}
 
 	/**
