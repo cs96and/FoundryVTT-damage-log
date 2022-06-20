@@ -145,28 +145,32 @@ export class DamageLogSettings {
 	 * Enable / disable interaction with various settings, depending on whether "Allow Player View" is enabled.
 	 */
 	_onRenderSettingsConfig(settingsConfig, html, user) {
-		const formGroups = html.find('div.form-group');
+		const formGroups = html[0].querySelectorAll('div.form-group');
 
 		// Disable the player-centric controls if allowPlayerView is disabled.
-		const playerSpecificDivs = formGroups.has('select[name="damage-log.minPlayerPermission"],:checkbox[name="damage-log.allowPlayerUndo"],:checkbox[name="damage-log.showLimitedInfoToPlayers"]');
+		const playerSpecificDivs = [...formGroups].filter(fg => {
+			return !!fg.querySelector('select[name="damage-log.minPlayerPermission"],input[name="damage-log.allowPlayerUndo"],input[name="damage-log.showLimitedInfoToPlayers"]');
+		});
 		DamageLogSettings._toggleDivs(playerSpecificDivs, this.allowPlayerView);
 
+		// Disable "Hide healing in the limited damage info", if "Show limited damage info to players" is disabled.
+		const hideHealingDiv = [...formGroups].filter(fg => {
+			return !!fg.querySelector('input[name="damage-log.hideHealingInLimitedInfo"]');
+		});
+		DamageLogSettings._toggleDivs(hideHealingDiv, this.allowPlayerView && this.showLimitedInfoToPlayers);
+		
+		const allowPlayersCheckbox = html[0].querySelector('input[name="damage-log.allowPlayerView"]');
+		const showLimitedInfoCheckbox = html[0].querySelector('input[name="damage-log.showLimitedInfoToPlayers"]');
+
 		// Handle the allowPlayerView checkbox being toggled.
-		const allowPlayersCheckbox = formGroups.find(':checkbox[name="damage-log.allowPlayerView"]');
-		allowPlayersCheckbox.change(function() {
-			const checked = allowPlayersCheckbox[0].checked;
-			DamageLogSettings._toggleDivs(playerSpecificDivs, checked);
+		allowPlayersCheckbox.addEventListener("change", (event) => {
+			DamageLogSettings._toggleDivs(playerSpecificDivs, allowPlayersCheckbox.checked);
+			DamageLogSettings._toggleDivs(hideHealingDiv, allowPlayersCheckbox.checked && showLimitedInfoCheckbox.checked);
 		});
 
-		// Disable "Hide healing in the limited damage info", if "Show limited damage info to players" is disabled.
-		const hideHealingDiv = formGroups.has(':checkbox[name="damage-log.hideHealingInLimitedInfo"]');
-		DamageLogSettings._toggleDivs(hideHealingDiv, this.showLimitedInfoToPlayers);
-
 		// Handle the showLimitedInfoToPlayers checkbox being toggled.
-		const showLimitedInfoCheckbox = formGroups.find(':checkbox[name="damage-log.showLimitedInfoToPlayers"]');
-		showLimitedInfoCheckbox.change(function() {
-			const checked = showLimitedInfoCheckbox[0].checked;
-			DamageLogSettings._toggleDivs(hideHealingDiv, checked);
+		showLimitedInfoCheckbox.addEventListener("change", (event) => {
+			DamageLogSettings._toggleDivs(hideHealingDiv, allowPlayersCheckbox.checked && showLimitedInfoCheckbox.checked);
 		});
 	}
 
@@ -174,12 +178,11 @@ export class DamageLogSettings {
 	 * Enable / disable inputs in a set of divs.
 	 */
 	static _toggleDivs(divs, enabled) {
-		const inputs = divs.find("input,select");
-		const labels = divs.find("label>span");
-
-		// Disable all inputs in the divs (checkboxes and dropdowns)
-		inputs.prop("disabled", !enabled);
-		// Disable TidyUI's on click events for the labels.
-		labels.css("pointer-events", enabled ? "auto" : "none");
+		for (const div of divs) {
+			// Disable all inputs in the divs (checkboxes and dropdowns)
+			div.querySelectorAll("input,select").forEach(i => i.disabled = !enabled);
+			// Disable TidyUI's on click events for the labels.
+			div.querySelectorAll("label>span").forEach(l => l.style.pointerEvents = (enabled ? "auto" : "none"));
+		}
 	}
 }

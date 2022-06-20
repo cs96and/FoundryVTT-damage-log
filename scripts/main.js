@@ -90,7 +90,7 @@ class DamageLog {
 		// If BetterRolls5e is enabled, wrap the BetterRollsChatCard.applyDamage function
 		// to cache the damage type of applied damage.
 		if (!!game.modules.get("betterrolls5e")?.active) {
-			import("../../betterrolls5e/scripts/chat-message.js").then((obj) => {
+			import("/modules/betterrolls5e/scripts/chat-message.js").then((obj) => {
 				const damageLog = this;
 				const origBetterRollsApplyDamage = obj.BetterRollsChatCard.prototype.applyDamage;
 
@@ -124,7 +124,7 @@ class DamageLog {
 			});
 		} else {
 			const tabsHtml = await renderTemplate(DamageLog.TABS_TEMPLATE);
-			html.prepend(tabsHtml);
+			html[0].insertAdjacentHTML("afterBegin", tabsHtml);
 
 			const tabs = new Tabs({
 				navSelector: ".damage-log-nav.tabs",
@@ -138,19 +138,19 @@ class DamageLog {
 				this.tabs = tabs;
 		}
 
-		const chatLogSelector = html.find("#chat-log");
-		chatLogSelector.after('<ol id="damage-log"></ol>');
+		const chatLogElement = html[0].querySelector("#chat-log");
+		chatLogElement.insertAdjacentHTML("afterEnd", '<ol id="damage-log"></ol>');
 
-		// Move all existing damage log messages into the damage log
-		const damageLogSelector = html.find('#damage-log');
-		const damageMessages = chatLogSelector.find(".message.damage-log");
-		damageLogSelector.append(damageMessages);
-		damageMessages.filter(".not-permitted").remove();
+		// Move all the damage log messages into teh damage log tab.
+		const damageLogElement = html[0].querySelector("#damage-log");
+		const damageMessages = chatLogElement.querySelectorAll(".message.damage-log");
+		damageLogElement.append(...damageMessages);
+		damageMessages.forEach(m => m.classList.contains("not-permitted") && m.remove());
 
 		this._onTabSwitch(undefined, undefined, this.currentTab, chatTab);
 
 		// Handle scrolling the damage log
-		damageLogSelector.scroll(this._onScroll.bind(this));
+		damageLogElement.addEventListener("scroll", this._onScroll.bind(this));
 
 		// Listen for items being added to the chat log.  If they are damage messages, move them to the damage log tab.
 		const observer = new MutationObserver((mutationList, observer) => {
@@ -158,26 +158,31 @@ class DamageLog {
 				if (0 === mutation.addedNodes.length) continue;
 
 				// Check if the messages are being added to the top or bottom of the chat log
-				const firstChatLogMessageId = chatLogSelector.find("li").first()[0]?.getAttribute("data-message-id");
+				const firstChatLogMessageId = chatLogElement.querySelector("li")?.getAttribute("data-message-id");
 				const firstAppendedMessageId = mutation.addedNodes[0]?.getAttribute("data-message-id");
 				const shouldPrepend = (firstAppendedMessageId === firstChatLogMessageId);
+				
+				const nodes = [...mutation.addedNodes].filter(n => {
+					if (n.classList.contains("not-permitted"))
+						n.remove();
+					else if (n.classList.contains("damage-log"))
+						return true;
+					return false;
+				});
 
-				let nodes = $(mutation.addedNodes).filter(".damage-log");
-				nodes.filter(".not-permitted").remove();
-				nodes = nodes.not(".not-permitted");
 				if (0 !== nodes.length) {
 					if (shouldPrepend) {
-						damageLogSelector.prepend(nodes);
+						damageLogElement.prepend(...nodes);
 					}
 					else {
-						damageLogSelector.append(nodes);
-						damageLogSelector.animate({scrollTop: damageLogSelector[0].scrollHeight});
+						damageLogElement.append(...nodes);
+						damageLogElement.scrollTo({ top: damageLogElement.scrollHeight, behavior: "smooth" });
 					}
 				}
 			}
 		});
 
-		observer.observe(chatLogSelector[0], { childList: true });
+		observer.observe(chatLogElement, { childList: true });
 	}
 
 	/**
@@ -185,8 +190,8 @@ class DamageLog {
 	 */
 	_onTabbedChatlogRenderChatLog(chatTab, html, user) {
 		// Append our tab to the end of Tabbed Chatlog's tabs
-		const tabs = html.find(".tabbedchatlog.tabs");
-		tabs.append(`<a class="item damage-log" data-tab="damage-log">${game.i18n.localize("damage-log.damage-log-tab-name")}</a>`);
+		const tabs = html[0].querySelector(".tabbedchatlog.tabs");
+		tabs.insertAdjacentHTML("beforeEnd", `<a class="item damage-log" data-tab="damage-log">${game.i18n.localize("damage-log.damage-log-tab-name")}</a>`);
 
 		// Override Tabbed Chatlog's callback to call our _onTabSwitch() function first.
 		const tabbedChatlogCallback = game.tabbedchat.tabs.callback;
@@ -197,8 +202,8 @@ class DamageLog {
 
 		if (chatTab.popOut) {
 			if ("damage-log" === this.currentTab) {
-				html.find(".item.active").removeClass("active");
-				html.find(".item.damage-log").addClass("active");
+				html[0].querySelectorAll(".item.active").forEach(elem => elem.classList.remove("active"));
+				html[0].querySelectorAll(".item.damage-log").forEach(elem => elem.classList.add("active"));
 			}
 		}
 	}
@@ -210,20 +215,20 @@ class DamageLog {
 		if (!chatTab.popOut)
 			this.currentTab = tab;
 
-		const chatLog = chatTab.element.find("#chat-log");
-		const damageLog = chatTab.element.find("#damage-log");
+		const chatLog = chatTab.element[0].querySelector("#chat-log");
+		const damageLog = chatTab.element[0].querySelector("#damage-log");
 
 		if (tab === "damage-log") {
-			chatLog.hide();
-			damageLog.show();
-			damageLog.scrollTop(damageLog[0].scrollHeight);
-			this.prevScrollTop = damageLog[0].scrollTop;
+			chatLog.style.display = "none";
+			damageLog.style.display = "";
+			damageLog.scrollTop = damageLog.scrollHeight;
+			this.prevScrollTop = damageLog.scrollTop;
 		}
 		else
 		{
-			damageLog.hide();
-			chatLog.show();
-			chatLog.scrollTop(chatLog[0].scrollHeight);
+			damageLog.style.display = "none";
+			chatLog.style.display = "";
+			chatLog.scrollTop = chatLog.scrollHeight;
 		}
 	}
 
@@ -244,8 +249,8 @@ class DamageLog {
 		wrapper(...args);
 
 		// "this" will be a ChatLog here
-		const messages = this.element.find("#damage-log .message");
-		for (let li of messages) {
+		const messages = this.element[0].querySelectorAll("#damage-log .message");
+		for (const li of messages) {
 			const message = game.messages.get(li.dataset["messageId"]);
 			if (!message?.data.timestamp) continue;
 			const stamp = li.querySelector('.message-timestamp');
@@ -305,8 +310,8 @@ class DamageLog {
 	 */
 	_onCollapseSidebar(sidebar, isCollapsing) {
 		if (!isCollapsing && ("damage-log" === this.currentTab)) {
-			const damageLog = sidebar.element.find("#damage-log");
-			setTimeout(() => damageLog.scrollTop(damageLog[0].scrollHeight), 250);
+			const damageLog = sidebar.element[0].querySelector("#damage-log");
+			setTimeout(() => damageLog.scrollTop = damageLog.scrollHeight, 250);
 		}
 	}
 
@@ -315,11 +320,11 @@ class DamageLog {
 	 * This sets up the right click context menus for chat messages.
 	 */
 	_onGetChatLogEntryContext(html, options) {
-		const canUndo = li => {
+		const canUndo = (li) => {
 			if (game.user.isGM) return true;
 			if (!this.settings.allowPlayerUndo) return false;
 
-			const message = game.messages.get(li.data("messageId"));
+			const message = game.messages.get(li[0].dataset["messageId"]);
 			const actor = ChatMessage.getSpeakerActor(message?.data?.speaker);
 			return actor?.testUserPermission(game.user, CONST.ENTITY_PERMISSIONS.OWNER);
 		};
@@ -328,26 +333,26 @@ class DamageLog {
 			{
 				name: game.i18n.localize("damage-log.undo-damage"),
 				icon: '<i class="fas fa-undo-alt"></i>',
-				condition: li => canUndo(li) && li.is(".damage-log.damage:not(.reverted)"),
-				callback: li => this._undoDamage(li)
+				condition: li => canUndo(li) && li[0].matches(".damage-log.damage:not(.reverted)"),
+				callback: li => this._undoDamage(li[0])
 			},
 			{
 				name: game.i18n.localize("damage-log.undo-healing"),
 				icon: '<i class="fas fa-undo-alt"></i>',
-				condition: li => canUndo(li) && li.is(".damage-log.healing:not(.reverted)"),
-				callback: li => this._undoDamage(li)
+				condition: li => canUndo(li) && li[0].matches(".damage-log.healing:not(.reverted)"),
+				callback: li => this._undoDamage(li[0])
 			},
 			{
 				name: game.i18n.localize("damage-log.redo-damage"),
 				icon: '<i class="fas fa-redo-alt"></i>',
-				condition: li => canUndo(li) && li.is(".damage-log.damage.reverted"),
-				callback: li => this._undoDamage(li)
+				condition: li => canUndo(li) && li[0].matches(".damage-log.damage.reverted"),
+				callback: li => this._undoDamage(li[0])
 			},
 			{
 				name: game.i18n.localize("damage-log.redo-healing"),
 				icon: '<i class="fas fa-redo-alt"></i>',
-				condition: li => canUndo(li) && li.is(".damage-log.healing.reverted"),
-				callback: li => this._undoDamage(li)
+				condition: li => canUndo(li) && li[0].matches(".damage-log.healing.reverted"),
+				callback: li => this._undoDamage(li[0])
 			}
 		);
 	}
@@ -413,7 +418,7 @@ class DamageLog {
 			if (this.settings.useTab && this.hasTabbedChatlog)
 			{
 				// If the rolls notification is not currently showing, set a flag so we can prevent it from showing in _onRenderChatMessage.
-				const rollsNotification = $("#rollsNotification")[0];
+				const rollsNotification = document.getElementById("rollsNotification");
 				if (rollsNotification?.style.display === "none")
 					flags.preventRollsNotification = true;
 			}
@@ -482,18 +487,20 @@ class DamageLog {
 		const hp = message.data?.flags["damage-log"];
 		if (!hp) return;
 
-		html.addClass("damage-log");
+		const classList = html[0].classList;
+
+		classList.add("damage-log");
 
 		if (hp.revert)
-			html.addClass("reverted");
+			classList.add("reverted");
 		else
-			html.removeClass("reverted");
+			classList.remove("reverted");
 
 		const isHealing = ((hp.temp.diff + hp.value.diff) >= 0);
 		if (isHealing)
-			html.addClass("healing");
+			classList.add("healing");
 		else
-			html.addClass("damage");
+			classList.add("damage");
 
 		// Work out if the user is allowed to see the damage table, and then add it to the HTML.
 		let canViewTable = game.user.isGM;
@@ -503,7 +510,7 @@ class DamageLog {
 		}
 
 		if (!canViewTable && (!this.settings.showLimitedInfoToPlayers || (isHealing && this.settings.hideHealingInLimitedInfo)))
-			html.addClass("not-permitted");
+			classList.add("not-permitted");
 
 		if (this.settings.useTab && this.hasTabbedChatlog) {
 			// Do the following after Tabbed Chatlog has rendered.
@@ -511,19 +518,18 @@ class DamageLog {
 				// If the rolls notification wasn't showing before the message was created, then hide it again.
 				// TODO - this currently only works for the user that modified the token.
 				if (hp.preventRollsNotification)
-					$("#rollsNotification").hide();
-				html.removeClass("hardHide").addClass("hard-show").css("display", "").show();
+					document.getElementById("rollsNotification").style.display = "none";
+				classList.remove("hardHide");
+				classList.add("hard-show")
+				html[0].style.display = "";
 				r();
 			});
 		}
 
-		const content = html.find("div.message-content");
+		const content = html[0].querySelector("div.message-content");
 
 		// The current content is just some placeholder text.  Completely replace it with the HTML table, or nothing if the user is not allowed to see it.
-		if (canViewTable)
-			content.html(await renderTemplate(DamageLog.TABLE_TEMPLATE, hp));
-		else
-			content.text('');
+		content.innerHTML = (canViewTable ? await renderTemplate(DamageLog.TABLE_TEMPLATE, hp) : "");
 	}
 
 	/**
@@ -540,7 +546,7 @@ class DamageLog {
 	 * Undo the the damage on a given message.
 	 */
 	_undoDamage(li) {
-		const message = game.messages.get(li.data("messageId"));
+		const message = game.messages.get(li.dataset["messageId"]);
 		const speaker = message.data.speaker;
 		const flags = message.data.flags["damage-log"];
 
@@ -570,7 +576,7 @@ class DamageLog {
 			return;
 		}
 
-		const modifier = li.hasClass("reverted") ? -1 : 1;
+		const modifier = li.classList.contains("reverted") ? -1 : 1;
 		const actorData = token.actor.data;
 
 		// Get a nested property of actorData.data using a string.
