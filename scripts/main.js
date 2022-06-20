@@ -11,6 +11,7 @@
  */
 
 import { DamageLogSettings } from "./settings.js";
+import { Util } from "./util.js";
 
 class DamageLog {
 
@@ -236,7 +237,7 @@ class DamageLog {
 	 *	Disable the chat notification on damage log messages.
 	 */
 	 _onChatLogNotify(wrapper, message, ...args) {
-		if (message.data?.flags["damage-log"])
+		if (Util.getDocumentData(message)?.flags["damage-log"])
 			return;
 
 		return wrapper(message, ...args);
@@ -252,9 +253,10 @@ class DamageLog {
 		const messages = this.element[0].querySelectorAll("#damage-log .message");
 		for (const li of messages) {
 			const message = game.messages.get(li.dataset["messageId"]);
-			if (!message?.data.timestamp) continue;
+			if (!message || !Util.getDocumentData(message).timestamp) continue;
+
 			const stamp = li.querySelector('.message-timestamp');
-			stamp.textContent = foundry.utils.timeSince(message.data.timestamp);
+			stamp.textContent = foundry.utils.timeSince(Util.getDocumentData(message).timestamp);
 		}
 	}
 
@@ -264,7 +266,7 @@ class DamageLog {
 				title: game.i18n.localize("CHAT.FlushTitle"),
 				content: game.i18n.localize("CHAT.FlushWarning"),
 				yes: () => {
-					const damageLogMessagesIds = game.messages.filter(message => "damage-log" in message.data.flags).map(message => message.id);
+					const damageLogMessagesIds = game.messages.filter(message => "damage-log" in Util.getDocumentData(message).flags).map(message => message.id);
 					game.messages.documentClass.deleteDocuments(damageLogMessagesIds, {deleteAll: false});
 				},
 				options: {
@@ -325,8 +327,8 @@ class DamageLog {
 			if (!this.settings.allowPlayerUndo) return false;
 
 			const message = game.messages.get(li[0].dataset["messageId"]);
-			const actor = ChatMessage.getSpeakerActor(message?.data?.speaker);
-			return actor?.testUserPermission(game.user, CONST.ENTITY_PERMISSIONS.OWNER);
+			const actor = ChatMessage.getSpeakerActor(Util.getDocumentData(message)?.speaker);
+			return actor?.testUserPermission(game.user, Util.PERMISSION_CONSTS.OWNER);
 		};
 
 		options.push(
@@ -381,11 +383,14 @@ class DamageLog {
 			return path && path.split('.').reduce((prev, curr) => prev && prev[curr], obj);
 		}
 
-		const oldValue = getAttrib(actor.data.data, this.system.value) ?? 0;
-		const newValue = getAttrib(updateData.data, this.system.value) ?? oldValue;
+		const actorSystemData = Util.getSystemData(actor);
+		const systemUpdates = (Util.isV10 ? updateData.system : updateData.data);
 
-		const oldTemp = getAttrib(actor.data.data, this.system.temp) ?? 0;
-		const newTemp = getAttrib(updateData.data, this.system.temp) ?? oldTemp;
+		const oldValue = getAttrib(actorSystemData, this.system.value) ?? 0;
+		const newValue = getAttrib(systemUpdates, this.system.value) ?? oldValue;
+
+		const oldTemp = getAttrib(actorSystemData, this.system.temp) ?? 0;
+		const newTemp = getAttrib(systemUpdates, this.system.temp) ?? oldTemp;
 
 		let hpLocalizationName = `damage-log.hp-name.${game.system.id}`;
 		if (!game.i18n.has(hpLocalizationName))
@@ -483,8 +488,9 @@ class DamageLog {
 	 * Handle the "renderChatMessage" hook.
 	 * Applies classes to the message's HTML based on the message flags.
 	 */
-	async _onRenderChatMessage(message, html, messageData) {
-		const hp = message.data?.flags["damage-log"];
+	async _onRenderChatMessage(message, html, data) {
+		const messageData = Util.getDocumentData(message);
+		const hp = messageData?.flags["damage-log"];
 		if (!hp) return;
 
 		const classList = html[0].classList;
@@ -505,7 +511,7 @@ class DamageLog {
 		// Work out if the user is allowed to see the damage table, and then add it to the HTML.
 		let canViewTable = game.user.isGM;
 		if (!canViewTable && this.settings.allowPlayerView) {
-			const actor = ChatMessage.getSpeakerActor(message.data?.speaker);
+			const actor = ChatMessage.getSpeakerActor(messageData?.speaker);
 			canViewTable = this._canUserViewActorDamage(game.user, actor);
 		}
 
@@ -547,8 +553,9 @@ class DamageLog {
 	 */
 	_undoDamage(li) {
 		const message = game.messages.get(li.dataset["messageId"]);
-		const speaker = message.data.speaker;
-		const flags = message.data.flags["damage-log"];
+		const messageData = Util.getDocumentData(message);
+		const speaker = messageData.speaker;
+		const flags = messageData.flags["damage-log"];
 
 		if (!speaker.scene)
 		{
@@ -577,14 +584,16 @@ class DamageLog {
 		}
 
 		const modifier = li.classList.contains("reverted") ? -1 : 1;
-		const actorData = token.actor.data;
+		const actorData = Util.getDocumentData(token.actor);
+		const systemData = Util.getSystemData(token.actor);
 
 		// Get a nested property of actorData.data using a string.
 		const getActorAttrib = (path) => {
-			return path && path.split('.').reduce((prev, curr) => prev && prev[curr], actorData.data);
+			return path && path.split('.').reduce((prev, curr) => prev && prev[curr], systemData);
 		}
 
 		const update = {};
+		const updatePath = (Util.isV10 ? "system" : "data");
 
 		if (this.system.value) {
 			let newValue = (getActorAttrib(this.system.value) ?? 0) - (flags.value.diff * modifier);
@@ -599,15 +608,15 @@ class DamageLog {
 				newValue = Math.min(newValue, maxHp);
 			}
 
-			update[`data.${this.system.value}`] = newValue;
+			update[`${updatePath}.${this.system.value}`] = newValue;
 		}
 
 		if (this.system.temp) {
 			const newTemp = getActorAttrib(this.system.temp) - (flags.temp.diff * modifier);
-			update[`data.${this.system.temp}`] = Math.max(newTemp, 0);
+			update[`${updatePath}.${this.system.temp}`] = Math.max(newTemp, 0);
 		}
 
-		actorData.document.update(update, { "damage-log": { revert: modifier, messageId: message.id } });
+		token.actor.update(update, { "damage-log": { revert: modifier, messageId: message.id } });
 	}
 }
 
@@ -631,7 +640,7 @@ Hooks.once("init", () => {
 
 			let haveNotified = false;
 			for (const message of game.messages) {
-				const oldFlags = message.data?.flags?.damageLog;
+				const oldFlags = Util.getDocumentData(message)?.flags?.damageLog;
 				if (oldFlags) {
 					if (!haveNotified) {
 						ui.notifications.warn("Damage Log | Updating message database, please do not close the game", { permanent: true });

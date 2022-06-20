@@ -10,6 +10,8 @@
  * https://mit-license.org/
  */
 
+import { Util } from "./util.js";
+
 export class DamageLogSettings {
 
 	/**
@@ -21,6 +23,8 @@ export class DamageLogSettings {
 
 		Hooks.on("renderSettingsConfig", this._onRenderSettingsConfig.bind(this));
 
+		const debouncedReload = debounce(() => window.location.reload(), 500);
+
 		game.settings.register("damage-log", "useTab", {
 			name: game.i18n.localize("damage-log.settings.use-tab"),
 			hint: game.i18n.localize("damage-log.settings.use-tab-hint"),
@@ -28,7 +32,7 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: true,
-			onChange: debounce(() => window.location.reload(), 500)
+			onChange: debouncedReload
 		});
 
 		game.settings.register("damage-log", "allowPlayerView", {
@@ -37,14 +41,14 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: false,
-			onChange: debounce(() => window.location.reload(), 500)
+			onChange: debouncedReload
 		});
 
 		const permissionChoices = {};
-		permissionChoices[CONST.ENTITY_PERMISSIONS.NONE] = game.i18n.localize("damage-log.settings.none");
-		permissionChoices[CONST.ENTITY_PERMISSIONS.LIMITED] = game.i18n.localize("damage-log.settings.limited");
-		permissionChoices[CONST.ENTITY_PERMISSIONS.OBSERVER] = game.i18n.localize("damage-log.settings.observer");
-		permissionChoices[CONST.ENTITY_PERMISSIONS.OWNER] = game.i18n.localize("damage-log.settings.owner");
+		permissionChoices[Util.PERMISSION_CONSTS.NONE] = game.i18n.localize("damage-log.settings.none");
+		permissionChoices[Util.PERMISSION_CONSTS.LIMITED] = game.i18n.localize("damage-log.settings.limited");
+		permissionChoices[Util.PERMISSION_CONSTS.OBSERVER] = game.i18n.localize("damage-log.settings.observer");
+		permissionChoices[Util.PERMISSION_CONSTS.OWNER] = game.i18n.localize("damage-log.settings.owner");
 
 		game.settings.register("damage-log", "minPlayerPermission", {
 			name: game.i18n.localize("damage-log.settings.min-player-permission"),
@@ -53,8 +57,8 @@ export class DamageLogSettings {
 			config: true,
 			type: Number,
 			choices: permissionChoices,
-			default: CONST.ENTITY_PERMISSIONS.OWNER,
-			onChange: debounce(() => window.location.reload(), 500)
+			default: Util.PERMISSION_CONSTS.OWNER,
+			onChange: debouncedReload
 		});
 
 		game.settings.register("damage-log", "allowPlayerUndo", {
@@ -74,7 +78,7 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: false,
-			onChange: () => window.location.reload()
+			onChange: debouncedReload
 		});
 
 		game.settings.register("damage-log", "hideHealingInLimitedInfo", {
@@ -84,7 +88,7 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: false,
-			onChange: () => window.location.reload()
+			onChange: debouncedReload
 		});
 
 		game.settings.register("damage-log", "clampToMax", {

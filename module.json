@@ -1,13 +1,18 @@
 {
+	"id": "damage-log",
 	"name": "damage-log",
+	"type": "module",
 	"title": "Damage Log",
 	"description": "Displayes damage and healing to tokens in a separate chatlog tab.",
 	"version": "This is auto replaced",
 	"library": false,
 	"manifestPlusVersion": "1.2.0",
+	"compatibility": {
+		"minimum": "0.8.6",
+		"verified": "10"
+	},
 	"minimumCoreVersion": "0.8.6",
-	"compatibleCoreVersion": "9",
-	"author": "Alan Davies",
+	"compatibleCoreVersion": "10",
 	"authors": [
 		{
 			"name": "Alan Davies",
@@ -15,14 +20,18 @@
 			"ko-fi": "cs96and"
 		}
 	],
+	"author": "Alan Davies",
 	"dependencies": [
 		{
-		  "name": "lib-wrapper"
+			"id": "lib-wrapper",
+			"name": "lib-wrapper",
+			"type": "module"
 		}
 	  ],
 	"esmodules": [
 		"scripts/main.js",
-		"scripts/settings.js"
+		"scripts/settings.js",
+		"scripts/util.js"
 	],
 	"scripts": [],
 	"styles": [
