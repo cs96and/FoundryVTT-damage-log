@@ -49,5 +49,6 @@
 	"damage-log.error.scene-id-missing": "Damage Log | Scene ID missing from damage log",
 	"damage-log.error.scene-deleted": "Damage Log | Scene '{scene}' no longer exists",
 	"damage-log.error.token-id-missing": "Damage Log | Token ID missing from damage log",
-	"damage-log.error.token-deleted": "Damage Log | Token '{token}' no longer exists"
+	"damage-log.error.token-deleted": "Damage Log | Token '{token}' no longer exists",
+	"damage-log.error.no-undo-user": "Damage Log | Cannot {undo} {damage}.  Neither {user}, nor any GM is connected"
 }

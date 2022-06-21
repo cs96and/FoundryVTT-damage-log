@@ -584,6 +584,20 @@ class DamageLog {
 		}
 
 		const modifier = li.classList.contains("reverted") ? -1 : 1;
+
+		// Check the user that created the message is connected, or there is a GM is connected.
+		if (!message.user.active) {
+			const activGMs = game.users.filter(u => u.isGM && u.active);
+			if (!activGMs || (0 === activGMs.length)) {
+				const messageFlags = {
+					undo: ((modifier > 0) ? "undo" : "redo"),
+					damage: li.classList.contains("healing") ? "healing" : "damage",
+					user: message.user.name
+				};
+				ui.notifications.error(game.i18n.format("damage-log.error.no-undo-user", messageFlags));
+			}
+		}
+
 		const actorData = Util.getDocumentData(token.actor);
 		const systemData = Util.getSystemData(token.actor);
 
