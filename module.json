@@ -30,6 +30,7 @@
 	  ],
 	"esmodules": [
 		"scripts/main.js",
+		"scripts/migration.js",
 		"scripts/settings.js",
 		"scripts/util.js"
 	],

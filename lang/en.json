@@ -15,8 +15,9 @@
 	"damage-log.diff": "Diff",
 
 	"damage-log.default.hp-name" : "HP",
-	"damage-log.age-of-sigmar-soulbound.hp-name" : "Toughness",
-	"damage-log.swade.hp-name" : "Wounds",
+	"damage-log.default.temp-name" : "Temp",
+	"damage-log.age-of-sigmar-soulbound.toughness-name" : "Toughness",
+	"damage-log.swade.wounds-name" : "Wounds",
 	"damage-log.swade.fatigue-name" : "Fatigue",
 	"damage-log.swade.bennies-name" : "Bennies",
 

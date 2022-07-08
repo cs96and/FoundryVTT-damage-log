@@ -10,6 +10,7 @@
  * https://mit-license.org/
  */
 
+import { DamageLogMigration } from "./migration.js";
 import { DamageLogSettings } from "./settings.js";
 import { Util } from "./util.js";
 
@@ -19,49 +20,57 @@ class DamageLog {
 	 * Location of HP attributes in D&D-like systems.
 	 */
 	static DND_ATTRIBUTES = {
-		value: "attributes.hp.value",
-		min: "attributes.hp.min",
-		max: "attributes.hp.max",
-		tempMax: "attributes.hp.tempMax",
-		temp: "attributes.hp.temp"
+		hp: {
+			value: "attributes.hp.value",
+			min: "attributes.hp.min",
+			max: "attributes.hp.max",
+			tempMax: "attributes.hp.tempMax",
+		},
+		temp: {
+			value: "attributes.hp.temp"
+		}
 	};
 
 	/**
 	 * Location of HP attributes for supported systems.
 	 */
-	static SYSTEMS = {
+	static SYSTEM_CONFIGS = {
 		dnd5e: DamageLog.DND_ATTRIBUTES,
 		D35E: DamageLog.DND_ATTRIBUTES,
 		pf1: DamageLog.DND_ATTRIBUTES,
 		pf2e: DamageLog.DND_ATTRIBUTES,
 		swade: {
-			invert: true,
-			value: "wounds.value",
-			min: "wounds.min",
-			max: "wounds.max",
-			others: {
-				bennies: {
-					invert: false,
-					value: "bennies.value",
-					min: "bennies.min",
-					max: "bennies.max"
-				},
-				fatigue: {
-					invert: true,
-					value: "fatigue.value",
-					min: "fatigue.min",
-					max: "fatigue.max"
-				},
+			wounds: {
+				invert: true,
+				value: "wounds.value",
+				min: "wounds.min",
+				max: "wounds.max"
+			},
+			fatigue: {
+				invert: true,
+				value: "fatigue.value",
+				min: "fatigue.min",
+				max: "fatigue.max"
+			},
+			bennies: {
+				invert: false,
+				value: "bennies.value",
+				min: "bennies.min",
+				max: "bennies.max"
 			}
 		},
 		worldbuilding: {
-			value: "health.value",
-			min: "health.min",
-			max: "health.max"
+			hp: {
+				value: "health.value",
+				min: "health.min",
+				max: "health.max"
+			}
 		},
 		"age-of-sigmar-soulbound": {
-			value: "combat.health.toughness.value",
-			max: "combat.health.toughness.max"
+			toughness: {
+				value: "combat.health.toughness.value",
+				max: "combat.health.toughness.max"
+			}
 		}
 	};
 
@@ -74,7 +83,7 @@ class DamageLog {
 	 */
 	constructor() {
 		this.settings = new DamageLogSettings();
-		this.system = DamageLog.SYSTEMS[game.system.id];
+		this.systemConfig = DamageLog.SYSTEM_CONFIGS[game.system.id];
 		this.prevFlags = null;
 		this.tabs = null;
 		this.currentTab = "chat";
@@ -82,7 +91,7 @@ class DamageLog {
 		this.damageType = "";
 		this.prevScrollTop = 0;
 
-		if (!this.system) {
+		if (!this.systemConfig) {
 			Hooks.once("ready", () => ui.notifications.error(game.i18n.format("damage-log.error.system-not-supported", { systemId: game.system.id })));
 			throw false;
 		}
@@ -406,48 +415,27 @@ class DamageLog {
 		const actorSystemData = Util.getSystemData(actor);
 		const systemUpdates = (Util.isV10 ? updateData.system : updateData.data);
 
-		const oldValue = getAttrib(actorSystemData, this.system.value) ?? 0;
-		const newValue = getAttrib(systemUpdates, this.system.value) ?? oldValue;
+		const flags = {};
 
-		const oldTemp = getAttrib(actorSystemData, this.system.temp) ?? 0;
-		const newTemp = getAttrib(systemUpdates, this.system.temp) ?? oldTemp;
+		for (const [ id, config ] of Object.entries(this.systemConfig)) {
+			let localizationId = `damage-log.${game.system.id}.${id}-name`;
+			if (!game.i18n.has(localizationId))
+				localizationId = `damage-log.default.${id}-name`;
+			const name = (game.i18n.has(localizationId) ? game.i18n.localize(localizationId) : id);
 
-		let hpLocalizationName = `damage-log.${game.system.id}.hp-name`;
-		if (!game.i18n.has(hpLocalizationName))
-			hpLocalizationName = "damage-log.default.hp-name";
-
-		const flags = {
-			speaker,
-			value: {
-				name: game.i18n.localize(hpLocalizationName),
-				old: oldValue, new: newValue, diff: newValue - oldValue
-			},
-			temp: {
-				old: oldTemp, new: newTemp, diff: newTemp - oldTemp
-			}
-		};
-
-		if (this.system.others) {
-			for (const [ otherId, otherConfig ] of Object.entries(this.system.others)) {
-				const otherLocalizationName = `damage-log.${game.system.id}.${otherId}-name`;
-				const otherName = (game.i18n.has(otherLocalizationName) ? game.i18n.localize(otherLocalizationName) : otherId);
-
-				const oldOther = getAttrib(actorSystemData, otherConfig.value) ?? 0;
-				const newOther = getAttrib(systemUpdates, otherConfig.value) ?? oldOther;
-				const otherDiff = newOther - oldOther;
-		
-				if (0 != otherDiff) {
-					flags.others ??= [];
-					flags.others.push({
-						id: otherId,
-						name: otherName,
-						old: oldOther, new: newOther, diff: otherDiff
-					});
-				}
+			const oldValue = getAttrib(actorSystemData, config.value) ?? 0;
+			const newValue = getAttrib(systemUpdates, config.value) ?? oldValue;
+			const diff = newValue - oldValue;
+	
+			if (0 != diff) {
+				flags.changes ??= [];
+				flags.changes.push({ id, name, old: oldValue, new: newValue, diff });
 			}
 		}
 
-		if ((0 === flags.temp.diff) && (0 === flags.value.diff) && !flags.others) return;
+		if (Util.isEmpty(flags)) return;
+
+		flags.speaker = speaker;
 
 		// There is a bug in Foundry 0.8.8 that causes preUpdateActor to fire multiple times.
 		// Ignore duplicate updates.
@@ -475,11 +463,9 @@ class DamageLog {
 				damageType: this.damageType
 			};
 
-			let content = ''
-			if (0 != flags.value.diff)
-				content += `${flags.value.name}: ${flags.value.old} -&gt; ${flags.value.new} `;
-			if (0 != flags.temp.diff)
-				content += `Temp: ${flags.temp.old} -&gt; ${flags.temp.new}`;
+			const content = flags.changes.reduce((prev, curr) => {
+				return prev + `${curr.id}: ${curr.old} -&gt; ${curr.new} `
+			}, '');
 
 			const chatData = {
 				flags: { "damage-log": flags },
@@ -516,7 +502,7 @@ class DamageLog {
 			if (messageData.user.active ? (messageData.user.id === game.user.id) : game.user.isGM)
 			{
 				// Changing the message flags will cause the renderChatMessage hook to fire
-				if (flags.revert > 0)
+				if (flags.revert)
 					message.setFlag("damage-log", "revert", true);
 				else
 					message.unsetFlag("damage-log", "revert");
@@ -637,7 +623,6 @@ class DamageLog {
 			}
 		}
 
-		const actorData = Util.getDocumentData(token.actor);
 		const systemData = Util.getSystemData(token.actor);
 
 		// Get a nested property of actorData.data using a string.
@@ -648,67 +633,42 @@ class DamageLog {
 		const update = {};
 		const updatePath = (Util.isV10 ? "system" : "data");
 
-		if (this.system.value) {
-			let newValue = (getActorAttrib(this.system.value) ?? 0) - (flags.value.diff * modifier);
+		for (const change of flags.changes) {
+			const config = this.systemConfig[change.id];
+			if (!config) continue;
+
+			let newValue = getActorAttrib(config.value) - (change.diff * modifier);
 
 			if (this.settings.clampToMin) {
-				const minHp = getActorAttrib(this.system.min) ?? 0;
-				newValue = Math.max(newValue, minHp);
+				const min = getActorAttrib(config.min) ?? 0;
+				newValue = Math.max(newValue, min);
 			}
 
-			if (this.settings.clampToMax && this.system.max) {
-				const maxHp = getActorAttrib(this.system.max) + (getActorAttrib(this.system.tempMax) ?? 0);
-				newValue = Math.min(newValue, maxHp);
+			if (this.settings.clampToMax && config.max) {
+				const max = getActorAttrib(config.max) + (getActorAttrib(config.tempMax) ?? 0);
+				newValue = Math.min(newValue, max);
 			}
 
-			update[`${updatePath}.${this.system.value}`] = newValue;
+			update[`${updatePath}.${config.value}`] = newValue;
 		}
 
-		if (this.system.temp) {
-			const newTemp = getActorAttrib(this.system.temp) - (flags.temp.diff * modifier);
-			update[`${updatePath}.${this.system.temp}`] = Math.max(newTemp, 0);
-		}
-
-		if (flags.others) {
-			for (const otherData of flags.others) {
-				const otherConfig = this.system.others?.[otherData.id];
-				if (!otherConfig) continue;
-
-				let newOtherValue = getActorAttrib(`${otherData.id}.value`) - (otherData.diff * modifier);
-
-				if (this.settings.clampToMin) {
-					const minOther = getActorAttrib(otherConfig.min) ?? 0;
-					newOtherValue = Math.max(newOtherValue, minOther);
-				}
-
-				if (this.settings.clampToMax) {
-					const maxOther = getActorAttrib(otherConfig.max) ?? 0;
-					newOtherValue = Math.min(newOtherValue, maxOther);
-				}
-
-				update[`${updatePath}.${otherConfig.value}`] = newOtherValue;
-			}
-		}
-
-		token.actor.update(update, { "damage-log": { revert: modifier, messageId: message.id } });
+		token.actor.update(update, { "damage-log": { revert: modifier > 0, messageId: message.id } });
 	}
 
 	/**
 	 * Returns an object containing data about the healing/damage in the flags.
 	 */
 	_analyseFlags(flags) {
-		// Sum up all the diffs in the "others" section of the flags.
-		// If the "invert" paramater of the section does not match the master invert flag, then subtract the diff instead of adding.
-		const othersDiff = (flags.others) ? flags.others.reduce((prev, curr) => { 
-			if (!!this.system.others?.[curr.id]?.invert === !!this.system.invert)
-				return prev + curr.diff;
-			else
+		// Sum up all the diffs in the changes section of the flags.
+		// If the "invert" paramater is true, subtract the diff rather than adding.
+		const totalDiff = flags.changes.reduce((prev, curr) => { 
+			if (this.systemConfig[curr.id]?.invert === true)
 				return prev - curr.diff;
-		}, 0) : 0;
+			else
+				return prev + curr.diff;
+		}, 0);
 
-		const totalDiff = flags.temp.diff + flags.value.diff + othersDiff;
-		const isHealing = this.system.invert ? (totalDiff < 0) : (totalDiff > 0);
-		return { isHealing, totalDiff } ;
+		return { isHealing: totalDiff > 0, totalDiff } ;
 	}
 }
 
@@ -719,39 +679,12 @@ Hooks.once("init", () => {
 	game.damageLog = new DamageLog();
 
 	/**
-	 * Ready handling.  Convert damage log messages from to new flag format.
+	 * Ready handling.  Convert damage log messages flag to new format.
 	 */
 	Hooks.once("ready", async () => {
-
 		if (!game.modules.get('lib-wrapper')?.active && game.user.isGM)
 			ui.notifications.error("Damage Log requires the 'libWrapper' module. Please install and activate it.", { permanent: true });
 
-		if (game.user.isGM && (game.damageLog.settings.dbVersion < 1))
-		{
-			console.log("Damage Log | Updating message database");
-
-			let haveNotified = false;
-			for (const message of game.messages) {
-				const oldFlags = Util.getDocumentData(message)?.flags?.damageLog;
-				if (oldFlags) {
-					if (!haveNotified) {
-						ui.notifications.warn("Damage Log | Updating message database, please do not close the game", { permanent: true });
-						haveNotified = true;
-					}
-					console.log(`Damage Log | Updating flags for message ${message.id}`);
-					await message.update({
-						"flags.damage-log": oldFlags,
-						"flags.-=damageLog": null,
-						"content": null
-					});
-				}
-			}
-
-			game.damageLog.settings.dbVersion = 1;
-
-			console.log("Damage Log | Finished updating message database");
-			if (haveNotified)
-				ui.notifications.info("Damage Log | Finished updating message database", { permanent: true });
-		}
+		await DamageLogMigration.migrateFlags();
 	});
 });

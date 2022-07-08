@@ -115,7 +115,7 @@ export class DamageLogSettings {
 			scope: 'world',
 			config: false,
 			type: Number,
-			default: 0
+			default: 2
 		});
 
 		// Cache the settings in class properties for quick lookup.
