@@ -34,6 +34,26 @@ class DamageLog {
 		D35E: DamageLog.DND_ATTRIBUTES,
 		pf1: DamageLog.DND_ATTRIBUTES,
 		pf2e: DamageLog.DND_ATTRIBUTES,
+		swade: {
+			invert: true,
+			value: "wounds.value",
+			min: "wounds.min",
+			max: "wounds.max",
+			others: {
+				bennies: {
+					invert: false,
+					value: "bennies.value",
+					min: "bennies.min",
+					max: "bennies.max"
+				},
+				fatigue: {
+					invert: true,
+					value: "fatigue.value",
+					min: "fatigue.min",
+					max: "fatigue.max"
+				},
+			}
+		},
 		worldbuilding: {
 			value: "health.value",
 			min: "health.min",
@@ -236,7 +256,7 @@ class DamageLog {
 	/**
 	 *	Disable the chat notification on damage log messages.
 	 */
-	 _onChatLogNotify(wrapper, message, ...args) {
+	_onChatLogNotify(wrapper, message, ...args) {
 		if (Util.getDocumentData(message)?.flags["damage-log"])
 			return;
 
@@ -392,9 +412,9 @@ class DamageLog {
 		const oldTemp = getAttrib(actorSystemData, this.system.temp) ?? 0;
 		const newTemp = getAttrib(systemUpdates, this.system.temp) ?? oldTemp;
 
-		let hpLocalizationName = `damage-log.hp-name.${game.system.id}`;
+		let hpLocalizationName = `damage-log.${game.system.id}.hp-name`;
 		if (!game.i18n.has(hpLocalizationName))
-			hpLocalizationName = "damage-log.hp-name.default";
+			hpLocalizationName = "damage-log.default.hp-name";
 
 		const flags = {
 			speaker,
@@ -407,7 +427,27 @@ class DamageLog {
 			}
 		};
 
-		if ((0 === flags.temp.diff) && (0 === flags.value.diff)) return;
+		if (this.system.others) {
+			for (const [ otherId, otherConfig ] of Object.entries(this.system.others)) {
+				const otherLocalizationName = `damage-log.${game.system.id}.${otherId}-name`;
+				const otherName = (game.i18n.has(otherLocalizationName) ? game.i18n.localize(otherLocalizationName) : otherId);
+
+				const oldOther = getAttrib(actorSystemData, otherConfig.value) ?? 0;
+				const newOther = getAttrib(systemUpdates, otherConfig.value) ?? oldOther;
+				const otherDiff = newOther - oldOther;
+		
+				if (0 != otherDiff) {
+					flags.others ??= [];
+					flags.others.push({
+						id: otherId,
+						name: otherName,
+						old: oldOther, new: newOther, diff: otherDiff
+					});
+				}
+			}
+		}
+
+		if ((0 === flags.temp.diff) && (0 === flags.value.diff) && !flags.others) return;
 
 		// There is a bug in Foundry 0.8.8 that causes preUpdateActor to fire multiple times.
 		// Ignore duplicate updates.
@@ -428,8 +468,7 @@ class DamageLog {
 					flags.preventRollsNotification = true;
 			}
 
-			const totalDiff = flags.temp.diff + flags.value.diff;
-			const isHealing = (totalDiff >= 0);
+			const { isHealing, totalDiff } = this._analyseFlags(flags);
 
 			const flavorOptions = {
 				diff: Math.abs(totalDiff),
@@ -445,7 +484,7 @@ class DamageLog {
 			const chatData = {
 				flags: { "damage-log": flags },
 				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-				flavor: game.i18n.format((totalDiff > 0 ? "damage-log.healing-flavor-text" : "damage-log.damage-flavor-text"), flavorOptions),
+				flavor: game.i18n.format((isHealing ? "damage-log.healing-flavor-text" : "damage-log.damage-flavor-text"), flavorOptions),
 				content,
 				speaker
 			};
@@ -491,20 +530,19 @@ class DamageLog {
 	 */
 	async _onRenderChatMessage(message, html, data) {
 		const messageData = Util.getDocumentData(message);
-		const hp = messageData?.flags["damage-log"];
-		if (!hp) return;
+		const flags = messageData?.flags["damage-log"];
+		if (!flags) return;
 
 		const classList = html[0].classList;
 
 		classList.add("damage-log");
 
-		if (hp.revert)
+		if (flags.revert)
 			classList.add("reverted");
 		else
 			classList.remove("reverted");
 
-		const isHealing = ((hp.temp.diff + hp.value.diff) >= 0);
-		if (isHealing)
+		if (this._analyseFlags(flags).isHealing)
 			classList.add("healing");
 		else
 			classList.add("damage");
@@ -524,7 +562,7 @@ class DamageLog {
 			new Promise(r => {
 				// If the rolls notification wasn't showing before the message was created, then hide it again.
 				// TODO - this currently only works for the user that modified the token.
-				if (hp.preventRollsNotification)
+				if (flags.preventRollsNotification)
 					document.getElementById("rollsNotification").style.display = "none";
 				classList.remove("hardHide");
 				classList.add("hard-show")
@@ -536,7 +574,7 @@ class DamageLog {
 		const content = html[0].querySelector("div.message-content");
 
 		// The current content is just some placeholder text.  Completely replace it with the HTML table, or nothing if the user is not allowed to see it.
-		content.innerHTML = (canViewTable ? await renderTemplate(DamageLog.TABLE_TEMPLATE, hp) : "");
+		content.innerHTML = (canViewTable ? await renderTemplate(DamageLog.TABLE_TEMPLATE, flags) : "");
 	}
 
 	/**
@@ -631,7 +669,46 @@ class DamageLog {
 			update[`${updatePath}.${this.system.temp}`] = Math.max(newTemp, 0);
 		}
 
+		if (flags.others) {
+			for (const otherData of flags.others) {
+				const otherConfig = this.system.others?.[otherData.id];
+				if (!otherConfig) continue;
+
+				let newOtherValue = getActorAttrib(`${otherData.id}.value`) - (otherData.diff * modifier);
+
+				if (this.settings.clampToMin) {
+					const minOther = getActorAttrib(otherConfig.min) ?? 0;
+					newOtherValue = Math.max(newOtherValue, minOther);
+				}
+
+				if (this.settings.clampToMax) {
+					const maxOther = getActorAttrib(otherConfig.max) ?? 0;
+					newOtherValue = Math.min(newOtherValue, maxOther);
+				}
+
+				update[`${updatePath}.${otherConfig.value}`] = newOtherValue;
+			}
+		}
+
 		token.actor.update(update, { "damage-log": { revert: modifier, messageId: message.id } });
+	}
+
+	/**
+	 * Returns an object containing data about the healing/damage in the flags.
+	 */
+	_analyseFlags(flags) {
+		// Sum up all the diffs in the "others" section of the flags.
+		// If the "invert" paramater of the section does not match the master invert flag, then subtract the diff instead of adding.
+		const othersDiff = (flags.others) ? flags.others.reduce((prev, curr) => { 
+			if (!!this.system.others?.[curr.id]?.invert === !!this.system.invert)
+				return prev + curr.diff;
+			else
+				return prev - curr.diff;
+		}, 0) : 0;
+
+		const totalDiff = flags.temp.diff + flags.value.diff + othersDiff;
+		const isHealing = this.system.invert ? (totalDiff < 0) : (totalDiff > 0);
+		return { isHealing, totalDiff } ;
 	}
 }
 

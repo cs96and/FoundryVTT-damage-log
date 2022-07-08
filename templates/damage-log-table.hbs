@@ -18,7 +18,7 @@
         <th class="num">{{localize "damage-log.new"}}</th>
     </tr>
     {{#with temp}}
-    {{#if diff }}
+    {{#if diff}}
     <tr>
         <td>Temp</td>
         <td class="num">{{old}}</td>
@@ -28,7 +28,7 @@
     {{/if}}
     {{/with}}
     {{#with value}}
-    {{#if diff }}
+    {{#if diff}}
     <tr>
         <td>{{name}}</td>
         <td class="num">{{old}}</td>
@@ -37,4 +37,14 @@
     </tr>
     {{/if}}
     {{/with}}
+    {{#each others}}
+    {{#if diff}}
+    <tr>
+        <td>{{name}}</td>
+        <td class="num">{{old}}</td>
+        <td class="num">{{numberFormat diff sign=true}}</td>
+        <td class="num">{{new}}</td>
+    </tr>
+    {{/if}}
+    {{/each}}
 </table>

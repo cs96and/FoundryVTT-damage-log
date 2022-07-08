@@ -45,12 +45,13 @@
 		}
 	],
 	"system": [
-		"dnd5e",
+		"age-of-sigmar-soulbound",
 		"D35E",
+		"dnd5e",
+		"swade",
 		"pf1",
 		"pf2e",
-		"worldbuilding",
-		"age-of-sigmar-soulbound"
+		"worldbuilding"
 	],
 	"url": "This is auto replaced",
 	"manifest": "This is auto replaced",

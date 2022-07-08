@@ -14,8 +14,11 @@
 	"damage-log.new": "New",
 	"damage-log.diff": "Diff",
 
-	"damage-log.hp-name.default" : "HP",
-	"damage-log.hp-name.age-of-sigmar-soulbound" : "Toughness",
+	"damage-log.default.hp-name" : "HP",
+	"damage-log.age-of-sigmar-soulbound.hp-name" : "Toughness",
+	"damage-log.swade.hp-name" : "Wounds",
+	"damage-log.swade.fatigue-name" : "Fatigue",
+	"damage-log.swade.bennies-name" : "Bennies",
 
 	"damage-log.settings.use-tab": "Use separate damage log tab",
 	"damage-log.settings.use-tab-hint": "Use a separate tab for damage logs.  If this is unchecked, damage logs will be sent to the default chatlog.",
