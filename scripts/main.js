@@ -473,7 +473,8 @@ class DamageLog {
 
 			// If the user that created the message is connected, let their client update the message.
 			// Otherwise let the GM do it.
-			if (message.user.active ? (message.user.id === game.user.id) : game.user.isGM)
+			const messageData = Util.getDocumentData(message);
+			if (messageData.user.active ? (messageData.user.id === game.user.id) : game.user.isGM)
 			{
 				// Changing the message flags will cause the renderChatMessage hook to fire
 				if (flags.revert > 0)
@@ -586,13 +587,13 @@ class DamageLog {
 		const modifier = li.classList.contains("reverted") ? -1 : 1;
 
 		// Check the user that created the message is connected, or there is a GM is connected.
-		if (!message.user.active) {
+		if (!messageData.user.active) {
 			const activGMs = game.users.filter(u => u.isGM && u.active);
 			if (!activGMs || (0 === activGMs.length)) {
 				const messageFlags = {
 					undo: ((modifier > 0) ? "undo" : "redo"),
 					damage: li.classList.contains("healing") ? "healing" : "damage",
-					user: message.user.name
+					user: messageData.user.name
 				};
 				ui.notifications.error(game.i18n.format("damage-log.error.no-undo-user", messageFlags));
 			}
