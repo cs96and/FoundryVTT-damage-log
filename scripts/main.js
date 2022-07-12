@@ -59,6 +59,16 @@ class DamageLog {
 				max: "bennies.max"
 			}
 		},
+		tormenta20: {
+			pv: {
+				value: "attributes.pv.value",
+				min: "attributes.pv.min",
+				max: "attributes.pv.max",
+			},
+			temp: {
+				value: "attributes.pv.temp"
+			}
+		},
 		worldbuilding: {
 			hp: {
 				value: "health.value",
