@@ -29,7 +29,7 @@
 		}
 	  ],
 	"esmodules": [
-		"scripts/main.js",
+		"scripts/damage-log.js",
 		"scripts/migration.js",
 		"scripts/settings.js",
 		"scripts/util.js"
