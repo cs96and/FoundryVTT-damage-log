@@ -538,7 +538,8 @@ class DamageLog {
 		else
 			classList.remove("reverted");
 
-		if (this._analyseFlags(flags).isHealing)
+		const isHealing = this._analyseFlags(flags).isHealing;
+		if (isHealing)
 			classList.add("healing");
 		else
 			classList.add("damage");
