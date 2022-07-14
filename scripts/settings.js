@@ -149,6 +149,8 @@ export class DamageLogSettings {
 	 * Enable / disable interaction with various settings, depending on whether "Allow Player View" is enabled.
 	 */
 	_onRenderSettingsConfig(settingsConfig, html, user) {
+		if (!game.user.isGM) return;
+
 		const formGroups = html[0].querySelectorAll('div.form-group');
 
 		// Disable the player-centric controls if allowPlayerView is disabled.
