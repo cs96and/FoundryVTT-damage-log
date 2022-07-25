@@ -13,24 +13,9 @@
 import { DamageLogMigration } from "./migration.js";
 import { DamageLogSettings } from "./settings.js";
 import { Util } from "./util.js";
+import { SupportedConfigs } from "./supported-configs.js";
 
 class DamageLog {
-
-	/**
-	 * Location of HP attributes in D&D-like systems.
-	 */
-	static DND_ATTRIBUTES = {
-		hp: {
-			value: "attributes.hp.value",
-			min: "attributes.hp.min",
-			max: "attributes.hp.max",
-			tempMax: "attributes.hp.tempMax",
-		},
-		temp: {
-			value: "attributes.hp.temp"
-		}
-	};
-
 	/**
 	 * Location of HP attributes for supported systems.
 	 */
@@ -81,7 +66,7 @@ class DamageLog {
 				value: "combat.health.toughness.value",
 				max: "combat.health.toughness.max"
 			}
-		}
+		},
 	};
 
 	static TABS_TEMPLATE = "modules/damage-log/templates/damage-log-tabs.hbs";
@@ -93,7 +78,7 @@ class DamageLog {
 	 */
 	constructor() {
 		this.settings = new DamageLogSettings();
-		this.systemConfig = DamageLog.SYSTEM_CONFIGS[game.system.id];
+		this.systemConfig = SupportedConfigs.CONFIGS.get(game.system.id);
 		this.prevFlags = null;
 		this.tabs = null;
 		this.currentTab = "chat";
@@ -427,7 +412,7 @@ class DamageLog {
 
 		const flags = {};
 
-		for (const [ id, config ] of Object.entries(this.systemConfig)) {
+		for (const [ id, config ] of this.systemConfig.entries()) {
 			let localizationId = `damage-log.${game.system.id}.${id}-name`;
 			if (!game.i18n.has(localizationId))
 				localizationId = `damage-log.default.${id}-name`;
@@ -645,7 +630,7 @@ class DamageLog {
 		const updatePath = (Util.isV10 ? "system" : "data");
 
 		for (const change of flags.changes) {
-			const config = this.systemConfig[change.id];
+			const config = this.systemConfig.get(change.id);
 			if (!config) continue;
 
 			let newValue = getActorAttrib(config.value) - (change.diff * modifier);
@@ -673,7 +658,7 @@ class DamageLog {
 		// Sum up all the diffs in the changes section of the flags.
 		// If the "invert" paramater is true, subtract the diff rather than adding.
 		const totalDiff = flags.changes.reduce((prev, curr) => { 
-			if (this.systemConfig[curr.id]?.invert === true)
+			if (this.systemConfig.get(curr.id)?.invert === true)
 				return prev - curr.diff;
 			else
 				return prev + curr.diff;
