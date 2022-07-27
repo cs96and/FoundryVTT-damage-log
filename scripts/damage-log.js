@@ -98,6 +98,7 @@ class DamageLog {
 		this.tabs = null;
 		this.currentTab = "chat";
 		this.hasTabbedChatlog = !!game.modules.get("tabbed-chatlog")?.active;
+		this.hasPf2eDorakoUi = !!game.modules.get("pf2e-dorako-ui")?.active;
 		this.damageType = "";
 		this.prevScrollTop = 0;
 
@@ -570,8 +571,11 @@ class DamageLog {
 
 		const content = html[0].querySelector("div.message-content");
 
+		// Dorako UI moves the flavor text into the message content.  Extract it so we don't overwrite it with the table.
+		const flavorText = (this.hasPf2eDorakoUi) ? content.querySelector("span.flavor-text")?.outerHTML ?? "" : "";
+
 		// The current content is just some placeholder text.  Completely replace it with the HTML table, or nothing if the user is not allowed to see it.
-		content.innerHTML = (canViewTable ? await renderTemplate(DamageLog.TABLE_TEMPLATE, flags) : "");
+		content.innerHTML = flavorText + (canViewTable ? await renderTemplate(DamageLog.TABLE_TEMPLATE, flags) : "");
 	}
 
 	/**
