@@ -27,7 +27,32 @@
 			"name": "lib-wrapper",
 			"type": "module"
 		}
-	  ],
+	],
+	"system": [
+		"age-of-sigmar-soulbound",
+		"D35E",
+		"dnd5e",
+		"swade",
+		"tormenta20",
+		"pf1",
+		"pf2e",
+		"worldbuilding"
+	],
+	"relationships": {
+		"requires": [
+			{	"id": "lib-wrapper", "type": "module" }
+		],
+		"systems" : [
+			{ "id": "age-of-sigmar-soulbound", "type": "system" },
+			{ "id": "D35E", "type": "system" },
+			{ "id": "dnd5e", "type": "system" },
+			{ "id": "swade", "type": "system" },
+			{ "id": "tormenta20", "type": "system" },
+			{ "id": "pf1", "type": "system" },
+			{ "id": "pf2e", "type": "system" },
+			{ "id": "worldbuilding", "type": "system" }
+		]
+	},
 	"esmodules": [
 		"scripts/damage-log.js",
 		"scripts/migration.js",
@@ -44,16 +69,6 @@
 			"name": "English",
 			"path": "lang/en.json"
 		}
-	],
-	"system": [
-		"age-of-sigmar-soulbound",
-		"D35E",
-		"dnd5e",
-		"swade",
-		"tormenta20",
-		"pf1",
-		"pf2e",
-		"worldbuilding"
 	],
 	"url": "This is auto replaced",
 	"manifest": "This is auto replaced",
