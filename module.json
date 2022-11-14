@@ -4,7 +4,7 @@
 	"type": "module",
 	"title": "Damage Log",
 	"description": "Displayes damage and healing to tokens in a separate chatlog tab.",
-	"version": "This is auto replaced",
+	"version": "#{VERSION}#",
 	"library": false,
 	"manifestPlusVersion": "1.2.0",
 	"compatibility": {
@@ -70,7 +70,7 @@
 			"path": "lang/en.json"
 		}
 	],
-	"url": "This is auto replaced",
-	"manifest": "This is auto replaced",
-	"download": "This is auto replaced"
+	"url": "#{URL}#",
+	"manifest": "#{MANIFEST}#",
+	"download": "#{DOWNLOAD}#"
 }
