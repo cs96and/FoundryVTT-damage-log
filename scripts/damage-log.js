@@ -560,8 +560,11 @@ class DamageLog {
 			new Promise(r => {
 				// If the rolls notification wasn't showing before the message was created, then hide it again.
 				// TODO - this currently only works for the user that modified the token.
-				if (flags.preventRollsNotification && document.getElementById("rollsNotification"))
-					document.getElementById("rollsNotification").style.display = "none";
+				if (flags.preventRollsNotification) {
+					const rollsNotification = document.getElementById("rollsNotification");
+					if (rollsNotification)
+						rollsNotification.style.display = "none";
+				}
 				classList.remove("hardHide");
 				classList.add("hard-show")
 				html[0].style.display = "";
