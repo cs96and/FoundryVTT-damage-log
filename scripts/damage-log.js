@@ -14,6 +14,11 @@ import { DamageLogMigration } from "./migration.js";
 import { DamageLogSettings } from "./settings.js";
 import { Util } from "./util.js";
 
+/**
+ * Initialization.  Create the DamageLog.
+ */
+Hooks.once("setup", () => game.damageLog = new DamageLog());
+
 class DamageLog {
 
 	/**
@@ -146,6 +151,14 @@ class DamageLog {
 				};
 			})
 		}
+
+		// Ready handling.  Convert damage log messages flag to new format.
+		Hooks.once("ready", async () => {
+			if (!game.modules.get('lib-wrapper')?.active && game.user.isGM)
+				ui.notifications.error("Damage Log requires the 'libWrapper' module. Please install and activate it.", { permanent: true });
+
+			await DamageLogMigration.migrateFlags();
+		});
 	}
 
 	/**
@@ -359,7 +372,7 @@ class DamageLog {
 
 	/**
 	 * Handle the "getChatLogEntryContext" hook.
-	 * This sets up the right click context menus for chat messages.
+	 * This sets up the right-click context menus for chat messages.
 	 */
 	_onGetChatLogEntryContext(html, options) {
 		const canUndo = (li) => {
@@ -690,19 +703,3 @@ class DamageLog {
 	}
 }
 
-/**
- * Initialization.  Create the DamageLog.
- */
-Hooks.once("init", () => {
-	game.damageLog = new DamageLog();
-
-	/**
-	 * Ready handling.  Convert damage log messages flag to new format.
-	 */
-	Hooks.once("ready", async () => {
-		if (!game.modules.get('lib-wrapper')?.active && game.user.isGM)
-			ui.notifications.error("Damage Log requires the 'libWrapper' module. Please install and activate it.", { permanent: true });
-
-		await DamageLogMigration.migrateFlags();
-	});
-});
