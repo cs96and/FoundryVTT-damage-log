@@ -24,6 +24,7 @@ export class DamageLogMigration {
 			{
 				// Convert from v0 -> v1
 				console.log("Damage Log | Updating message database to v1");
+				let haveNotified = false
 				for (const message of game.messages) {
 					const oldFlags = Util.getDocumentData(message)?.flags?.damageLog;
 					if (oldFlags) {
