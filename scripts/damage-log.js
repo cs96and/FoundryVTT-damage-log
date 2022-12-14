@@ -99,7 +99,6 @@ class DamageLog {
 	constructor() {
 		this.settings = new DamageLogSettings();
 		this.systemConfig = DamageLog.SYSTEM_CONFIGS[game.system.id];
-		this.prevFlags = null;
 		this.tabs = null;
 		this.currentTab = "chat";
 		this.hasTabbedChatlog = !!game.modules.get("tabbed-chatlog")?.active;
@@ -123,6 +122,7 @@ class DamageLog {
 		Hooks.on('getChatLogEntryContext', this._onGetChatLogEntryContext.bind(this));
 		Hooks.on('preUpdateActor', this._onPreUpdateActor.bind(this));
 		Hooks.on('updateActor', this._onUpdateActor.bind(this));
+		Hooks.on('preUpdateChatMessage', this._onPreUpdateChatMessage.bind(this));
 		Hooks.on('renderChatMessage', this._onRenderChatMessage.bind(this));
 
 		if (game.modules.get('lib-wrapper')?.active) {
@@ -375,11 +375,30 @@ class DamageLog {
 	 * This sets up the right-click context menus for chat messages.
 	 */
 	_onGetChatLogEntryContext(html, options) {
+		const getMessage = li => game.messages.get(li[0].dataset["messageId"]);
+
+		const resetVisibility = {
+			name: game.i18n.localize("damage-log.reset-visibility"),
+			icon: '<i class="fad fa-glasses"></i>',
+			condition: (li) => {
+				if (!game.user.isGM) return false;
+	
+				const messageData = Util.getDocumentData(getMessage(li));
+				return (typeof(messageData?.getFlag("damage-log", "public")) == "boolean");
+			},
+			callback: li => this._resetVisibility(li[0])
+		};
+
+		// Put the Reset Visibility menu item after the Reveal/Conceal options
+		let index = options.findIndex(o => o.name === "CHAT.ConcealMessage");
+		if (index >= 0) ++index;
+		options.splice(index, 0, resetVisibility);
+
 		const canUndo = (li) => {
 			if (game.user.isGM) return true;
 			if (!this.settings.allowPlayerUndo) return false;
 
-			const message = game.messages.get(li[0].dataset["messageId"]);
+			const message = getMessage(li);
 			const actor = ChatMessage.getSpeakerActor(Util.getDocumentData(message)?.speaker);
 			return actor?.testUserPermission(game.user, Util.PERMISSION_CONSTS.OWNER);
 		};
@@ -459,53 +478,35 @@ class DamageLog {
 
 		if (Util.isEmpty(flags)) return;
 
-		flags.speaker = speaker;
-
-		// There is a bug in Foundry 0.8.8 that causes preUpdateActor to fire multiple times.
-		// Ignore duplicate updates.
-		const stringifiedFlags = JSON.stringify(flags);
-		if (stringifiedFlags !== this.prevFlags)
+		if (this.settings.useTab && this.hasTabbedChatlog)
 		{
-			this.prevFlags = stringifiedFlags;
-
-			// No need to keep the speaker data in the flags, because it is also in the chatData.
-			// We only kept it in there briefly for the stringify check.
-			delete flags.speaker;
-
-			if (this.settings.useTab && this.hasTabbedChatlog)
-			{
-				// If the rolls notification is not currently showing, set a flag so we can prevent it from showing in _onRenderChatMessage.
-				const rollsNotification = document.getElementById("rollsNotification");
-				if (rollsNotification?.style.display === "none")
-					flags.preventRollsNotification = true;
-			}
-
-			const { isHealing, totalDiff } = this._analyseFlags(flags);
-
-			const flavorOptions = {
-				diff: Math.abs(totalDiff),
-				damageType: this.damageType
-			};
-
-			const content = flags.changes.reduce((prev, curr) => {
-				return prev + `${curr.id}: ${curr.old} -&gt; ${curr.new} `
-			}, '');
-
-			const chatData = {
-				flags: { "damage-log": flags },
-				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-				flavor: game.i18n.format((isHealing ? "damage-log.healing-flavor-text" : "damage-log.damage-flavor-text"), flavorOptions),
-				content,
-				speaker
-			};
-
-			// If limited player view is enabled, send messages to all players (confidential info will get stripped out in _onRenderChatMessage)
-			// Otherwise, only send the message to the players who have the correct permissions.
-			if (!this.settings.allowPlayerView || (!this.settings.showLimitedInfoToPlayers || (isHealing && this.settings.hideHealingInLimitedInfo)))
-				chatData["whisper"] = game.users.contents.filter(user => this._canUserViewActorDamage(user, actor)).map(user => user.id);
-
-			ChatMessage.create(chatData, {});
+			// If the rolls notification is not currently showing, set a flag so we can prevent it from showing in _onRenderChatMessage.
+			const rollsNotification = document.getElementById("rollsNotification");
+			if (rollsNotification?.style.display === "none")
+				flags.preventRollsNotification = true;
 		}
+
+		const { isHealing, totalDiff } = this._analyseFlags(flags);
+
+		const flavorOptions = {
+			diff: Math.abs(totalDiff),
+			damageType: this.damageType
+		};
+
+		const content = flags.changes.reduce((prev, curr) => {
+			return prev + `${curr.id}: ${curr.old} -&gt; ${curr.new} `
+		}, '');
+
+		const chatData = {
+			flags: { "damage-log": flags },
+			type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+			flavor: game.i18n.format((isHealing ? "damage-log.healing-flavor-text" : "damage-log.damage-flavor-text"), flavorOptions),
+			content,
+			speaker,
+			whisper: this._calculteWhisperData(actor, isHealing)
+		};
+
+		ChatMessage.create(chatData, {});
 	}
 
 	/**
@@ -535,6 +536,21 @@ class DamageLog {
 	}
 
 	/**
+	 * 	Handle a Damage Log chat message being made public or private.
+	 */
+	_onPreUpdateChatMessage(message, changes, options, userId) {
+		if (("whisper" in changes) && Util.getDocumentData(message)?.flags["damage-log"]) {
+			// Damage Log message is being made private or public
+
+			// Don't alter the public flag if it is being removed.
+			if (changes.flags?.["damage-log"]?.["-=public"] !== null) {
+				const isPublic = ((null == changes.whisper) || (0 === changes.whisper.length));
+				changes["flags.damage-log.public"] = isPublic;
+			}
+		}
+	}
+
+	/**
 	 * Handle the "renderChatMessage" hook.
 	 * Applies classes to the message's HTML based on the message flags.
 	 */
@@ -559,7 +575,7 @@ class DamageLog {
 			classList.add("damage");
 
 		// Work out if the user is allowed to see the damage table, and then add it to the HTML.
-		let canViewTable = game.user.isGM;
+		let canViewTable = game.user.isGM || !!flags.public
 		if (!canViewTable && this.settings.allowPlayerView) {
 			const actor = ChatMessage.getSpeakerActor(messageData?.speaker);
 			canViewTable = this._canUserViewActorDamage(game.user, actor);
@@ -595,6 +611,18 @@ class DamageLog {
 	}
 
 	/**
+	 * Calculate the array of users who can see a given actor's damage info.
+	 */
+	_calculteWhisperData(actor, isHealing) {
+		// If limited player view is enabled, send messages to all players (confidential info will get stripped out in _onRenderChatMessage)
+		// Otherwise, only send the message to the players who have the correct permissions.
+		if (!this.settings.allowPlayerView || (!this.settings.showLimitedInfoToPlayers || (isHealing && this.settings.hideHealingInLimitedInfo)))
+			return game.users.contents.filter(user => this._canUserViewActorDamage(user, actor)).map(user => user.id);
+
+		return [];
+	}
+
+	/**
 	 * Check whether a user has permission to see a given actor's damage info or not.
 	 */
 	_canUserViewActorDamage(user, actor) {
@@ -603,6 +631,20 @@ class DamageLog {
  
 		return actor?.testUserPermission(user, this.settings.minPlayerPermission);
 	};
+
+	_resetVisibility(li) {
+		const message = game.messages.get(li.dataset["messageId"]);
+		const messageData = Util.getDocumentData(message);
+		const flags = messageData.flags?.["damage-log"];
+
+		const actor = game.actors.get(messageData.speaker.actor);
+		const isHealing = flags && this._analyseFlags(flags).isHealing;
+
+		message.update({
+			whisper: this._calculteWhisperData(actor, isHealing),
+			"flags.damage-log": { "-=public": null }
+		});
+	}
 
 	/**
 	 * Undo the the damage on a given message.

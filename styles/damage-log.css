@@ -70,11 +70,9 @@ nav.damage-log-nav .item.active {
 .message.damage-log.reverted.healing {
 	background: #eaffea;
 }
-/* Hide whisper information on damage logs */
-.message.damage-log .chat-mode-indicator,
-.message.damage-log .whisper-to,
-.message.damage-log .chat-portrait-indicator,
-.message.damage-log .chat-portrait-whisper-to {
+/* Hide chat portrait whisper information on damage logs */
+.message.damage-log [class^="chat-portrait-indicator-"],
+.message.damage-log [class^="chat-portrait-whisper-to-"] {
 	display: none;
 }
 /* Hide chat portrait image next to flavor text */

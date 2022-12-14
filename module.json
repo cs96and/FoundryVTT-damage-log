@@ -8,10 +8,10 @@
 	"library": false,
 	"manifestPlusVersion": "1.2.0",
 	"compatibility": {
-		"minimum": "0.8.6",
+		"minimum": "0.8.9",
 		"verified": "10"
 	},
-	"minimumCoreVersion": "0.8.6",
+	"minimumCoreVersion": "0.8.9",
 	"compatibleCoreVersion": "10",
 	"authors": [
 		{
