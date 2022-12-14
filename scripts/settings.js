@@ -140,7 +140,7 @@ export class DamageLogSettings {
 	 * Set the db version.
 	 */
 	set dbVersion(value) {
-		return game.settings.set("damage-log", "dbVersion", value);
+		game.settings.set("damage-log", "dbVersion", value);
 	}
 
 	/**
