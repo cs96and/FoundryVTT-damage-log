@@ -31,9 +31,10 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true # Set this to false if you want to prevent updating existing releases
-        name: ${{ github.event.release.name }}
-        draft: ${{ github.event.release.unpublished }}
-        prerelease: ${{ github.event.release.prerelease }}
+        omitNameDuringUpdate: true
+        omitBodyDuringUpdate: true
+        omitDraftDuringUpdate: true
+        omitPrereleaseDuringUpdate: true
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: './module.json, ./module.zip'
         tag: ${{ github.event.release.tag_name }}
