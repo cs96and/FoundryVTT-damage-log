@@ -17,13 +17,16 @@ jobs:
       with:
         files: 'module.json'
       env:
-        VERSION: ${{github.event.release.tag_name}}
-        URL: https://github.com/${{github.repository}}
-        MANIFEST: https://github.com/${{github.repository}}/releases/latest/download/module.json
-        DOWNLOAD: https://github.com/${{github.repository}}/releases/download/${{github.event.release.tag_name}}/module.zip
+        VERSION: ${{ github.event.release.tag_name }}
+        URL: https://github.com/${{ github.repository }}
+        MANIFEST: https://github.com/${{ github.repository }}/releases/latest/download/module.json
+        DOWNLOAD: https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/module.zip
+        CHANGELOG: https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}
 
     # Create a zip file with all files required by the module to add to the release
-    - run: zip -r ./module.zip lang/ scripts/ styles/ templates/ LICENSE module.json
+    - name: Zip Files
+      id: zip_files
+      run: zip -r ./module.zip lang/ scripts/ styles/ templates/ LICENSE module.json
 
     # Create a release for this specific version
     - name: Update Release with Files
@@ -41,6 +44,7 @@ jobs:
 
     # Publish the release to FoundryVTT's package repository.
     - name: Publish Module to FoundryVTT Website
+      id: publish_to_foundry_website
       if: ${{ !github.event.release.unpublished && !github.event.release.prerelease }}
       uses: Varriount/fvtt-autopublish@v1.1.0
       with:
