@@ -46,7 +46,7 @@ jobs:
     - name: Publish Module to FoundryVTT Website
       id: publish_to_foundry_website
       if: ${{ !github.event.release.unpublished && !github.event.release.prerelease }}
-      uses: Varriount/fvtt-autopublish@v1.1.0
+      uses: Varriount/fvtt-autopublish@v1.1.1
       with:
         username: ${{ secrets.FOUNDRY_ADMIN_USERNAME }}
         password: ${{ secrets.FOUNDRY_ADMIN_PASSWORD }}
