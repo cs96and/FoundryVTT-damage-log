@@ -195,7 +195,7 @@ class DamageLog {
 		const chatLogElement = html[0].querySelector("#chat-log");
 		chatLogElement.insertAdjacentHTML("afterEnd", '<ol id="damage-log"></ol>');
 
-		// Move all the damage log messages into teh damage log tab.
+		// Move all the damage log messages into the damage log tab.
 		const damageLogElement = html[0].querySelector("#damage-log");
 		const damageMessages = chatLogElement.querySelectorAll(".message.damage-log");
 		damageLogElement.append(...damageMessages);
@@ -303,7 +303,7 @@ class DamageLog {
 		wrapper(...args);
 
 		// "this" will be a ChatLog here
-		const messages = this.element[0].querySelectorAll("#damage-log .message");
+		const messages = this.element.find(".damage-log.message");
 		for (const li of messages) {
 			const message = game.messages.get(li.dataset["messageId"]);
 			if (!message || !Util.getDocumentData(message).timestamp) continue;
