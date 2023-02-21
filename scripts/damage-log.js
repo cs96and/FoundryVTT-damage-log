@@ -44,6 +44,18 @@ class DamageLog {
 		D35E: DamageLog.DND_ATTRIBUTES,
 		pf1: DamageLog.DND_ATTRIBUTES,
 		pf2e: DamageLog.DND_ATTRIBUTES,
+		gurps: {
+			hp: {
+				value: "HP.value",
+				min: "HP.min",
+				max: "HP.max"
+			},
+			fp: {
+				value: "FP.value",
+				min: "FP.min",
+				max: "FP.max"
+			}
+		},
 		swade: {
 			wounds: {
 				invert: true,

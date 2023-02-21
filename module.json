@@ -46,6 +46,7 @@
 			{ "id": "age-of-sigmar-soulbound", "type": "system" },
 			{ "id": "D35E", "type": "system" },
 			{ "id": "dnd5e", "type": "system" },
+			{ "id": "gurps", "type": "system" },
 			{ "id": "swade", "type": "system" },
 			{ "id": "tormenta20", "type": "system" },
 			{ "id": "pf1", "type": "system" },
