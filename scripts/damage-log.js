@@ -43,7 +43,12 @@ class DamageLog {
 		dnd5e: DamageLog.DND_ATTRIBUTES,
 		D35E: DamageLog.DND_ATTRIBUTES,
 		pf1: DamageLog.DND_ATTRIBUTES,
-		pf2e: DamageLog.DND_ATTRIBUTES,
+		pf2e: mergeObject(DamageLog.DND_ATTRIBUTES, {
+			sp: {
+				value: "attributes.sp.value",
+				max: "attributes.sp.max"
+			}
+		}),
 		gurps: {
 			hp: {
 				value: "HP.value",

@@ -19,6 +19,7 @@
 	"damage-log.default.temp-name" : "Temp",
 	"damage-log.age-of-sigmar-soulbound.toughness-name" : "Toughness",
 	"damage-log.gurps.fp-name": "FP",
+	"damage-log.pf2e.sp-name": "Stamina",
 	"damage-log.swade.wounds-name" : "Wounds",
 	"damage-log.swade.fatigue-name" : "Fatigue",
 	"damage-log.swade.bennies-name" : "Bennies",
