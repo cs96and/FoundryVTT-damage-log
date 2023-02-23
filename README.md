@@ -33,6 +33,7 @@ Damage Log is current compatible with the following systems.
 * Simple Worldbuilding (`worldbuilding`)
 * Savage Worlds Adventure Edition (`swade`)
 * Tormenta 20 (`tormenta20`)
+* Toolkit13 (13th Age Compatible) (`archmage`)
 
 ## Installation
 Damage Log can be installed using the Foundry module installer.  Alternatively, you can install it using the following manifest URL...<br>
