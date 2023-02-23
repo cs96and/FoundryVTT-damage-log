@@ -23,7 +23,7 @@ Damage Log is also compatible with the [Tabbed Chatlog](https://github.com/cswen
 * Integrates with the [Tabbed Chatlog](https://github.com/cswendrowski/FoundryVTT-Tabbed-Chatlog) module.  Damage Log's extra tab will be added on to the end of Tabbed Chatlog's tabs.
 
 ## System Compatibility
-Damage Log is current compatible with the following systems.
+Damage Log is currently compatible with the following systems.
 * Age of Sigmar: Soulbound (`age-of-sigmar-soulbound`)
 * Dungeons & Dragons v3.5 (`D35E`)
 * Dungeons & Dragons 5th Edition (`dnd5e`)

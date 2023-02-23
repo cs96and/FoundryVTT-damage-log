@@ -3,7 +3,7 @@
 	"name": "damage-log",
 	"type": "module",
 	"title": "Damage Log",
-	"description": "Displayes damage and healing to tokens in a separate chatlog tab.",
+	"description": "Displays damage and healing to tokens in a separate chatlog tab.",
 	"version": "#{VERSION}#",
 	"library": false,
 	"manifestPlusVersion": "1.2.0",
