@@ -3,7 +3,7 @@
 	"name": "damage-log",
 	"type": "module",
 	"title": "Damage Log",
-	"description": "Displayes damage and healing to tokens in a separate chatlog tab.",
+	"description": "Displays damage and healing to tokens in a separate chatlog tab.",
 	"version": "#{VERSION}#",
 	"library": false,
 	"manifestPlusVersion": "1.2.0",
@@ -36,7 +36,8 @@
 		"tormenta20",
 		"pf1",
 		"pf2e",
-		"worldbuilding"
+		"worldbuilding",
+		"archmage"
 	],
 	"relationships": {
 		"requires": [
@@ -51,7 +52,8 @@
 			{ "id": "tormenta20", "type": "system" },
 			{ "id": "pf1", "type": "system" },
 			{ "id": "pf2e", "type": "system" },
-			{ "id": "worldbuilding", "type": "system" }
+			{ "id": "worldbuilding", "type": "system" },
+			{ "id": "archmage", "type": "system"}
 		]
 	},
 	"esmodules": [
@@ -69,6 +71,11 @@
 			"lang": "en",
 			"name": "English",
 			"path": "lang/en.json"
+		},
+		{
+			"lang": "de",
+			"name": "Deutsch",
+			"path": "lang/de.json"
 		}
 	],
 	"url": "#{URL}#",
