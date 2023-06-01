@@ -104,7 +104,14 @@ class DamageLog {
 				max: "combat.health.toughness.max"
 			}
 		},
-		archmage: DamageLog.DND_ATTRIBUTES
+		archmage: DamageLog.DND_ATTRIBUTES,
+		shaper: {
+			hp: {
+				value: "attributes.hp.value",
+				min: "attributes.hp.min",
+				max: "attributes.hp.max"
+			}
+		}
 	};
 
 	static TABS_TEMPLATE = "modules/damage-log/templates/damage-log-tabs.hbs";

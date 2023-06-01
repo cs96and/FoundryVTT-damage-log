@@ -37,7 +37,8 @@
 		"pf1",
 		"pf2e",
 		"worldbuilding",
-		"archmage"
+		"archmage",
+		"shaper"
 	],
 	"relationships": {
 		"requires": [
@@ -85,6 +86,10 @@
 			},
 			{
 				"id": "archmage",
+				"type": "system"
+			},
+			{
+				"id": "shaper",
 				"type": "system"
 			}
 		]
