@@ -41,7 +41,21 @@ class DamageLog {
 	 */
 	static SYSTEM_CONFIGS = {
 		dnd5e: DamageLog.DND_ATTRIBUTES,
-		D35E: DamageLog.DND_ATTRIBUTES,
+		D35E: mergeObject(DamageLog.DND_ATTRIBUTES, {
+			vigor: {
+				value: "attributes.vigor.value",
+				min: "attributes.vigor.min",
+				max: "attributes.vigor.max"
+			},
+			vigorTemp: {
+				value: "attributes.vigor.temp"
+			},
+			wounds: {
+				value: "attributes.wounds.value",
+				min: "attributes.wounds.min",
+				max: "attributes.wounds.max"
+			}
+		}),
 		pf1: DamageLog.DND_ATTRIBUTES,
 		pf2e: mergeObject(DamageLog.DND_ATTRIBUTES, {
 			sp: {
