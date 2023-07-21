@@ -32,9 +32,9 @@ Damage Log is currently compatible with the following systems.
 * Pathfinder 2nd Edition (`pf2e`)
 * Simple Worldbuilding (`worldbuilding`)
 * Savage Worlds Adventure Edition (`swade`)
+* Story Shaper (`shaper`)
 * Tormenta 20 (`tormenta20`)
 * Toolkit13 (13th Age Compatible) (`archmage`)
-* Story Shaper (`shaper`)
 
 ## Installation
 Damage Log can be installed using the Foundry module installer.  Alternatively, you can install it using the following manifest URL...<br>
