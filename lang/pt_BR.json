@@ -18,7 +18,7 @@
 	"damage-log.swade.fatigue-name": "Fatiga",
 	"damage-log.swade.bennies-name": "Bennies",
 	"damage-log.tormenta20.pv-name": "PV",
-	"damage-log.settings.use-tab": "Use a guia de registro de danos separada",
+	"damage-log.settings.use-tab": "Use a guia de log de danos separada",
 	"damage-log.settings.allow-player-view": "Permitir que os jogadores visualizem o log de danos",
 	"damage-log.settings.min-player-permission": "Permissão mínima do ator",
 	"damage-log.settings.allow-player-undo": "Permitir que os jogadores desfaçam/refaçam danos",
@@ -43,6 +43,6 @@
 	"damage-log.error.no-undo-user": "Log de Danos | Não é possível {desfazer} {dano}. Nem {user}, nem qualquer GM está conectado",
 	"damage-log.damage-log-tab-name": "Log de Danos",
 	"damage-log.healing-flavor-text": "Curou {diff} de dano",
-	"damage-log.settings.use-tab-hint": "Use uma guia separada para registros de danos. Se esta opção estiver desmarcada, os logs de danos serão enviados para o chatlog padrão.",
-	"damage-log.settings.min-player-permission-hint": "Os jogadores só poderão ver os atores no registro de danos para os quais eles têm essa permissão (ou melhor)."
+	"damage-log.settings.use-tab-hint": "Use uma guia separada para logs de danos. Se esta opção estiver desmarcada, os logs de danos serão enviados para o chatlog padrão.",
+	"damage-log.settings.min-player-permission-hint": "Os jogadores só poderão ver os atores no log de danos para os quais eles têm essa permissão (ou melhor)."
 }
