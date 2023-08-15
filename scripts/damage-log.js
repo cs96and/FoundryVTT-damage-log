@@ -89,6 +89,7 @@ class DamageLog {
 				max: "attributes.hp.max"
 			}
 		},
+		sw5e: DamageLog.DND_ATTRIBUTES,
 		swade: {
 			wounds: {
 				invert: true,

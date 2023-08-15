@@ -32,6 +32,7 @@ Damage Log is currently compatible with the following systems.
 * Pathfinder 2nd Edition (`pf2e`)
 * Savage Worlds Adventure Edition (`swade`)
 * Simple Worldbuilding (`worldbuilding`)
+* Star Wars 5e (`sw5e`)
 * Story Shaper (`shaper`)
 * Toolkit13 (13th Age Compatible) (`archmage`)
 * Tormenta 20 (`tormenta20`)
