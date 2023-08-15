@@ -40,7 +40,13 @@ class DamageLog {
 	 * Location of HP attributes for supported systems.
 	 */
 	static SYSTEM_CONFIGS = {
-		dnd5e: DamageLog.DND_ATTRIBUTES,
+		"age-of-sigmar-soulbound": {
+			toughness: {
+				value: "combat.health.toughness.value",
+				max: "combat.health.toughness.max"
+			}
+		},
+		archmage: DamageLog.DND_ATTRIBUTES,
 		D35E: mergeObject(DamageLog.DND_ATTRIBUTES, {
 			vigor: {
 				value: "attributes.vigor.value",
@@ -56,13 +62,7 @@ class DamageLog {
 				max: "attributes.wounds.max"
 			}
 		}),
-		pf1: DamageLog.DND_ATTRIBUTES,
-		pf2e: mergeObject(DamageLog.DND_ATTRIBUTES, {
-			sp: {
-				value: "attributes.sp.value",
-				max: "attributes.sp.max"
-			}
-		}),
+		dnd5e: DamageLog.DND_ATTRIBUTES,
 		gurps: {
 			hp: {
 				value: "HP.value",
@@ -73,6 +73,20 @@ class DamageLog {
 				value: "FP.value",
 				min: "FP.min",
 				max: "FP.max"
+			}
+		},
+		pf1: DamageLog.DND_ATTRIBUTES,
+		pf2e: mergeObject(DamageLog.DND_ATTRIBUTES, {
+			sp: {
+				value: "attributes.sp.value",
+				max: "attributes.sp.max"
+			}
+		}),
+		shaper: {
+			hp: {
+				value: "attributes.hp.value",
+				min: "attributes.hp.min",
+				max: "attributes.hp.max"
 			}
 		},
 		swade: {
@@ -110,20 +124,6 @@ class DamageLog {
 				value: "health.value",
 				min: "health.min",
 				max: "health.max"
-			}
-		},
-		"age-of-sigmar-soulbound": {
-			toughness: {
-				value: "combat.health.toughness.value",
-				max: "combat.health.toughness.max"
-			}
-		},
-		archmage: DamageLog.DND_ATTRIBUTES,
-		shaper: {
-			hp: {
-				value: "attributes.hp.value",
-				min: "attributes.hp.min",
-				max: "attributes.hp.max"
 			}
 		}
 	};

@@ -30,11 +30,11 @@ Damage Log is currently compatible with the following systems.
 * GURPS 4th Edition Game Aid (Unofficial) (`gurps`)
 * Pathfinder 1st Edition (`pf1`)
 * Pathfinder 2nd Edition (`pf2e`)
-* Simple Worldbuilding (`worldbuilding`)
 * Savage Worlds Adventure Edition (`swade`)
+* Simple Worldbuilding (`worldbuilding`)
 * Story Shaper (`shaper`)
-* Tormenta 20 (`tormenta20`)
 * Toolkit13 (13th Age Compatible) (`archmage`)
+* Tormenta 20 (`tormenta20`)
 
 ## Installation
 Damage Log can be installed using the Foundry module installer.  Alternatively, you can install it using the following manifest URL...<br>
