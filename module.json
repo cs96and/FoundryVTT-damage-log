@@ -53,6 +53,10 @@
 				"type": "system"
 			},
 			{
+				"id": "archmage",
+				"type": "system"
+			},
+			{
 				"id": "D35E",
 				"type": "system"
 			},
@@ -65,14 +69,6 @@
 				"type": "system"
 			},
 			{
-				"id": "swade",
-				"type": "system"
-			},
-			{
-				"id": "tormenta20",
-				"type": "system"
-			},
-			{
 				"id": "pf1",
 				"type": "system"
 			},
@@ -81,18 +77,26 @@
 				"type": "system"
 			},
 			{
-				"id": "worldbuilding",
-				"type": "system"
-			},
-			{
-				"id": "archmage",
-				"type": "system"
-			},
-			{
 				"id": "shaper",
 				"type": "system"
+			},
+			{
+				"id": "sw5e",
+				"type": "system"
+			},
+			{
+				"id": "swade",
+				"type": "system"
+			},
+			{
+				"id": "tormenta20",
+				"type": "system"
+			},
+			{
+				"id": "worldbuilding",
+				"type": "system"
 			}
-		]
+]
 	},
 	"esmodules": [
 		"scripts/damage-log.js",
