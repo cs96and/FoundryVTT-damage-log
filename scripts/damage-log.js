@@ -62,6 +62,24 @@ class DamageLog {
 				max: "attributes.wounds.max"
 			}
 		}),
+		demonlord: {
+			corruption: {
+				invert: true,
+				value: "characteristics.corruption.value",
+				min: "characteristics.corruption.min",
+			},
+			damage: {
+				invert: true,
+				value: "characteristics.health.value",
+				max: "characteristics.health.max",
+			},
+			insanity: {
+				invert: true,
+				value: "characteristics.insanity.value",
+				min: "characteristics.insanity.min",
+				max: "characteristics.insanity.max",
+			},
+		},
 		dnd5e: DamageLog.DND_ATTRIBUTES,
 		gurps: {
 			hp: {

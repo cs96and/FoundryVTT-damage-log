@@ -61,6 +61,10 @@
 				"type": "system"
 			},
 			{
+				"id": "demonlord",
+				"type": "system"
+			},
+			{
 				"id": "dnd5e",
 				"type": "system"
 			},
