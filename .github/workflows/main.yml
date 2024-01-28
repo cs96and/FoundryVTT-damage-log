@@ -46,10 +46,7 @@ jobs:
     - name: Publish Module to FoundryVTT Website
       id: publish_to_foundry_website
       if: ${{ !github.event.release.unpublished && !github.event.release.prerelease }}
-      uses: Varriount/fvtt-autopublish@v1.1.1
+      uses: cs96and/FoundryVTT-release-package@v1
       with:
-        username: ${{ secrets.FOUNDRY_ADMIN_USERNAME }}
-        password: ${{ secrets.FOUNDRY_ADMIN_PASSWORD }}
-        module-id: ${{ secrets.FOUNDRY_ADMIN_MODULE_ID }}
+        package-token: ${{ secrets.FOUNDRY_PACKAGE_TOKEN }}
         manifest-url: https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/module.json
-        manifest-file: ./module.json
