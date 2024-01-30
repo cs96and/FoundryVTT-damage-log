@@ -30,6 +30,10 @@
 	"damage-log.swade.fatigue-name" : "Fatigue",
 	"damage-log.swade.bennies-name" : "Bennies",
 	"damage-log.tormenta20.pv-name" : "PV",
+	"damage-log.ac2d20.stress-name" : "Stress",
+	"damage-log.ac2d20.injuries-name" : "Injuries",
+	"damage-log.ac2d20.fortune-name" : "Fortune",
+	"damage-log.ac2d20.fatigue-name" : "Fatigue",
 
 	"damage-log.settings.use-tab": "Use separate damage log tab",
 	"damage-log.settings.use-tab-hint": "Use a separate tab for damage logs.  If this is unchecked, damage logs will be sent to the default chatlog.",
