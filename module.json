@@ -38,7 +38,8 @@
 		"pf2e",
 		"worldbuilding",
 		"archmage",
-		"shaper"
+		"shaper",
+		"ac2d20"
 	],
 	"relationships": {
 		"requires": [
@@ -99,6 +100,10 @@
 			{
 				"id": "worldbuilding",
 				"type": "system"
+			},
+			{
+				"id": "ac2d20",
+				"type": "system"
 			}
 ]
 	},
@@ -132,6 +137,11 @@
 			"lang": "cn",
 			"name": "中文（简体）",
 			"path": "lang/cn.json"
+		},
+		{
+			"lang": "es",
+			"name": "Español",
+			"path": "lang/es.json"
 		}
 	],
 	"url": "#{URL}#",

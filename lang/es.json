@@ -1,0 +1,68 @@
+{
+	"damage-log.chat-tab-name": "Chat",
+	"damage-log.damage-log-tab-name": "Daño",
+
+	"damage-log.reset-visibility": "Reiniciar visibilidad",
+	"damage-log.undo-damage": "Deshacer daño",
+	"damage-log.undo-healing": "Deshacer curación",
+	"damage-log.redo-damage": "Reaplicar daño",
+	"damage-log.redo-healing": "Reaplicar curación",
+
+	"damage-log.damage-flavor-text": "Took {diff} {damageType} damage",
+	"damage-log.healing-flavor-text": "Healed {diff} damage",
+
+	"damage-log.old": "Old",
+	"damage-log.new": "New",
+	"damage-log.diff": "Diff",
+
+	"damage-log.default.hp-name" : "HP",
+	"damage-log.default.temp-name" : "Temp",
+	"damage-log.age-of-sigmar-soulbound.toughness-name" : "Toughness",
+	"damage-log.D35E.vigor-name": "Vigor",
+	"damage-log.D35E.vigorTemp-name": "Temp",
+	"damage-log.D35E.wounds-name": "Wounds",
+	"damage-log.demonlord.corruption-name": "Corruption",
+	"damage-log.demonlord.damage-name": "Damage",
+	"damage-log.demonlord.insanity-name": "Insanity",
+	"damage-log.gurps.fp-name": "FP",
+	"damage-log.pf2e.sp-name": "Stamina",
+	"damage-log.swade.wounds-name" : "Wounds",
+	"damage-log.swade.fatigue-name" : "Fatigue",
+	"damage-log.swade.bennies-name" : "Bennies",
+	"damage-log.tormenta20.pv-name" : "PV",
+
+	"damage-log.settings.use-tab": "Use separate damage log tab",
+	"damage-log.settings.use-tab-hint": "Use a separate tab for damage logs.  If this is unchecked, damage logs will be sent to the default chatlog.",
+
+	"damage-log.settings.allow-player-view": "Allow players to view the damage log",
+
+	"damage-log.settings.min-player-permission": "Minimum actor permission",
+	"damage-log.settings.min-player-permission-hint": "Players will only be able to see actors in the damage log for which they have this permission (or better).",
+
+	"damage-log.settings.allow-player-undo": "Allow players to undo/redo damage",
+	"damage-log.settings.allow-player-undo-hint": "When enabled, players will be able to undo/redo damage and healing dealt to their *owned* actors.",
+
+	"damage-log.settings.show-limited-info": "Show limited damage info to players",
+	"damage-log.settings.show-limited-info-hint": "When enabled, players can see the damage taken by *all* actors, but not the old/diff/new table of values.",
+
+	"damage-log.settings.hide-healing-in-limited-info": "Hide healing in the limited damage info",
+	"damage-log.settings.hide-healing-in-limited-info-hint": "When enabled, players will not be able to see any healing in the limited damage info.",
+
+	"damage-log.settings.clamp-to-max": "Clamp to max HP",
+	"damage-log.settings.clamp-to-max-hint": "When reverting damage or re-applying healing, prevent the character's HP going over its current allowed maxiumum value",
+
+	"damage-log.settings.clamp-to-min": "Clamp to min HP",
+	"damage-log.settings.clamp-to-min-hint": "When re-applying damage or reverting healing, prevent the character's HP going under its current allowed minimum value",
+
+	"damage-log.settings.none": "None",
+	"damage-log.settings.limited": "Limited",
+	"damage-log.settings.observer": "Observer",
+	"damage-log.settings.owner": "Owner",
+
+	"damage-log.error.system-not-supported": "Damage Log | The '{systemId}' system is not currently supported",
+	"damage-log.error.scene-id-missing": "Damage Log | Scene ID missing from damage log",
+	"damage-log.error.scene-deleted": "Damage Log | Scene '{scene}' no longer exists",
+	"damage-log.error.token-id-missing": "Damage Log | Token ID missing from damage log",
+	"damage-log.error.token-deleted": "Damage Log | Token '{token}' no longer exists",
+	"damage-log.error.no-undo-user": "Damage Log | Cannot {undo} {damage}.  Neither {user}, nor any GM is connected"
+}
