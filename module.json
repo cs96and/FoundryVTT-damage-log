@@ -29,16 +29,20 @@
 		}
 	],
 	"system": [
+		"ac2d20",
 		"age-of-sigmar-soulbound",
+		"archmage",
 		"D35E",
+		"demonlord",
 		"dnd5e",
-		"swade",
-		"tormenta20",
+		"gurps",
 		"pf1",
 		"pf2e",
-		"worldbuilding",
-		"archmage",
-		"shaper"
+		"shaper",
+		"sw5e",
+		"swade",
+		"tormenta20",
+		"worldbuilding"
 	],
 	"relationships": {
 		"requires": [
@@ -48,6 +52,10 @@
 			}
 		],
 		"systems": [
+			{
+				"id": "ac2d20",
+				"type": "system"
+			},
 			{
 				"id": "age-of-sigmar-soulbound",
 				"type": "system"
@@ -132,6 +140,11 @@
 			"lang": "cn",
 			"name": "中文（简体）",
 			"path": "lang/cn.json"
+		},
+		{
+			"lang": "es",
+			"name": "Español",
+			"path": "lang/es.json"
 		}
 	],
 	"url": "#{URL}#",

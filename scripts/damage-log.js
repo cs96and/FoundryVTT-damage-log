@@ -40,6 +40,25 @@ class DamageLog {
 	 * Location of HP attributes for supported systems.
 	 */
 	static SYSTEM_CONFIGS = {
+		ac2d20: {
+			fatigue: {
+				invert: true,
+				value: "fatigue"
+			},
+			fortune: {
+				invert: false,
+				value: "fortune.value"
+			},
+			injuries: {
+				invert: true,
+				value: "injuries.value"
+			},
+			stress: {
+				invert: true,
+				value: "stress.value",
+				max: "stress.max"
+			}			
+		},
 		"age-of-sigmar-soulbound": {
 			toughness: {
 				value: "combat.health.toughness.value",

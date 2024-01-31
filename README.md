@@ -24,6 +24,7 @@ Damage Log is also compatible with the [Tabbed Chatlog](https://github.com/cswen
 
 ## System Compatibility
 Damage Log is currently compatible with the following systems.
+* Achtung! Cthulhu 2d20 (`ac2d20`)
 * Age of Sigmar: Soulbound (`age-of-sigmar-soulbound`)
 * Dungeons & Dragons v3.5 (`D35E`)
 * Dungeons & Dragons 5th Edition (`dnd5e`)
