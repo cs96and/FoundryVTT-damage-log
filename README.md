@@ -19,7 +19,7 @@ Damage Log is also compatible with the [Tabbed Chatlog](https://github.com/cswen
 * Damage can easily be reverted or re-applied using the message's right click menu.
 * By default, only the GM can see the damage log.  The GM can optionally let players see the damage log for actors they are permissioned for (the minimum permission level is configurable, and defaults to "owner").
 * The GM can also let players see limited damage info for all actors (i.e. the amount of damage taken, but not the old and new HP values).
-* Works with [Better Rolls](https://foundryvtt.com/packages/betterrolls5e), [Midi QoL](https://foundryvtt.com/packages/midi-qol/), and probably works with other dice rolling modules too.
+* Works with [Ready Set Roll](https://foundryvtt.com/packages/ready-set-roll-5e/), [Midi QoL](https://foundryvtt.com/packages/midi-qol/), and probably works with other dice rolling modules too.
 * Integrates with the [Tabbed Chatlog](https://github.com/cswendrowski/FoundryVTT-Tabbed-Chatlog) module.  Damage Log's extra tab will be added on to the end of Tabbed Chatlog's tabs.
 
 ## System Compatibility

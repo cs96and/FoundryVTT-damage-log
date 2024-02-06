@@ -209,25 +209,6 @@ class DamageLog {
 			libWrapper.ignore_conflicts('damage-log', ['actually-private-rolls', 'hide-gm-rolls', 'monks-little-details'], 'ChatLog.prototype.notify');
 		}
 
-		// If BetterRolls5e is enabled, wrap the BetterRollsChatCard.applyDamage function
-		// to cache the damage type of applied damage.
-		if (!!game.modules.get("betterrolls5e")?.active) {
-			import("/modules/betterrolls5e/scripts/chat-message.js").then((obj) => {
-				const damageLog = this;
-				const origBetterRollsApplyDamage = obj.BetterRollsChatCard.prototype.applyDamage;
-
-				obj.BetterRollsChatCard.prototype.applyDamage = async function(actor, damageType, ...rest) {
-					// Here, "this" will be a BetterRollsChatCard object.
-					try {
-						damageLog.damageType = damageType;
-						return await origBetterRollsApplyDamage.call(this, actor, damageType, ...rest);
-					} finally {
-						damageLog.damageType = "";
-					}
-				};
-			})
-		}
-
 		// Ready handling.  Convert damage log messages flag to new format.
 		Hooks.once("ready", async () => {
 			if (!game.modules.get('lib-wrapper')?.active && game.user.isGM)
