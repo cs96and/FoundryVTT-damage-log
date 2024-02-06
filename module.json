@@ -113,8 +113,7 @@
 	"esmodules": [
 		"scripts/damage-log.js",
 		"scripts/migration.js",
-		"scripts/settings.js",
-		"scripts/util.js"
+		"scripts/settings.js"
 	],
 	"scripts": [],
 	"styles": [
