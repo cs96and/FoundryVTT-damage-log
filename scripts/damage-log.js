@@ -229,6 +229,23 @@ class DamageLog {
 
 			await DamageLogMigration.migrateFlags();
 		});
+
+		// If this is dnd5e 3.0.0 or greater, copy the styles for #chat-log to #damage-log
+		if ((game.system.id == "dnd5e") && (!isNewerVersion("3.0.0", game.system.version))) {
+			let damageLogStyleSheet = new CSSStyleSheet()
+			for (const sheet of document.styleSheets) {
+				if (sheet.href.endsWith("dnd5e.css")) {
+					for (const rule of sheet.cssRules) {
+						if ((rule instanceof CSSStyleRule) && rule.selectorText?.includes("#chat-log")) {
+							const newRule = rule.cssText.replaceAll("#chat-log", "#damage-log");
+							damageLogStyleSheet.insertRule(newRule, damageLogStyleSheet.cssRules.length);
+						}
+					}
+					break;
+				}
+			}
+			document.adoptedStyleSheets.push(damageLogStyleSheet);
+		}
 	}
 
 	/**

@@ -52,11 +52,11 @@ nav.damage-log-nav .item.active {
 }
 /* Styling for damage messages */
 .message.damage-log.damage {
-	background: #ffd9d9;
+	background: #ffd9d9 !important;
 }
 /* Styling for healing messages */
 .message.damage-log.healing {
-	background: #d9ffd9;
+	background: #d9ffd9 !important;
 }
 /* Stikethrough reverted messages */
 .message.damage-log.reverted {
@@ -64,11 +64,11 @@ nav.damage-log-nav .item.active {
 }
 /* Dim reverted damage */
 .message.damage-log.reverted.damage {
-	background: #ffeaea;
+	background: #ffeaea !important;
 }
 /* Dim reverted healing */
 .message.damage-log.reverted.healing {
-	background: #eaffea;
+	background: #eaffea !important;
 }
 /* Hide chat portrait whisper information on damage logs */
 .message.damage-log [class^="chat-portrait-indicator-"],
@@ -99,6 +99,3 @@ nav.damage-log-nav .item.active {
 .message.damage-log.not-permitted {
 	display: none !important;
 }
-
-
-
