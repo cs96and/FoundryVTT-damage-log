@@ -10,8 +10,6 @@
  * https://mit-license.org/
  */
 
-import { Util } from "./util.js";
-
 export class DamageLogMigration {
 	/**
 	 * Convert damage log messages flag to new format.
@@ -26,7 +24,7 @@ export class DamageLogMigration {
 				console.log("Damage Log | Updating message database to v1");
 				let haveNotified = false
 				for (const message of game.messages) {
-					const oldFlags = Util.getDocumentData(message)?.flags?.damageLog;
+					const oldFlags = message?.flags?.damageLog;
 					if (oldFlags) {
 						if (!haveNotified) {
 							ui.notifications.warn("Damage Log | Updating message database, please do not close the game", { permanent: true });
@@ -48,7 +46,7 @@ export class DamageLogMigration {
 			// Convert from v1 -> v2
 			console.log("Damage Log | Updating message database to v2");
 			for (const message of game.messages) {
-				const oldFlags = Util.getDocumentData(message)?.flags?.["damage-log"];
+				const oldFlags = message?.flags?.["damage-log"];
 				if (oldFlags) {
 					console.log(`Damage Log | Updating flags for message ${message.id}`);
 

@@ -12,7 +12,6 @@
 
 import { DamageLogMigration } from "./migration.js";
 import { DamageLogSettings } from "./settings.js";
-import { Util } from "./util.js";
 
 /**
  * Initialization.  Create the DamageLog.
@@ -367,7 +366,7 @@ class DamageLog {
 	 *	Disable the chat notification on damage log messages.
 	 */
 	_onChatLogNotify(wrapper, message, ...args) {
-		if (Util.getDocumentData(message)?.flags["damage-log"])
+		if (message?.flags["damage-log"])
 			return;
 
 		return wrapper(message, ...args);
@@ -383,10 +382,10 @@ class DamageLog {
 		const messages = this.element.find(".damage-log.message");
 		for (const li of messages) {
 			const message = game.messages.get(li.dataset["messageId"]);
-			if (!message || !Util.getDocumentData(message).timestamp) continue;
+			if (!message || !message.timestamp) continue;
 
 			const stamp = li.querySelector('.message-timestamp');
-			stamp.textContent = foundry.utils.timeSince(Util.getDocumentData(message).timestamp);
+			stamp.textContent = foundry.utils.timeSince(message.timestamp);
 		}
 	}
 
@@ -396,7 +395,7 @@ class DamageLog {
 				title: game.i18n.localize("CHAT.FlushTitle"),
 				content: game.i18n.localize("CHAT.FlushWarning"),
 				yes: () => {
-					const damageLogMessagesIds = game.messages.filter(message => "damage-log" in Util.getDocumentData(message).flags).map(message => message.id);
+					const damageLogMessagesIds = game.messages.filter(message => "damage-log" in message.flags).map(message => message.id);
 					game.messages.documentClass.deleteDocuments(damageLogMessagesIds, {deleteAll: false});
 				},
 				options: {
@@ -460,8 +459,8 @@ class DamageLog {
 			condition: (li) => {
 				if (!game.user.isGM) return false;
 	
-				const messageData = Util.getDocumentData(getMessage(li));
-				return (typeof(messageData?.getFlag("damage-log", "public")) == "boolean");
+				const message = getMessage(li);
+				return (typeof(message?.getFlag("damage-log", "public")) == "boolean");
 			},
 			callback: li => this._resetVisibility(li[0])
 		};
@@ -476,8 +475,8 @@ class DamageLog {
 			if (!this.settings.allowPlayerUndo) return false;
 
 			const message = getMessage(li);
-			const actor = ChatMessage.getSpeakerActor(Util.getDocumentData(message)?.speaker);
-			return actor?.testUserPermission(game.user, Util.PERMISSION_CONSTS.OWNER);
+			const actor = ChatMessage.getSpeakerActor(message?.speaker);
+			return actor?.testUserPermission(game.user, CONST.DOCUMENT_PERMISSION_LEVELS.OWNER);
 		};
 
 		options.push(
@@ -523,9 +522,6 @@ class DamageLog {
 			return path && path.split('.').reduce((prev, curr) => prev && prev[curr], obj);
 		}
 
-		const actorSystemData = Util.getSystemData(actor);
-		const systemUpdates = (Util.isV10 ? updateData.system : updateData.data);
-
 		const flags = {};
 
 		for (const [ id, config ] of Object.entries(this.systemConfig)) {
@@ -534,8 +530,8 @@ class DamageLog {
 				localizationId = `damage-log.default.${id}-name`;
 			const name = (game.i18n.has(localizationId) ? game.i18n.localize(localizationId) : id);
 
-			const oldValue = getAttrib(actorSystemData, config.value) ?? 0;
-			const newValue = getAttrib(systemUpdates, config.value) ?? oldValue;
+			const oldValue = getAttrib(actor.system, config.value) ?? 0;
+			const newValue = getAttrib(updateData.system, config.value) ?? oldValue;
 			const diff = newValue - oldValue;
 	
 			if (0 != diff) {
@@ -544,7 +540,7 @@ class DamageLog {
 			}
 		}
 
-		if (Util.isEmpty(flags)) return;
+		if (isEmpty(flags)) return;
 
 		if (this.settings.useTab && this.hasTabbedChatlog)
 		{
@@ -591,8 +587,7 @@ class DamageLog {
 
 			// If the user that created the message is connected, let their client update the message.
 			// Otherwise let the GM do it.
-			const messageData = Util.getDocumentData(message);
-			if (messageData.user.active ? (messageData.user.id === game.user.id) : game.user.isGM)
+			if (message.user.active ? (message.user.id === game.user.id) : game.user.isGM)
 			{
 				// Changing the message flags will cause the renderChatMessage hook to fire
 				if (flags.revert)
@@ -607,7 +602,7 @@ class DamageLog {
 	 * 	Handle a Damage Log chat message being made public or private.
 	 */
 	_onPreUpdateChatMessage(message, changes, options, userId) {
-		if (("whisper" in changes) && Util.getDocumentData(message)?.flags["damage-log"]) {
+		if (("whisper" in changes) && message?.flags["damage-log"]) {
 			// Damage Log message is being made private or public
 
 			// Don't alter the public flag if it is being removed.
@@ -623,8 +618,7 @@ class DamageLog {
 	 * Applies classes to the message's HTML based on the message flags.
 	 */
 	async _onRenderChatMessage(message, html, data) {
-		const messageData = Util.getDocumentData(message);
-		const flags = messageData?.flags["damage-log"];
+		const flags = message?.flags["damage-log"];
 		if (!flags) return;
 
 		const classList = html[0].classList;
@@ -645,7 +639,7 @@ class DamageLog {
 		// Work out if the user is allowed to see the damage table, and then add it to the HTML.
 		let canViewTable = game.user.isGM || !!flags.public
 		if (!canViewTable && this.settings.allowPlayerView) {
-			const actor = ChatMessage.getSpeakerActor(messageData?.speaker);
+			const actor = ChatMessage.getSpeakerActor(message?.speaker);
 			canViewTable = this._canUserViewActorDamage(game.user, actor);
 		}
 
@@ -702,10 +696,9 @@ class DamageLog {
 
 	_resetVisibility(li) {
 		const message = game.messages.get(li.dataset["messageId"]);
-		const messageData = Util.getDocumentData(message);
-		const flags = messageData.flags?.["damage-log"];
+		const flags = message.flags?.["damage-log"];
 
-		const actor = game.actors.get(messageData.speaker.actor);
+		const actor = game.actors.get(message.speaker.actor);
 		const isHealing = flags && this._analyseFlags(flags).isHealing;
 
 		message.update({
@@ -719,9 +712,8 @@ class DamageLog {
 	 */
 	_undoDamage(li) {
 		const message = game.messages.get(li.dataset["messageId"]);
-		const messageData = Util.getDocumentData(message);
-		const speaker = messageData.speaker;
-		const flags = messageData.flags["damage-log"];
+		const speaker = message.speaker;
+		const flags = message.flags["damage-log"];
 
 		if (!speaker.scene)
 		{
@@ -752,27 +744,24 @@ class DamageLog {
 		const modifier = li.classList.contains("reverted") ? -1 : 1;
 
 		// Check the user that created the message is connected, or there is a GM is connected.
-		if (!messageData.user.active) {
+		if (!message.user.active) {
 			const activGMs = game.users.filter(u => u.isGM && u.active);
 			if (!activGMs || (0 === activGMs.length)) {
 				const messageFlags = {
 					undo: ((modifier > 0) ? "undo" : "redo"),
 					damage: li.classList.contains("healing") ? "healing" : "damage",
-					user: messageData.user.name
+					user: message.user.name
 				};
 				ui.notifications.error(game.i18n.format("damage-log.error.no-undo-user", messageFlags));
 			}
 		}
 
-		const systemData = Util.getSystemData(token.actor);
-
 		// Get a nested property of actorData.data using a string.
 		const getActorAttrib = (path) => {
-			return path && path.split('.').reduce((prev, curr) => prev && prev[curr], systemData);
+			return path && path.split('.').reduce((prev, curr) => prev && prev[curr], token.actor.system);
 		}
 
 		const update = {};
-		const updatePath = (Util.isV10 ? "system" : "data");
 
 		for (const change of flags.changes) {
 			const config = this.systemConfig[change.id];
@@ -790,7 +779,7 @@ class DamageLog {
 				newValue = Math.min(newValue, max);
 			}
 
-			update[`${updatePath}.${config.value}`] = newValue;
+			update[`system.${config.value}`] = newValue;
 		}
 
 		token.actor.update(update, { "damage-log": { revert: modifier > 0, messageId: message.id } });
