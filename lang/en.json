@@ -2,6 +2,8 @@
 	"damage-log.chat-tab-name": "Chat",
 	"damage-log.damage-log-tab-name": "Damage Log",
 
+	"damage-log.customizable-chat-tabs-hint": "Messages created by the Damag Log module",
+
 	"damage-log.reset-visibility": "Reset Visibility",
 	"damage-log.undo-damage": "Undo Damage",
 	"damage-log.undo-healing": "Undo Healing",

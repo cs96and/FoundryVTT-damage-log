@@ -18,6 +18,15 @@ import { DamageLogSettings } from "./settings.js";
  */
 Hooks.once("setup", () => game.damageLog = new DamageLog());
 
+Hooks.once("chat-tabs.init", () => {
+	const data = {
+		key: "damage-log",
+		label: game.i18n.localize("damage-log.damage-log-tab-name"),
+		hint: game.i18n.localize("damage-log.customizable-chat-tabs-hint")
+	};
+	game.chatTabs.register(data);
+});
+
 class DamageLog {
 
 	/**
@@ -178,6 +187,7 @@ class DamageLog {
 		this.tabs = null;
 		this.currentTab = "chat";
 		this.hasTabbedChatlog = !!game.modules.get("tabbed-chatlog")?.active;
+		this.hasCustomizableChatTabs = !!game.modules.get("chat-tabs")?.active;
 		this.hasPf2eDorakoUi = !!game.modules.get("pf2e-dorako-ui")?.active;
 		this.damageType = "";
 		this.prevScrollTop = 0;
@@ -203,8 +213,11 @@ class DamageLog {
 
 		if (game.modules.get('lib-wrapper')?.active) {
 			libWrapper.register('damage-log', 'ChatLog.prototype.notify', this._onChatLogNotify, 'MIXED');
-			libWrapper.register('damage-log', 'ChatLog.prototype.updateTimestamps', this._onUpdateTimestamps, 'WRAPPER');
-			libWrapper.register('damage-log', 'Messages.prototype.flush', this._onMessageLogFlush.bind(this), 'MIXED');
+
+			if (!this.hasCustomizableChatTabs) {
+				libWrapper.register('damage-log', 'Messages.prototype.flush', this._onMessageLogFlush.bind(this), 'MIXED');
+				libWrapper.register('damage-log', 'ChatLog.prototype.updateTimestamps', this._onUpdateTimestamps, 'WRAPPER');
+			}
 
 			libWrapper.ignore_conflicts('damage-log', ['actually-private-rolls', 'hide-gm-rolls', 'monks-little-details'], 'ChatLog.prototype.notify');
 		}
@@ -225,6 +238,10 @@ class DamageLog {
 	 */
 	async _onRenderChatLog(chatTab, html, user) {
 		if (!game.user.isGM && !this.settings.allowPlayerView) return;
+
+		// If Customizable Chat Tabs is enabled, then we'll let that module sort out setting up the tabs.
+		if (this.hasCustomizableChatTabs)
+			return
 
 		if (this.hasTabbedChatlog) {
 			// Force Tabbed Chatlog to render first
@@ -550,6 +567,12 @@ class DamageLog {
 			speaker,
 			whisper: this._calculteWhisperData(actor, isHealing)
 		};
+
+		if (this.hasCustomizableChatTabs) {
+			chatData.flags["chat-tabs"] = {
+				module: "damage-log"
+			}
+		}
 
 		ChatMessage.create(chatData, {});
 	}
