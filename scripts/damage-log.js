@@ -132,6 +132,9 @@ class DamageLog {
 				value: "attributes.hp.value",
 				min: "attributes.hp.min",
 				max: "attributes.hp.max"
+			},
+			temp: {
+				value: "attributes.hp.temp"
 			}
 		},
 		sw5e: DamageLog.DND_ATTRIBUTES,
