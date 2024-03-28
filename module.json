@@ -11,38 +11,12 @@
 		"minimum": "10",
 		"verified": "11"
 	},
-	"minimumCoreVersion": "10",
-	"compatibleCoreVersion": "11",
 	"authors": [
 		{
 			"name": "Alan Davies",
 			"discord": "cs96and#3764",
 			"ko-fi": "cs96and"
 		}
-	],
-	"author": "Alan Davies",
-	"dependencies": [
-		{
-			"id": "lib-wrapper",
-			"name": "lib-wrapper",
-			"type": "module"
-		}
-	],
-	"system": [
-		"ac2d20",
-		"age-of-sigmar-soulbound",
-		"archmage",
-		"D35E",
-		"demonlord",
-		"dnd5e",
-		"gurps",
-		"pf1",
-		"pf2e",
-		"shaper",
-		"sw5e",
-		"swade",
-		"tormenta20",
-		"worldbuilding"
 	],
 	"relationships": {
 		"requires": [
@@ -108,7 +82,7 @@
 				"id": "worldbuilding",
 				"type": "system"
 			}
-]
+		]
 	},
 	"esmodules": [
 		"scripts/damage-log.js",
