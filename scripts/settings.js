@@ -10,6 +10,8 @@
  * https://mit-license.org/
  */
 
+import { Util } from "./util.js"
+
 export class DamageLogSettings {
 
 	/**
@@ -21,8 +23,6 @@ export class DamageLogSettings {
 
 		Hooks.on("renderSettingsConfig", this._onRenderSettingsConfig.bind(this));
 
-		const debouncedReload = debounce(() => window.location.reload(), 500);
-
 		game.settings.register("damage-log", "useTab", {
 			name: game.i18n.localize("damage-log.settings.use-tab"),
 			hint: game.i18n.localize("damage-log.settings.use-tab-hint"),
@@ -30,7 +30,7 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: true,
-			onChange: debouncedReload
+			onChange: foundry.utils.debouncedReload
 		});
 
 		game.settings.register("damage-log", "allowPlayerView", {
@@ -39,14 +39,14 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: false,
-			onChange: debouncedReload
+			onChange: foundry.utils.debouncedReload
 		});
 
 		const permissionChoices = {};
-		permissionChoices[CONST.DOCUMENT_PERMISSION_LEVELS.NONE] = game.i18n.localize("damage-log.settings.none");
-		permissionChoices[CONST.DOCUMENT_PERMISSION_LEVELS.LIMITED] = game.i18n.localize("damage-log.settings.limited");
-		permissionChoices[CONST.DOCUMENT_PERMISSION_LEVELS.OBSERVER] = game.i18n.localize("damage-log.settings.observer");
-		permissionChoices[CONST.DOCUMENT_PERMISSION_LEVELS.OWNER] = game.i18n.localize("damage-log.settings.owner");
+		permissionChoices[Util.DOCUMENT_OWNERSHIP_LEVELS.NONE] = game.i18n.localize("damage-log.settings.none");
+		permissionChoices[Util.DOCUMENT_OWNERSHIP_LEVELS?.LIMITED] = game.i18n.localize("damage-log.settings.limited");
+		permissionChoices[Util.DOCUMENT_OWNERSHIP_LEVELS?.OBSERVER] = game.i18n.localize("damage-log.settings.observer");
+		permissionChoices[Util.DOCUMENT_OWNERSHIP_LEVELS?.OWNER] = game.i18n.localize("damage-log.settings.owner");
 
 		game.settings.register("damage-log", "minPlayerPermission", {
 			name: game.i18n.localize("damage-log.settings.min-player-permission"),
@@ -55,8 +55,8 @@ export class DamageLogSettings {
 			config: true,
 			type: Number,
 			choices: permissionChoices,
-			default: CONST.DOCUMENT_PERMISSION_LEVELS.OWNER,
-			onChange: debouncedReload
+			default: Util.DOCUMENT_OWNERSHIP_LEVELS.OWNER,
+			onChange: foundry.utils.debouncedReload
 		});
 
 		game.settings.register("damage-log", "allowPlayerUndo", {
@@ -76,7 +76,7 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: false,
-			onChange: debouncedReload
+			onChange: foundry.utils.debouncedReload
 		});
 
 		game.settings.register("damage-log", "hideHealingInLimitedInfo", {
@@ -86,7 +86,7 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: false,
-			onChange: debouncedReload
+			onChange: foundry.utils.debouncedReload
 		});
 
 		game.settings.register("damage-log", "clampToMax", {

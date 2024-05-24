@@ -9,7 +9,7 @@
 	"manifestPlusVersion": "1.2.0",
 	"compatibility": {
 		"minimum": "10",
-		"verified": "11"
+		"verified": "12"
 	},
 	"authors": [
 		{
@@ -87,7 +87,8 @@
 	"esmodules": [
 		"scripts/damage-log.js",
 		"scripts/migration.js",
-		"scripts/settings.js"
+		"scripts/settings.js",
+		"scripts/util.js"
 	],
 	"scripts": [],
 	"styles": [

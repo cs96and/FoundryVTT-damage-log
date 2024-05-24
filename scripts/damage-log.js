@@ -12,6 +12,7 @@
 
 import { DamageLogMigration } from "./migration.js";
 import { DamageLogSettings } from "./settings.js";
+import { Util } from "./util.js"
 
 /**
  * Initialization.  Create the DamageLog.
@@ -234,7 +235,7 @@ class DamageLog {
 		});
 
 		// If this is dnd5e 3.0.0 or greater, copy the styles for #chat-log to #damage-log
-		if ((game.system.id == "dnd5e") && (!isNewerVersion("3.0.0", game.system.version))) {
+		if ((game.system.id == "dnd5e") && (!foundry.utils.isNewerVersion("3.0.0", game.system.version))) {
 			let damageLogStyleSheet = new CSSStyleSheet()
 			for (const sheet of document.styleSheets) {
 				if (sheet.href.endsWith("dnd5e.css")) {
@@ -431,7 +432,7 @@ class DamageLog {
 	 * Handle scrolling to top of the damage log.  If the scrollbar reaches the top, load more messages.
 	 */
 	async _onScroll(event) {
-		const element = event.target;
+		const element = event.currentTarget;
 
 		// Only try to load more messages if we are scrolling upwards
 		if ((0 === element.scrollTop) && (element.scrollTop < this.prevScrollTop)) {
@@ -494,7 +495,7 @@ class DamageLog {
 
 			const message = getMessage(li);
 			const actor = ChatMessage.getSpeakerActor(message?.speaker);
-			return actor?.testUserPermission(game.user, CONST.DOCUMENT_PERMISSION_LEVELS.OWNER);
+			return actor?.testUserPermission(game.user, Util.DOCUMENT_OWNERSHIP_LEVELS.OWNER);
 		};
 
 		options.push(
@@ -558,7 +559,7 @@ class DamageLog {
 			}
 		}
 
-		if (isEmpty(flags)) return;
+		if (foundry.utils.isEmpty(flags)) return;
 
 		if (this.settings.useTab && this.hasTabbedChatlog)
 		{
@@ -581,7 +582,7 @@ class DamageLog {
 
 		const chatData = {
 			flags: { "damage-log": flags },
-			type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+			[Util.chatStyleKeyName]: Util.CHAT_MESSAGE_STYLES.OTHER,
 			flavor: game.i18n.format((isHealing ? "damage-log.healing-flavor-text" : "damage-log.damage-flavor-text"), flavorOptions),
 			content,
 			speaker,
