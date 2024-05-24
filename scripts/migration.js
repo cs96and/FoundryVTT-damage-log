@@ -14,11 +14,11 @@ export class DamageLogMigration {
 	/**
 	 * Convert damage log messages flag to new format.
 	 */
-	static async migrateFlags() {
-		if (game.user.isGM && (game.damageLog.settings.dbVersion < 2)) {
+	static async migrateFlags(damageLog) {
+		if (game.user.isGM && (damageLog.settings.dbVersion < 2)) {
 			ui.notifications.warn("Damage Log | Updating message database, please do not close the game", { permanent: true });
 
-			if (game.user.isGM && (game.damageLog.settings.dbVersion < 1))
+			if (game.user.isGM && (damageLog.settings.dbVersion < 1))
 			{
 				// Convert from v0 -> v1
 				console.log("Damage Log | Updating message database to v1");
@@ -39,7 +39,7 @@ export class DamageLogMigration {
 					}
 				}
 
-				game.damageLog.settings.dbVersion = 1;
+				damageLog.settings.dbVersion = 1;
 				console.log("Damage Log | Finished updating message database to v1");
 			}
 
@@ -80,7 +80,7 @@ export class DamageLogMigration {
 				}
 			}
 
-			game.damageLog.settings.dbVersion = 2;
+			damageLog.settings.dbVersion = 2;
 			console.log("Damage Log | Finished updating message database to v2");
 
 			ui.notifications.info("Damage Log | Finished updating message database", { permanent: true });
