@@ -67,7 +67,7 @@ class DamageLog {
 				invert: true,
 				value: "stress.value",
 				max: "stress.max"
-			}			
+			}
 		},
 		"age-of-sigmar-soulbound": {
 			toughness: {
@@ -110,6 +110,13 @@ class DamageLog {
 			},
 		},
 		dnd5e: DamageLog.#DND_ATTRIBUTES,
+		dragonbane: {
+			hp: {
+				value: "hitPoints.value",
+				min: "0",
+				max: "hitPoints.max",
+			}
+		},
 		gurps: {
 			hp: {
 				value: "HP.value",
@@ -311,7 +318,7 @@ class DamageLog {
 				const firstChatLogMessageId = chatLogElement.querySelector("li")?.getAttribute("data-message-id");
 				const firstAppendedMessageId = mutation.addedNodes[0]?.getAttribute("data-message-id");
 				const shouldPrepend = (firstAppendedMessageId === firstChatLogMessageId);
-				
+
 				const nodes = [...mutation.addedNodes].filter(n => {
 					if (n.classList.contains("not-permitted"))
 						n.remove();
@@ -478,7 +485,7 @@ class DamageLog {
 			icon: '<i class="fad fa-glasses"></i>',
 			condition: (li) => {
 				if (!game.user.isGM) return false;
-	
+
 				const message = getMessage(li);
 				return (typeof(message?.getFlag("damage-log", "public")) == "boolean");
 			},
@@ -553,7 +560,7 @@ class DamageLog {
 			const oldValue = getAttrib(actor.system, config.value) ?? 0;
 			const newValue = getAttrib(updateData.system, config.value) ?? oldValue;
 			const diff = newValue - oldValue;
-	
+
 			if (0 != diff) {
 				flags.changes ??= [];
 				flags.changes.push({ id, name, old: oldValue, new: newValue, diff });
@@ -716,7 +723,7 @@ class DamageLog {
 	#canUserViewActorDamage(user, actor) {
 		if (user.isGM) return true;
 		if (!this.settings.allowPlayerView) return false;
- 
+
 		return actor?.testUserPermission(user, this.settings.minPlayerPermission);
 	};
 
@@ -817,7 +824,7 @@ class DamageLog {
 	#analyseFlags(flags) {
 		// Sum up all the diffs in the changes section of the flags.
 		// If the "invert" paramater is true, subtract the diff rather than adding.
-		const totalDiff = flags.changes.reduce((prev, curr) => { 
+		const totalDiff = flags.changes.reduce((prev, curr) => {
 			if (this.systemConfig[curr.id]?.invert === true)
 				return prev - curr.diff;
 			else

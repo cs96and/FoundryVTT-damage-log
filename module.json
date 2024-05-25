@@ -51,6 +51,10 @@
 				"type": "system"
 			},
 			{
+				"id": "dragonbane",
+				"type": "system"
+			},
+			{
 				"id": "gurps",
 				"type": "system"
 			},

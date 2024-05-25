@@ -30,6 +30,7 @@ Damage Log is compatible with the [Customizable Chat Tabs](https://foundryvtt.co
 Damage Log is currently compatible with the following systems.
 * Achtung! Cthulhu 2d20 (`ac2d20`)
 * Age of Sigmar: Soulbound (`age-of-sigmar-soulbound`)
+* Dragonbane / Drakar & Demoner (`dragonbane`)
 * Dungeons & Dragons v3.5 (`D35E`)
 * Dungeons & Dragons 5th Edition (`dnd5e`)
 * GURPS 4th Edition Game Aid (Unofficial) (`gurps`)
