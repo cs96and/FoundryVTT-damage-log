@@ -113,7 +113,6 @@ class DamageLog {
 		dragonbane: {
 			hp: {
 				value: "hitPoints.value",
-				min: "0",
 				max: "hitPoints.max",
 			}
 		},
