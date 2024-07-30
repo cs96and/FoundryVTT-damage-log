@@ -76,21 +76,24 @@ class DamageLog {
 			}
 		},
 		archmage: DamageLog.#DND_ATTRIBUTES,
-		D35E: mergeObject(DamageLog.#DND_ATTRIBUTES, {
-			vigor: {
-				value: "attributes.vigor.value",
-				min: "attributes.vigor.min",
-				max: "attributes.vigor.max"
+		D35E: foundry.utils.mergeObject(DamageLog.#DND_ATTRIBUTES,
+			{
+				vigor: {
+					value: "attributes.vigor.value",
+					min: "attributes.vigor.min",
+					max: "attributes.vigor.max"
+				},
+				vigorTemp: {
+					value: "attributes.vigor.temp"
+				},
+				wounds: {
+					value: "attributes.wounds.value",
+					min: "attributes.wounds.min",
+					max: "attributes.wounds.max"
+				},
 			},
-			vigorTemp: {
-				value: "attributes.vigor.temp"
-			},
-			wounds: {
-				value: "attributes.wounds.value",
-				min: "attributes.wounds.min",
-				max: "attributes.wounds.max"
-			}
-		}),
+			{ inplace: false }
+		),
 		demonlord: {
 			corruption: {
 				invert: true,
@@ -129,12 +132,15 @@ class DamageLog {
 			}
 		},
 		pf1: DamageLog.#DND_ATTRIBUTES,
-		pf2e: mergeObject(DamageLog.#DND_ATTRIBUTES, {
-			sp: {
-				value: "attributes.sp.value",
-				max: "attributes.sp.max"
-			}
-		}),
+		pf2e: foundry.utils.mergeObject(DamageLog.#DND_ATTRIBUTES,
+			{
+				sp: {
+					value: "attributes.sp.value",
+					max: "attributes.sp.max"
+				}
+			},
+			{ inplace: false }
+		),
 		shaper: {
 			hp: {
 				value: "attributes.hp.value",
