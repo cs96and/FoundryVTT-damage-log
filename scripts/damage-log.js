@@ -131,7 +131,14 @@ class DamageLog {
 				max: "FP.max"
 			}
 		},
-		pf1: DamageLog.#DND_ATTRIBUTES,
+		pf1: foundry.utils.mergeObject(DamageLog.#DND_ATTRIBUTES,
+			{
+				hp: {
+					offset: "attributes.hp.offset"
+				}
+			},
+			{ inplace: false }
+		),
 		pf2e: foundry.utils.mergeObject(DamageLog.#DND_ATTRIBUTES,
 			{
 				sp: {
@@ -563,7 +570,17 @@ class DamageLog {
 			const name = (game.i18n.has(localizationId) ? game.i18n.localize(localizationId) : id);
 
 			const oldValue = getAttrib(actor.system, config.value) ?? 0;
-			const newValue = getAttrib(updateData.system, config.value) ?? oldValue;
+
+			let newValue;
+			if ("offset" in config) {
+				const offset = getAttrib(updateData.system, config.offset);
+				if (offset != null)
+					newValue = getAttrib(actor.system, config.max) + offset;
+			}
+
+			if (newValue == null)
+				newValue = getAttrib(updateData.system, config.value) ?? oldValue;
+
 			const diff = newValue - oldValue;
 
 			if (0 != diff) {
