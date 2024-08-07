@@ -34,6 +34,11 @@
 				"id": "age-of-sigmar-soulbound",
 				"type": "system"
 			},
+			
+			{
+				"id": "a5e",
+				"type": "system"
+			},
 			{
 				"id": "archmage",
 				"type": "system"
