@@ -75,6 +75,12 @@ class DamageLog {
 				max: "combat.health.toughness.max"
 			}
 		},
+		a5e : {
+			hp: {
+				value: "attributes.hp.value",
+				max: "attributes.hp.max",
+			}					
+		},
 		archmage: DamageLog.#DND_ATTRIBUTES,
 		D35E: foundry.utils.mergeObject(DamageLog.#DND_ATTRIBUTES,
 			{
