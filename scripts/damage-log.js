@@ -189,6 +189,16 @@ class DamageLog {
 				value: "attributes.pv.temp"
 			}
 		},
+		vaarfeu: {
+			hp: {
+				value: "attributes.hp.value",
+				min: "attributes.hp.min",
+				max: "attributes.hp.max",
+			},
+			temp: {
+				value: "attributes.hp.temp"
+			}
+		},			
 		worldbuilding: {
 			hp: {
 				value: "health.value",
