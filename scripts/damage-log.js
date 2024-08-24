@@ -189,6 +189,7 @@ class DamageLog {
 				value: "attributes.pv.temp"
 			}
 		},
+		vaarfeu: DamageLog.#DND_ATTRIBUTES,
 		worldbuilding: {
 			hp: {
 				value: "health.value",
