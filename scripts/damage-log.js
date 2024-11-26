@@ -239,6 +239,7 @@ class DamageLog {
 
 		if (game.modules.get('lib-wrapper')?.active) {
 			libWrapper.register('damage-log', 'ChatLog.prototype.notify', this.#onChatLogNotify, 'MIXED');
+			libWrapper.register('damage-log', 'ChatLog.prototype.scrollBottom', this.#onScrollBottom, 'OVERRIDE');
 
 			if (!this.hasCustomizableChatTabs) {
 				libWrapper.register('damage-log', 'Messages.prototype.flush', this.#onMessageLogFlush.bind(this), 'MIXED');
@@ -411,6 +412,22 @@ class DamageLog {
 			return;
 
 		return wrapper(message, ...args);
+	}
+
+	/**
+	 * Override the ChatLog.scrollBottom() function to skip over hidden messages.
+	 */
+	async #onScrollBottom({popout=false, waitImages=false, scrollOptions={}}={}) {
+		if ( !this.rendered ) return;
+		if ( waitImages ) await this._waitForImages();
+		const log = this.element[0].querySelector("#chat-log");
+		let child = log.lastElementChild;
+		// Skip backwards over any hidden chat items
+		while ((child != null) && (window.getComputedStyle(child).display === "none")) {
+			child = child.previousElementSibling;
+		}
+		child?.scrollIntoView(scrollOptions);
+		if ( popout ) this._popout?.scrollBottom({waitImages, scrollOptions});	
 	}
 
 	/**
