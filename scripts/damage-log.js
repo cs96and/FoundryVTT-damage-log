@@ -260,6 +260,7 @@ class DamageLog {
 			}
 
 			libWrapper.ignore_conflicts('damage-log', ['actually-private-rolls', 'hide-gm-rolls', 'monks-little-details'], 'ChatLog.prototype.notify');
+			libWrapper.ignore_conflicts('damage-log', ['koboldworks-pf1-little-helper'], 'ChatLog.prototype.scrollBottom');
 		}
 
 		// Ready handling.  Convert damage log messages flag to new format.
