@@ -19,6 +19,10 @@
 
 	"damage-log.default.hp-name" : "HP",
 	"damage-log.default.temp-name" : "Temp",
+	"damage-log.ac2d20.stress-name" : "Stress",
+	"damage-log.ac2d20.injuries-name" : "Injuries",
+	"damage-log.ac2d20.fortune-name" : "Fortune",
+	"damage-log.ac2d20.fatigue-name" : "Fatigue",
 	"damage-log.age-of-sigmar-soulbound.toughness-name" : "Toughness",
 	"damage-log.D35E.vigor-name": "Vigor",
 	"damage-log.D35E.vigorTemp-name": "Temp",
@@ -26,18 +30,15 @@
 	"damage-log.demonlord.corruption-name": "Corruption",
 	"damage-log.demonlord.damage-name": "Damage",
 	"damage-log.demonlord.insanity-name": "Insanity",
+	"damage-log.fallout.radiation-name": "Radiation",
 	"damage-log.gurps.fp-name": "FP",
 	"damage-log.pf2e.sp-name": "Stamina",
+	"damage-log.shaper.temp-name": "Shield",
 	"damage-log.swade.wounds-name" : "Wounds",
 	"damage-log.swade.fatigue-name" : "Fatigue",
 	"damage-log.swade.bennies-name" : "Bennies",
 	"damage-log.tormenta20.pv-name" : "PV",
-	"damage-log.ac2d20.stress-name" : "Stress",
-	"damage-log.ac2d20.injuries-name" : "Injuries",
-	"damage-log.ac2d20.fortune-name" : "Fortune",
-	"damage-log.ac2d20.fatigue-name" : "Fatigue",
-	"damage-log.shaper.temp-name": "Shield",
-
+	
 	"damage-log.settings.use-tab": "Use separate damage log tab",
 	"damage-log.settings.use-tab-hint": "Use a separate tab for damage logs.  If this is unchecked, damage logs will be sent to the default chatlog.",
 

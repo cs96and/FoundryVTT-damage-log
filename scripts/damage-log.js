@@ -114,6 +114,19 @@ class DamageLog {
 			},
 		},
 		dnd5e: DamageLog.#DND_ATTRIBUTES,
+		fallout: {
+			hp: {
+				value: "health.value",
+				max: "health.max"
+			},
+			temp: {
+				value: "health.bonus"
+			},
+			radiation: {
+				invert: true,
+				value: "radiation"
+			}
+		},
 		dragonbane: {
 			hp: {
 				value: "hitPoints.value",

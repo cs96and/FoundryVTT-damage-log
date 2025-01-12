@@ -60,6 +60,10 @@
 				"type": "system"
 			},
 			{
+				"id": "fallout",
+				"type": "system"
+			},
+			{
 				"id": "gurps",
 				"type": "system"
 			},
