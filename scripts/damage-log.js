@@ -39,6 +39,7 @@ class DamageLog {
 	 * Location of HP attributes for supported systems.
 	 */
 	static #SYSTEM_CONFIGS = {
+		a5e : DamageLog.#DND_ATTRIBUTES,
 		ac2d20: {
 			fatigue: {
 				invert: true,
@@ -64,8 +65,8 @@ class DamageLog {
 				max: "combat.health.toughness.max"
 			}
 		},
-		a5e : DamageLog.#DND_ATTRIBUTES,
 		archmage: DamageLog.#DND_ATTRIBUTES,
+		"black-flag": DamageLog.#DND_ATTRIBUTES,
 		D35E: foundry.utils.mergeObject(DamageLog.#DND_ATTRIBUTES,
 			{
 				vigor: {
@@ -151,6 +152,12 @@ class DamageLog {
 			},
 			{ inplace: false }
 		),
+		shadowdark: {
+			hp: {
+				value: "attributes.hp.value",
+				max: "attributes.hp.max",
+			}
+		},
 		shaper: {
 			hp: {
 				value: "attributes.hp.value",

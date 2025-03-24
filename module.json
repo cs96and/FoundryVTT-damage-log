@@ -24,6 +24,10 @@
 		],
 		"systems": [
 			{
+				"id": "a5e",
+				"type": "system"
+			},
+			{
 				"id": "ac2d20",
 				"type": "system"
 			},
@@ -31,13 +35,12 @@
 				"id": "age-of-sigmar-soulbound",
 				"type": "system"
 			},
-			
 			{
-				"id": "a5e",
+				"id": "archmage",
 				"type": "system"
 			},
 			{
-				"id": "archmage",
+				"id": "black-flag",
 				"type": "system"
 			},
 			{
@@ -74,6 +77,10 @@
 			},
 			{
 				"id": "shaper",
+				"type": "system"
+			},
+			{
+				"id": "shadowdark",
 				"type": "system"
 			},
 			{
