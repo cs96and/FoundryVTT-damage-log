@@ -13,9 +13,11 @@
 /* Styling for the tabs */
 nav.damage-log-nav.tabs {
 	flex: 0;
-	margin: 0 0 5px;
-	border-bottom: 1px solid #ff6400;
-	box-shadow: 0 0 10px red;
+	margin: 0;
+	line-height: normal;
+	background-color: #0b0a13;
+	width: var(--sidebar-width);
+	pointer-events: all;
 }
 
 /* Ensure tabs take up their full available width */
@@ -27,7 +29,6 @@ nav.damage-log-nav .item {
 nav.damage-log-nav .item.active {
 	color: white;
 	border: 1px solid red;
-	border-bottom: none;
 	box-shadow: 0 0 6px inset #ff6400;
 	border-radius: 5px 5px 0 0;
 }
@@ -37,6 +38,7 @@ nav.damage-log-nav .item.active {
 	margin: 0;
 	padding: 0;
 	overflow-y: auto;
+	direction: ltr;
 }
 /* Reduce margins and padding in damage log tables */
 .message.damage-log table {
@@ -91,10 +93,6 @@ nav.damage-log-nav .item.active {
 	display: initial;
 }
 
-/* Force showing of damage logs (for compatibility with Tabbed Chatlog) */
-.message.damage-log.hard-show {
-    display: flex !important;
-}
 /* Force hiding of damage logs the user is not permitted to see */
 .message.damage-log.not-permitted {
 	display: none !important;

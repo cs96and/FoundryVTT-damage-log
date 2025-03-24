@@ -12,19 +12,12 @@ Damage Log is a FoundryVTT module that monitors for changes to characters' healt
 ![](images/damage-log.gif)
 
 ## Features
-* Creates a separate "Damage Log" chatlog tab.  Whenever an actor takes damage or receives healing, a message containing the HP changes is added to the tab.
+* Creates a separate "Damage Log" chat tab.  Whenever an actor takes damage or receives healing, a message containing the HP changes is added to the tab.
 * The extra tab can be disabled, in which case the messages go to the normal chatlog.
 * Damage can easily be reverted or re-applied using the message's right click menu.
 * By default, only the GM can see the damage log.  The GM can optionally let players see the damage log for actors they are permissioned for (the minimum permission level is configurable, and defaults to "owner").
 * The GM can also let players see limited damage info for all actors (i.e. the amount of damage taken, but not the old and new HP values).
 * Works with [Ready Set Roll](https://foundryvtt.com/packages/ready-set-roll-5e/), [Midi QoL](https://foundryvtt.com/packages/midi-qol/), and probably works with other dice rolling modules too.
-* Integrates with the [Tabbed Chatlog](https://github.com/cswendrowski/FoundryVTT-Tabbed-Chatlog) and [Customizable Chat Tabs](https://foundryvtt.com/packages/chat-tabs) modules (see below for more information).
-
-### Tabbed Chatlog Integration
-Damage Log is compatible with the [Tabbed Chatlog](https://github.com/cswendrowski/FoundryVTT-Tabbed-Chatlog) module, and will automatically add an extra tab on to the end of Tabbed Chatlog's tabs.
-
-### Customizable Chat Tabs Integration
-Damage Log is compatible with the [Customizable Chat Tabs](https://foundryvtt.com/packages/chat-tabs) module.  You will need to go into that module's settings, add a new tab, and select "Damage Log" messages to go into that tab.  Or alternatively add the Damage Log messages to one of your existing tabs.  Note that Damage Log messages have a type of "Other", so they will also appear in any other tabs that have "Other" messages selected.  To prevent this enable "Exclusive Mode" in Customizable Chat Tabs' settings.
 
 ## System Compatibility
 Damage Log is currently compatible with the following systems.
@@ -43,6 +36,10 @@ Damage Log is currently compatible with the following systems.
 * Story Shaper (`shaper`)
 * Toolkit13 (13th Age Compatible) (`archmage`)
 * Tormenta 20 (`tormenta20`)
+
+## Module Incompatibilities
+* Damage Log used to be compatible with the [Tabbed Chatlog](https://github.com/cswendrowski/FoundryVTT-Tabbed-Chatlog) and [Customizable Chat Tabs](https://foundryvtt.com/packages/chat-tabs) modules.  As these modules are no longer compatible with the latest version of Foundry, compatibility with them has been removed.
+* Damage Log is not compatible with [Simple Chat Tabs](https://github.com/mclemente/fvtt-simple-chat-tabs)
 
 ## Installation
 Damage Log can be installed using the Foundry module installer.  Alternatively, you can install it using the following manifest URL...<br>

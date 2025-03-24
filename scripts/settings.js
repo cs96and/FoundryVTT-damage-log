@@ -30,7 +30,7 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: true,
-			onChange: foundry.utils.debouncedReload
+			requiresReload: true
 		});
 
 		game.settings.register("damage-log", "allowPlayerView", {
@@ -39,7 +39,7 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: false,
-			onChange: foundry.utils.debouncedReload
+			requiresReload: true
 		});
 
 		const permissionChoices = {};
@@ -56,7 +56,7 @@ export class DamageLogSettings {
 			type: Number,
 			choices: permissionChoices,
 			default: Util.DOCUMENT_OWNERSHIP_LEVELS.OWNER,
-			onChange: foundry.utils.debouncedReload
+			requiresReload: true
 		});
 
 		game.settings.register("damage-log", "allowPlayerUndo", {
@@ -76,7 +76,7 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: false,
-			onChange: foundry.utils.debouncedReload
+			requiresReload: true
 		});
 
 		game.settings.register("damage-log", "hideHealingInLimitedInfo", {
@@ -86,7 +86,7 @@ export class DamageLogSettings {
 			config: true,
 			type: Boolean,
 			default: false,
-			onChange: foundry.utils.debouncedReload
+			requiresReload: true
 		});
 
 		game.settings.register("damage-log", "clampToMax", {
@@ -149,7 +149,8 @@ export class DamageLogSettings {
 	#onRenderSettingsConfig(settingsConfig, html, user) {
 		if (!game.user.isGM) return;
 
-		const formGroups = html[0].querySelectorAll('div.form-group');
+		const element = Util.isV13() ? html : html[0];
+		const formGroups = element.querySelectorAll('div.form-group');
 
 		// Disable the player-centric controls if allowPlayerView is disabled.
 		const playerSpecificDivs = [...formGroups].filter(fg => {
@@ -163,8 +164,8 @@ export class DamageLogSettings {
 		});
 		DamageLogSettings.#toggleDivs(hideHealingDiv, this.allowPlayerView && this.showLimitedInfoToPlayers);
 		
-		const allowPlayersCheckbox = html[0].querySelector('input[name="damage-log.allowPlayerView"]');
-		const showLimitedInfoCheckbox = html[0].querySelector('input[name="damage-log.showLimitedInfoToPlayers"]');
+		const allowPlayersCheckbox = element.querySelector('input[name="damage-log.allowPlayerView"]');
+		const showLimitedInfoCheckbox = element.querySelector('input[name="damage-log.showLimitedInfoToPlayers"]');
 
 		// Handle the allowPlayerView checkbox being toggled.
 		allowPlayersCheckbox.addEventListener("change", (event) => {
