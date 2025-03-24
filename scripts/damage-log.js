@@ -12,6 +12,7 @@
 
 import { DamageLogMigration } from "./migration.js";
 import { DamageLogSettings } from "./settings.js";
+import { Systems } from "./systems.js";
 import { Util } from "./util.js"
 
 // Initialization.  Create the DamageLog.
@@ -19,205 +20,6 @@ let damageLog;
 Hooks.once("setup", () => damageLog = new DamageLog());
 
 class DamageLog {
-
-	/**
-	 * Location of HP attributes in D&D-like systems.
-	 */
-	static #DND_ATTRIBUTES = {
-		hp: {
-			value: "attributes.hp.value",
-			min: "attributes.hp.min",
-			max: "attributes.hp.max",
-			tempMax: "attributes.hp.tempMax",
-		},
-		temp: {
-			value: "attributes.hp.temp"
-		}
-	};
-
-	/**
-	 * Location of HP attributes for supported systems.
-	 */
-	static #SYSTEM_CONFIGS = {
-		a5e : DamageLog.#DND_ATTRIBUTES,
-		ac2d20: {
-			fatigue: {
-				invert: true,
-				value: "fatigue"
-			},
-			fortune: {
-				invert: false,
-				value: "fortune.value"
-			},
-			injuries: {
-				invert: true,
-				value: "injuries.value"
-			},
-			stress: {
-				invert: true,
-				value: "stress.value",
-				max: "stress.max"
-			}
-		},
-		"age-of-sigmar-soulbound": {
-			toughness: {
-				value: "combat.health.toughness.value",
-				max: "combat.health.toughness.max"
-			}
-		},
-		archmage: DamageLog.#DND_ATTRIBUTES,
-		"black-flag": DamageLog.#DND_ATTRIBUTES,
-		D35E: foundry.utils.mergeObject(DamageLog.#DND_ATTRIBUTES,
-			{
-				vigor: {
-					value: "attributes.vigor.value",
-					min: "attributes.vigor.min",
-					max: "attributes.vigor.max"
-				},
-				vigorTemp: {
-					value: "attributes.vigor.temp"
-				},
-				wounds: {
-					value: "attributes.wounds.value",
-					min: "attributes.wounds.min",
-					max: "attributes.wounds.max"
-				},
-			},
-			{ inplace: false }
-		),
-		demonlord: {
-			corruption: {
-				invert: true,
-				value: "characteristics.corruption.value",
-				min: "characteristics.corruption.min",
-			},
-			damage: {
-				invert: true,
-				value: "characteristics.health.value",
-				max: "characteristics.health.max",
-			},
-			insanity: {
-				invert: true,
-				value: "characteristics.insanity.value",
-				min: "characteristics.insanity.min",
-				max: "characteristics.insanity.max",
-			},
-		},
-		dnd5e: DamageLog.#DND_ATTRIBUTES,
-		fallout: {
-			hp: {
-				value: "health.value",
-				max: "health.max"
-			},
-			temp: {
-				value: "health.bonus"
-			},
-			radiation: {
-				invert: true,
-				value: "radiation"
-			}
-		},
-		dragonbane: {
-			hp: {
-				value: "hitPoints.value",
-				max: "hitPoints.max",
-			}
-		},
-		gurps: {
-			hp: {
-				value: "HP.value",
-				min: "HP.min",
-				max: "HP.max"
-			},
-			fp: {
-				value: "FP.value",
-				min: "FP.min",
-				max: "FP.max"
-			}
-		},
-		pf1: foundry.utils.mergeObject(DamageLog.#DND_ATTRIBUTES,
-			{
-				hp: {
-					offset: "attributes.hp.offset"
-				}
-			},
-			{ inplace: false }
-		),
-		pf2e: foundry.utils.mergeObject(DamageLog.#DND_ATTRIBUTES,
-			{
-				sp: {
-					value: "attributes.sp.value",
-					max: "attributes.sp.max"
-				}
-			},
-			{ inplace: false }
-		),
-		shadowdark: {
-			hp: {
-				value: "attributes.hp.value",
-				max: "attributes.hp.max",
-			}
-		},
-		shaper: {
-			hp: {
-				value: "attributes.hp.value",
-				min: "attributes.hp.min",
-				max: "attributes.hp.max"
-			},
-			temp: {
-				value: "attributes.hp.temp"
-			}
-		},
-		sw5e: DamageLog.#DND_ATTRIBUTES,
-		swade: {
-			wounds: {
-				invert: true,
-				value: "wounds.value",
-				min: "wounds.min",
-				max: "wounds.max"
-			},
-			fatigue: {
-				invert: true,
-				value: "fatigue.value",
-				min: "fatigue.min",
-				max: "fatigue.max"
-			},
-			bennies: {
-				invert: false,
-				value: "bennies.value",
-				min: "bennies.min",
-				max: "bennies.max"
-			}
-		},
-		tormenta20: {
-			pv: {
-				value: "attributes.pv.value",
-				min: "attributes.pv.min",
-				max: "attributes.pv.max",
-			},
-			temp: {
-				value: "attributes.pv.temp"
-			}
-		},
-		tresdetv: {
-			mana: {
-				value: "pontos.mana.value",
-				max: "pontos.mana.max"
-			},
-			vida: {
-				value: "pontos.vida.value",
-				max: "pontos.vida.max"
-			}
-		},
-		vaarfeu: DamageLog.#DND_ATTRIBUTES,
-		worldbuilding: {
-			hp: {
-				value: "health.value",
-				min: "health.min",
-				max: "health.max"
-			}
-		}
-	};
 
 	static #TABS_TEMPLATE = "modules/damage-log/templates/damage-log-tabs.hbs";
 	static #TABLE_TEMPLATE = "modules/damage-log/templates/damage-log-table.hbs";
@@ -228,7 +30,7 @@ class DamageLog {
 	 */
 	constructor() {
 		this.settings = new DamageLogSettings();
-		this.systemConfig = DamageLog.#SYSTEM_CONFIGS[game.system.id];
+		this.systemConfig = Systems.CONFIGS[game.system.id];
 		this.tabs = null;
 		this.scrollTarget = null;
 		this.currentTab = "chat";
