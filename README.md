@@ -21,6 +21,7 @@ Damage Log is a FoundryVTT module that monitors for changes to characters' healt
 
 ## System Compatibility
 Damage Log is currently compatible with the following systems.
+* 3DeT Victory (`tresdetv`)
 * Achtung! Cthulhu 2d20 (`ac2d20`)
 * Age of Sigmar: Soulbound (`age-of-sigmar-soulbound`)
 * Dragonbane / Drakar & Demoner (`dragonbane`)

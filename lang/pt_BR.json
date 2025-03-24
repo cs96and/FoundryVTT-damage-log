@@ -18,6 +18,8 @@
 	"damage-log.swade.fatigue-name": "Fatiga",
 	"damage-log.swade.bennies-name": "Bennies",
 	"damage-log.tormenta20.pv-name": "PV",
+	"damage-log.tresdetv.mana-name" : "Mana",
+	"damage-log.tresdetv.vida-name" : "Vida",
 	"damage-log.settings.use-tab": "Use a guia de log de danos separada",
 	"damage-log.settings.allow-player-view": "Permitir que os jogadores visualizem o log de danos",
 	"damage-log.settings.min-player-permission": "Permissão mínima do ator",

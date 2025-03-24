@@ -192,6 +192,16 @@ class DamageLog {
 				value: "attributes.pv.temp"
 			}
 		},
+		tresdetv: {
+			mana: {
+				value: "pontos.mana.value",
+				max: "pontos.mana.max"
+			},
+			vida: {
+				value: "pontos.vida.value",
+				max: "pontos.vida.max"
+			}
+		},
 		vaarfeu: DamageLog.#DND_ATTRIBUTES,
 		worldbuilding: {
 			hp: {
