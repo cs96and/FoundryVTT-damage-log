@@ -27,6 +27,7 @@ Damage Log is currently compatible with the following systems.
 * Dragonbane / Drakar & Demoner (`dragonbane`)
 * Dungeons & Dragons v3.5 (`D35E`)
 * Dungeons & Dragons 5th Edition (`dnd5e`)
+* Fallout: The Rollplaying Game (`fallout`)
 * GURPS 4th Edition Game Aid (Unofficial) (`gurps`)
 * Level Up: Advanced 5th Edition (`a5e`)
 * Pathfinder 1st Edition (`pf1`)
