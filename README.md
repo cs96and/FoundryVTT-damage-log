@@ -1,7 +1,7 @@
  # Damage Log
 
 ![GitHub Latest Release](https://img.shields.io/github/release/cs96and/FoundryVTT-damage-log?style=for-the-badge)
-![Foundry Version](https://img.shields.io/badge/dynamic/json?label=Foundry%20Version&prefix=v&query=%24.compatibleCoreVersion&url=https%3A%2F%2Fraw.githubusercontent.com%2Fcs96and%2FFoundryVTT-damage-log%2Fmaster%2Fmodule.json&style=for-the-badge)
+![Foundry Version](https://img.shields.io/badge/dynamic/json?label=Foundry%20Version&prefix=v&query=%24.compatibility.verified&url=https%3A%2F%2Fraw.githubusercontent.com%2Fcs96and%2FFoundryVTT-damage-log%2Fmaster%2Fmodule.json&style=for-the-badge)
 ![Latest Release Downloads](https://img.shields.io/github/downloads/cs96and/FoundryVTT-damage-log/latest/total?style=for-the-badge)
 ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fdamage-log&colorB=4aa94a&style=for-the-badge)
 
