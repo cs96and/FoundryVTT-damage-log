@@ -246,7 +246,7 @@ class DamageLog {
 		const log = chatLog.style.display === "" ? chatLog : (damageLog.style.display === "" ? damageLog : null);
 		if (!log) return;
 
-		log.scrollTop = Number.MAX_SAFE_INTEGER;
+		log.scrollTop = log.scrollHeight;
 		if ( popout ) this._popout?.scrollBottom({waitImages, scrollOptions});
 	}
 
