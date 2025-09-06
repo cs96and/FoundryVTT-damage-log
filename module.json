@@ -76,6 +76,10 @@
 				"type": "system"
 			},
 			{
+				"id": "pirateborg",
+				"type": "system"
+			},
+			{
 				"id": "shaper",
 				"type": "system"
 			},
