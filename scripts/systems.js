@@ -144,6 +144,30 @@ export class Systems {
 			},
 			{ inplace: false }
 		),
+		pirateborg: {
+			hp: {
+				value: "attributes.hp.value",
+				max: "attributes.hp.max",
+			},
+			luck: {
+				value: "attributes.luck.value",
+			},  
+        	agility: {
+				value: "abilities.agility.value",
+			},  
+        	presence: {
+				value: "abilities.presence.value",
+			}, 
+        	spirit: {
+				value: "abilities.spirit.value",
+			}, 
+        	strength: {
+				value: "abilities.strength.value",
+			}, 
+        	toughness: {
+				value: "abilities.toughness.value",
+			},
+        },
 		shadowdark: {
 			hp: {
 				value: "attributes.hp.value",
