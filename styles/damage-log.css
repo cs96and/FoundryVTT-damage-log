@@ -15,7 +15,7 @@ nav.damage-log-nav.tabs {
 	flex: 0;
 	margin: 0;
 	line-height: normal;
-	background-color: #0b0a13;
+	background-color: rgba(0,0,0,0.2);
 	width: var(--sidebar-width);
 	pointer-events: all;
 }
@@ -54,11 +54,11 @@ nav.damage-log-nav .item.active {
 }
 /* Styling for damage messages */
 .message.damage-log.damage {
-	background: #ffd9d9 !important;
+	background: rgba(255,0,0,.1) !important;
 }
 /* Styling for healing messages */
 .message.damage-log.healing {
-	background: #d9ffd9 !important;
+	background: rgba(0,255,0,.1) !important;
 }
 /* Stikethrough reverted messages */
 .message.damage-log.reverted {
@@ -66,11 +66,11 @@ nav.damage-log-nav .item.active {
 }
 /* Dim reverted damage */
 .message.damage-log.reverted.damage {
-	background: #ffeaea !important;
+	background: rgba(255,255,0,.1) !important;
 }
 /* Dim reverted healing */
 .message.damage-log.reverted.healing {
-	background: #eaffea !important;
+	background: rgba(0,255,255,.1) !important;
 }
 /* Hide chat portrait whisper information on damage logs */
 .message.damage-log [class^="chat-portrait-indicator-"],
