@@ -43,7 +43,7 @@ class DamageLog {
 			throw false;
 		}
 
-		loadTemplates([DamageLog.#TABS_TEMPLATE, DamageLog.#TABLE_TEMPLATE]);
+		Util.loadTemplates([DamageLog.#TABS_TEMPLATE, DamageLog.#TABLE_TEMPLATE]);
 
 		if (this.settings.useTab)
 		{
@@ -60,18 +60,18 @@ class DamageLog {
 		Hooks.on('preUpdateActor', this.#onPreUpdateActor.bind(this));
 		Hooks.on('updateActor', this.#onUpdateActor.bind(this));
 		Hooks.on('preUpdateChatMessage', this.#onPreUpdateChatMessage.bind(this));
-		Hooks.on('renderChatMessage', this.#onRenderChatMessage.bind(this));
+		Hooks.on(Util.isV13() ? 'renderChatMessageHTML' : 'renderChatMessage', this.#onRenderChatMessage.bind(this));
 
 		if (game.modules.get('lib-wrapper')?.active) {
-			libWrapper.register('damage-log', 'ChatLog.prototype.notify', this.#onChatLogNotify, 'MIXED');
-			libWrapper.register('damage-log', 'ChatLog.prototype.updateTimestamps', this.#onUpdateTimestamps, 'WRAPPER');
+			libWrapper.register('damage-log', `${Util.chatLogClassPath}.prototype.notify`, this.#onChatLogNotify, 'MIXED');
+			libWrapper.register('damage-log', `${Util.chatLogClassPath}.prototype.updateTimestamps`, this.#onUpdateTimestamps, 'WRAPPER');
 
 			if (!Util.isV13()) {
-				libWrapper.register('damage-log', 'ChatLog.prototype.scrollBottom', this.#onScrollBottom, 'OVERRIDE');
-				libWrapper.ignore_conflicts('damage-log', ['koboldworks-pf1-little-helper'], 'ChatLog.prototype.scrollBottom');
+				libWrapper.register('damage-log', `${Util.chatLogClassPath}.prototype.scrollBottom`, this.#onScrollBottom, 'OVERRIDE');
+				libWrapper.ignore_conflicts('damage-log', ['koboldworks-pf1-little-helper'], `${Util.chatLogClassPath}.prototype.scrollBottom`);
 			}
 
-			libWrapper.ignore_conflicts('damage-log', ['actually-private-rolls', 'hide-gm-rolls', 'monks-little-details'], 'ChatLog.prototype.notify');
+			libWrapper.ignore_conflicts('damage-log', ['actually-private-rolls', 'hide-gm-rolls', 'monks-little-details'], `${Util.chatLogClassPath}.prototype.notify`);
 		}
 
 		// Ready handling. Convert damage log messages flag to new format.
@@ -123,10 +123,11 @@ class DamageLog {
 
 		const element = Util.isV13() ? html : html[0];
 
-		const tabsHtml = await renderTemplate(DamageLog.#TABS_TEMPLATE);
+		const tabsHtml = await Util.renderTemplate(DamageLog.#TABS_TEMPLATE);
 		element.insertAdjacentHTML("afterBegin", tabsHtml);
 
-		const tabs = new Tabs({
+		const TabsClass = Util.isV13() ? foundry.applications.ux.Tabs : Tabs;
+		const tabs = new TabsClass({
 			navSelector: ".damage-log-nav.tabs",
 			contentSelector: undefined,
 			initial: this.currentTab,
@@ -489,7 +490,8 @@ class DamageLog {
 		const flags = message?.flags["damage-log"];
 		if (!flags) return;
 
-		const classList = html[0].classList;
+		const element = Util.isV13() ? html : html[0];
+		const classList = element.classList;
 
 		classList.add("damage-log");
 
@@ -514,13 +516,13 @@ class DamageLog {
 		if (!canViewTable && (!this.settings.showLimitedInfoToPlayers || (isHealing && this.settings.hideHealingInLimitedInfo)))
 			classList.add("not-permitted");
 
-		const content = html[0].querySelector("div.message-content");
+		const content = element.querySelector("div.message-content");
 
 		// Dorako UI moves the flavor text into the message content.  Extract it so we don't overwrite it with the table.
 		const flavorText = (this.hasPf2eDorakoUi) ? content.querySelector("span.flavor-text")?.outerHTML ?? "" : "";
 
 		// The current content is just some placeholder text.  Completely replace it with the HTML table, or nothing if the user is not allowed to see it.
-		content.innerHTML = flavorText + (canViewTable ? await renderTemplate(DamageLog.#TABLE_TEMPLATE, flags) : "");
+		content.innerHTML = flavorText + (canViewTable ? await Util.renderTemplate(DamageLog.#TABLE_TEMPLATE, flags) : "");
 	}
 
 	/**

@@ -32,6 +32,10 @@ export class Util {
 		return (Util.isV12() ? CONST.DOCUMENT_OWNERSHIP_LEVELS : CONST.DOCUMENT_PERMISSION_LEVELS);
 	}
 
+	static get chatLogClassPath() {
+		return Util.isV13() ? "foundry.applications.sidebar.tabs.ChatLog" : "ChatLog";
+	}
+
 	static get chatLogSelector() {
 		return `${Util.isV13() ? '.' : '#'}chat-log`;
 	}
@@ -46,5 +50,13 @@ export class Util {
 
 	static getMessageAuthor(message) {
 		return (Util.isV12() ? message.author : message.user);
+	}
+
+	static async loadTemplates(...args) {
+		return Util.isV13() ? foundry.applications.handlebars.loadTemplates(...args) : loadTemplates(...args)
+	}
+
+	static async renderTemplate(...args) {
+		return Util.isV13() ? foundry.applications.handlebars.renderTemplate(...args) : renderTemplate(...args)
 	}
 }
