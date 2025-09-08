@@ -32,6 +32,7 @@ Damage Log is currently compatible with the following systems.
 * Level Up: Advanced 5th Edition (`a5e`)
 * Pathfinder 1st Edition (`pf1`)
 * Pathfinder 2nd Edition (`pf2e`)
+* Pirate Borg (`pirateborg`)
 * Savage Worlds Adventure Edition (`swade`)
 * Simple Worldbuilding (`worldbuilding`)
 * Shadow Of The Demon Lord (`demonlord`)

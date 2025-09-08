@@ -76,11 +76,15 @@
 				"type": "system"
 			},
 			{
-				"id": "shaper",
+				"id": "pirateborg",
 				"type": "system"
 			},
 			{
 				"id": "shadowdark",
+				"type": "system"
+			},
+			{
+				"id": "shaper",
 				"type": "system"
 			},
 			{
