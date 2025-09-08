@@ -16,8 +16,8 @@ import { Systems } from "./systems.js";
 import { Util } from "./util.js"
 
 // Initialization.  Create the DamageLog.
-let damageLog;
-Hooks.once("setup", () => damageLog = new DamageLog());
+let globalDamageLog;
+Hooks.once("setup", () => globalDamageLog = new DamageLog());
 
 class DamageLog {
 
@@ -37,6 +37,7 @@ class DamageLog {
 		this.hasPf2eDorakoUi = !!game.modules.get("pf2e-dorako-ui")?.active;
 		this.damageType = "";
 		this.prevScrollTop = 0;
+		this.isCreatingDamageLogMessage = 0;
 
 		if (!this.systemConfig) {
 			Hooks.once("ready", () => ui.notifications.error(game.i18n.format("damage-log.error.system-not-supported", { systemId: game.system.id })));
@@ -65,13 +66,10 @@ class DamageLog {
 		if (game.modules.get('lib-wrapper')?.active) {
 			libWrapper.register('damage-log', `${Util.chatLogClassPath}.prototype.notify`, this.#onChatLogNotify, 'MIXED');
 			libWrapper.register('damage-log', `${Util.chatLogClassPath}.prototype.updateTimestamps`, this.#onUpdateTimestamps, 'WRAPPER');
-
-			if (!Util.isV13()) {
-				libWrapper.register('damage-log', `${Util.chatLogClassPath}.prototype.scrollBottom`, this.#onScrollBottom, 'OVERRIDE');
-				libWrapper.ignore_conflicts('damage-log', ['koboldworks-pf1-little-helper'], `${Util.chatLogClassPath}.prototype.scrollBottom`);
-			}
+			libWrapper.register('damage-log', `${Util.chatLogClassPath}.prototype.scrollBottom`, this.#onScrollBottom, 'MIXED');
 
 			libWrapper.ignore_conflicts('damage-log', ['actually-private-rolls', 'hide-gm-rolls', 'monks-little-details'], `${Util.chatLogClassPath}.prototype.notify`);
+			libWrapper.ignore_conflicts('damage-log', ['koboldworks-pf1-little-helper'], `${Util.chatLogClassPath}.prototype.scrollBottom`);
 		}
 
 		// Ready handling. Convert damage log messages flag to new format.
@@ -235,17 +233,29 @@ class DamageLog {
 	/**
 	 * Override the ChatLog.scrollBottom() function to skip over hidden messages.
 	 */
-	async #onScrollBottom({popout=false, waitImages=false, scrollOptions={}}={}) {
-		if ( !this.rendered ) return;
-		if ( waitImages ) await this._waitForImages();
-
-		const chatLog = this.element[0].querySelector("#chat-log");
-		const damageLog = this.element[0].querySelector("#damage-log");
-
+	async #onScrollBottom(wrapper, options={}) {
 		// Work out whether chat or damage log is showing.
 		// Don't use DamageLog.currentTab, as that only tracks the main chatlog, not the popout.
+		const element = Util.isV13() ? this.element : this.element[0];
+		const chatLog = element.querySelector(Util.chatLogSelector);
+		const damageLog = element.querySelector("#damage-log");
 		const log = chatLog.style.display === "" ? chatLog : (damageLog.style.display === "" ? damageLog : null);
 		if (!log) return;
+
+		// Prevent scrolling to the bottom if we are creating a damage log message and the damage-log is not showing
+		if (globalDamageLog.isCreatingDamageLogMessage > 0) {
+			globalDamageLog.isCreatingDamageLogMessage -= 1;
+			if (log.id !== "damage-log")
+				return;
+		}
+
+		if (Util.isV13())
+			return wrapper(options);
+
+		const {popout=false, waitImages=false, scrollOptions={}} = options;
+
+		if ( !this.rendered ) return;
+		if ( waitImages ) await this._waitForImages();
 
 		log.scrollTop = log.scrollHeight;
 		if ( popout ) this._popout?.scrollBottom({waitImages, scrollOptions});
@@ -438,6 +448,16 @@ class DamageLog {
 			speaker,
 			whisper: this.#calculteWhisperData(actor, isHealing)
 		};
+
+		const nMessages = (document.getElementById("chat-popout") ? 2 : 1);
+		this.isCreatingDamageLogMessage += nMessages;
+
+		// isCreatingDamageLogMessage should get decremented in #onScrollBottom, but reset it after 500ms in case that
+		// callback doesn't happen for some reason.
+		setTimeout(() => {
+			if (this.isCreatingDamageLogMessage > 0)
+				this.isCreatingDamageLogMessage -= Math.min(nMessages, this.isCreatingDamageLogMessage);
+		}, 500);
 
 		ChatMessage.create(chatData, {});
 	}
