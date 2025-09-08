@@ -52,6 +52,14 @@ nav.damage-log-nav .item.active {
 .message.damage-log table .num {
 	text-align: right;
 }
+
+/* Font colour for all damage-log messages */
+.message.damage-log {
+	color: #191813 !important;
+}
+.message.damage-log .message-header {
+	color: #4b4a44 !important;
+}
 /* Styling for damage messages */
 .message.damage-log.damage {
 	background: #ffd9d9 !important;
