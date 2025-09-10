@@ -127,6 +127,23 @@ export class Systems {
 				max: "FP.max"
 			}
 		},
+		mosh: {
+			health: {
+				value: "health.value",
+				min: "health.min",
+				max: "health.max"
+			},
+			wounds: {
+				value: "hits.value",
+				min: "hits.min",
+				max: "hits.max"
+			},
+			stress: {
+				value: "other.stress.value",
+				min: "other.stress.min",
+				max: "other.stress.max"
+			}
+		},
 		pf1: foundry.utils.mergeObject(Systems.#DND_ATTRIBUTES,
 			{
 				hp: {
