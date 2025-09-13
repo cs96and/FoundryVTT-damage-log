@@ -24,6 +24,7 @@ Damage Log is currently compatible with the following systems.
 * 3DeT Victory (`tresdetv`)
 * Achtung! Cthulhu 2d20 (`ac2d20`)
 * Age of Sigmar: Soulbound (`age-of-sigmar-soulbound`)
+* Call of Cthulhu 7th edition (`CoC7`)
 * Dragonbane / Drakar & Demoner (`dragonbane`)
 * Dungeons & Dragons v3.5 (`D35E`)
 * Dungeons & Dragons 5th Edition (`dnd5e`)

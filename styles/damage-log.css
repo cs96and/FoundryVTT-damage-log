@@ -60,6 +60,7 @@ nav.damage-log-nav .item.active {
 .message.damage-log .message-header {
 	color: #4b4a44 !important;
 }
+
 /* Styling for damage messages */
 .message.damage-log.damage {
 	background: #ffd9d9 !important;

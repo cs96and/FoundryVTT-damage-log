@@ -59,6 +59,24 @@ export class Systems {
 		},
 		archmage: Systems.#DND_ATTRIBUTES,
 		"black-flag": Systems.#DND_ATTRIBUTES,
+		CoC7: {
+			hp: {
+				value: "attribs.hp.value",
+				max: "attribs.hp.max",
+			},
+			mp: {
+				value: "attribs.mp.value",
+				max: "attribs.mp.max",
+			},
+			lck: {
+				value: "attribs.lck.value",
+				max: "attribs.lck.max",
+			},
+			san: {
+				value: "attribs.san.value",
+				max: "attribs.san.max",
+			}
+		},
 		D35E: foundry.utils.mergeObject(Systems.#DND_ATTRIBUTES,
 			{
 				vigor: {
