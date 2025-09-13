@@ -68,6 +68,10 @@
 				"type": "system"
 			},
 			{
+				"id": "mosh",
+				"type": "system"
+			},
+			{
 				"id": "pf1",
 				"type": "system"
 			},
