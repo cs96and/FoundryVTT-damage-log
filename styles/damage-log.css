@@ -43,10 +43,21 @@ nav.damage-log-nav .item.active {
 /* Reduce margins and padding in damage log tables */
 .message.damage-log table {
 	margin: 2px auto;
+	background-color: inherit !important;
 }
 .message.damage-log table th,
 .message.damage-log table td {
 	padding: 2px;
+}
+/* Darken table headers and alternating rows */
+.message.damage-log table th {
+	background-color: rgba(0,0,0,0.05) !important;
+}
+.message.damage-log table tr:nth-child(even) {
+	background-color: rgba(0,0,0,0.1) !important;
+}
+.message.damage-log table tr:nth-child(odd) {
+	background-color: rgba(0,0,0,0.2) !important;
 }
 /* Align numbers in tables */
 .message.damage-log table .num {
@@ -54,11 +65,14 @@ nav.damage-log-nav .item.active {
 }
 
 /* Font colour for all damage-log messages */
-.message.damage-log {
+.message.damage-log,
+.message.damage-log .message-header,
+.message.damage-log .message-header .title,
+.message.damage-log .message-header .subtitle {
 	color: #191813 !important;
 }
-.message.damage-log .message-header {
-	color: #4b4a44 !important;
+.message.damage-log .message-header .message-timestamp {
+	color: #666666 !important;
 }
 
 /* Styling for damage messages */
