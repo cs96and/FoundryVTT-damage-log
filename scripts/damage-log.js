@@ -41,7 +41,7 @@ class DamageLog {
 
 		if (!this.systemConfig) {
 			Hooks.once("ready", () => ui.notifications.error(game.i18n.format("damage-log.error.system-not-supported", { systemId: game.system.id })));
-			throw false;
+			throw Error(game.i18n.format("damage-log.error.system-not-supported", { systemId: game.system.id }));
 		}
 
 		Util.loadTemplates([DamageLog.#TABS_TEMPLATE, DamageLog.#TABLE_TEMPLATE]);
@@ -84,28 +84,34 @@ class DamageLog {
 		if ((game.system.id === "dnd5e") && !foundry.utils.isNewerVersion("3.0.0", game.system.version)) {
 			let damageLogStyleSheet = new CSSStyleSheet()
 			for (const sheet of document.styleSheets) {
-				let dnd5eStyleSheet = null;
-				if (sheet.href?.endsWith("dnd5e.css")) {
-					dnd5eStyleSheet = sheet;
-				} else for (const innerRule of sheet.cssRules) {
-					if (innerRule.styleSheet?.href?.endsWith("dnd5e.css")) {
-						dnd5eStyleSheet = innerRule.styleSheet;
-						break;
-					}
-				}
-
-				if (dnd5eStyleSheet) {
-					for (const rule of dnd5eStyleSheet.cssRules) {
-						if ((rule instanceof CSSStyleRule) && rule.selectorText?.includes(Util.chatLogSelector)) {
-							let newRule = rule.cssText.replaceAll(Util.chatLogSelector, "#damage-log");
-							if (Util.isV13()) {
-								newRule = newRule.replaceAll(/#chat-log,?/g, "");
-							}
-							damageLogStyleSheet.insertRule(newRule, damageLogStyleSheet.cssRules.length);
+				// ForgeVTT loads a style sheet from a different domain, which causes a security error when trying to access sheet.cssRules.
+				// Wrap in a try...catch block so we don't end up throwing out of the constructor.
+				try {
+					let dnd5eStyleSheet = null;
+					if (sheet.href?.endsWith("dnd5e.css")) {
+						dnd5eStyleSheet = sheet;
+					} else for (const innerRule of sheet.cssRules) {
+						if (innerRule.styleSheet?.href?.endsWith("dnd5e.css")) {
+							dnd5eStyleSheet = innerRule.styleSheet;
+							break;
 						}
 					}
-					document.adoptedStyleSheets.push(damageLogStyleSheet);
-					break;
+
+					if (dnd5eStyleSheet) {
+						for (const rule of dnd5eStyleSheet.cssRules) {
+							if ((rule instanceof CSSStyleRule) && rule.selectorText?.includes(Util.chatLogSelector)) {
+								let newRule = rule.cssText.replaceAll(Util.chatLogSelector, "#damage-log");
+								if (Util.isV13()) {
+									newRule = newRule.replaceAll(/#chat-log,?/g, "");
+								}
+								damageLogStyleSheet.insertRule(newRule, damageLogStyleSheet.cssRules.length);
+							}
+						}
+						document.adoptedStyleSheets.push(damageLogStyleSheet);
+						break;
+					}
+				} catch (error) {
+					console.warn(`DamageLog | Failed to read style sheet: {error}`, sheet);
 				}
 			}
 		}
