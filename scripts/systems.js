@@ -271,7 +271,7 @@ export class Systems {
 		"fantastic-depths": {
 			hp: {
 				value: "hp.value",
-				max:"hp.max"
+				max: "hp.max"
 			}
 		}
 	};
