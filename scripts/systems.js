@@ -31,7 +31,7 @@ export class Systems {
 	 * Location of HP attributes for supported systems.
 	 */
 	static CONFIGS = {
-		a5e : Systems.#DND_ATTRIBUTES,
+		a5e: Systems.#DND_ATTRIBUTES,
 		ac2d20: {
 			fatigue: {
 				invert: true,
@@ -186,19 +186,19 @@ export class Systems {
 			},
 			luck: {
 				value: "attributes.luck.value",
-			},  
+			},
 			agility: {
 				value: "abilities.agility.value",
-			},  
+			},
 			presence: {
 				value: "abilities.presence.value",
-			}, 
+			},
 			spirit: {
 				value: "abilities.spirit.value",
-			}, 
+			},
 			strength: {
 				value: "abilities.strength.value",
-			}, 
+			},
 			toughness: {
 				value: "abilities.toughness.value",
 			},
@@ -266,6 +266,12 @@ export class Systems {
 				value: "health.value",
 				min: "health.min",
 				max: "health.max"
+			}
+		},
+		"fantastic-depths": {
+			hp: {
+				value: "hp.value",
+				max:"hp.max"
 			}
 		}
 	};
