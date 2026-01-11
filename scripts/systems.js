@@ -162,6 +162,16 @@ export class Systems {
 				max: "other.stress.max"
 			}
 		},
+		nimble: foundry.utils.mergeObject(Systems.#DND_ATTRIBUTES,
+			{
+				wounds: {
+					invert: true,
+					value: "attributes.wounds.value",
+					max: "attributes.wounds.max"
+				},
+			},
+			{ inplace: false }
+		),
 		pf1: foundry.utils.mergeObject(Systems.#DND_ATTRIBUTES,
 			{
 				hp: {
