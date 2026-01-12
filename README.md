@@ -32,6 +32,7 @@ Damage Log is currently compatible with the following systems.
 * GURPS 4th Edition Game Aid (Unofficial) (`gurps`)
 * Level Up: Advanced 5th Edition (`a5e`)
 * Mothership (`mosh`)
+* Nimble v2 (`nimble`)
 * Pathfinder 1st Edition (`pf1`)
 * Pathfinder 2nd Edition (`pf2e`)
 * Pirate Borg (`pirateborg`)
