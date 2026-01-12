@@ -31,7 +31,7 @@ export class Systems {
 	 * Location of HP attributes for supported systems.
 	 */
 	static CONFIGS = {
-		a5e : Systems.#DND_ATTRIBUTES,
+		a5e: Systems.#DND_ATTRIBUTES,
 		ac2d20: {
 			fatigue: {
 				invert: true,
@@ -127,6 +127,12 @@ export class Systems {
 				value: "radiation"
 			}
 		},
+		"fantastic-depths": {
+			hp: {
+				value: "hp.value",
+				max: "hp.max"
+			}
+		},
 		dragonbane: {
 			hp: {
 				value: "hitPoints.value",
@@ -196,19 +202,19 @@ export class Systems {
 			},
 			luck: {
 				value: "attributes.luck.value",
-			},  
+			},
 			agility: {
 				value: "abilities.agility.value",
-			},  
+			},
 			presence: {
 				value: "abilities.presence.value",
-			}, 
+			},
 			spirit: {
 				value: "abilities.spirit.value",
-			}, 
+			},
 			strength: {
 				value: "abilities.strength.value",
-			}, 
+			},
 			toughness: {
 				value: "abilities.toughness.value",
 			},
