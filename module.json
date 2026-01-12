@@ -68,6 +68,10 @@
 				"type": "system"
 			},
 			{
+				"id": "fantastic-depths",
+				"type": "system"
+			},
+			{
 				"id": "gurps",
 				"type": "system"
 			},
@@ -115,16 +119,12 @@
 				"id": "tresdetv",
 				"type": "system"
 			},
-			{			
+			{
 				"id": "vaarfeu",
 				"type": "system"
 			},
 			{
 				"id": "worldbuilding",
-				"type": "system"
-			},
-			{
-				"id": "fantastic-depths",
 				"type": "system"
 			}
 		]
